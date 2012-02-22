@@ -1,10 +1,11 @@
 AC_PREREQ([2.63])
-AC_INIT([test], [0.0.1], [me@me.com])
+AC_INIT([quorum], [0.1.0], [gmarcais@umd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_SRCDIR([test.hpp])
+AC_CONFIG_SRCDIR([src/error_correct_reads.hpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([subdir-objects])
+AM_SILENT_RULES([yes])
 # Uncomment for creating libraries
 # AC_PROG_LIBTOOL
 
@@ -13,12 +14,14 @@ AM_INIT_AUTOMAKE([subdir-objects])
 AC_PROG_CXX
 
 # Checks for libraries.
+AC_CHECK_LIB([pthread], [pthread_create])
+AC_CHECK_LIB([rt], [clock_gettime])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
 # Uncomment to get libraries via pkg-config
-# PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
+PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
 
 
 # Checks for typedefs, structures, and compiler characteristics.

@@ -192,22 +192,25 @@ public:
   virtual ~contaminant_check() { }
   
   virtual bool is_contaminant(uint64_t m) = 0;
+  virtual void debug(const char*msg) = 0;
 };
 
 class contaminant_no_database : public contaminant_check {
 public:
   virtual ~contaminant_no_database() { }
   virtual bool is_contaminant(uint64_t m) { return false; }
+  virtual void debug(const char* msg) { std::cerr << msg << " no database" << std::endl; }
 };
 
 class contaminant_database : public contaminant_check {
-  inv_hash_storage_t* ary_;
+  inv_hash_storage_t ary_;
 public:
-  contaminant_database(inv_hash_storage_t* ary) : ary_(ary) { }
+  contaminant_database(inv_hash_storage_t ary) : ary_(ary) { }
   virtual ~contaminant_database() { }
+  virtual void debug(const char* msg) { std::cerr << msg << " block_len " << ary_.get_block_len() << std::endl; }
   virtual bool is_contaminant(uint64_t m) {
     hval_t val = 0;
-    return ary_->get_val(m, val, false);
+    return ary_.get_val(m, val, false);
   }
 };
 
@@ -227,6 +230,7 @@ class error_correct_t : public thread_exec {
   bool                   _gzip;
   int                    _combined;
   contaminant_check*     _contaminant;
+  bool                   _trim_contaminant;
   jflib::o_multiplexer * _output;
   jflib::o_multiplexer * _log;
 public:
@@ -234,7 +238,7 @@ public:
     _parser(parser), _hashes(hashes),
     _mer_len(_hashes->begin()->get_key_len() / 2),
     _skip(0), _good(1), _min_count(1), _window(0), _error(0), _gzip(false),
-    _combined(0), _contaminant(0) { }
+    _combined(0), _contaminant(0), _trim_contaminant(false) { }
 
 private:
   std::ostream *open_file(const char *suffix) {
@@ -287,6 +291,7 @@ public:
   error_correct_t & gzip(bool g) { _gzip = g; return *this; }
   error_correct_t & combined(int c) { _combined = c; return *this; }
   error_correct_t & contaminant(contaminant_check* c) { _contaminant = c; return *this; }
+  error_correct_t & trim_contaminant(bool t) { _trim_contaminant = t; return *this; }
 
   jellyfish::parse_read* parser() const { return _parser; }
   int skip() const { return _skip; }
@@ -301,6 +306,8 @@ public:
   bool gzip() const { return _gzip; }
   int combined() const { return _combined; }
   contaminant_check* contaminant() const { return _contaminant; }
+  bool trim_contaminant() const { return _trim_contaminant; }
+
   jflib::o_multiplexer &output() { return *_output; }
   jflib::o_multiplexer &log() { return *_log; }
 
@@ -322,6 +329,9 @@ private:
   size_t                    _buff_size;
   char                     *_buffer;
   alternative_finder*       _af;
+
+  static const char* error_contaminant;
+  static const char* error_no_starting_mer;
   
 public:
   error_correct_instance(ec_t *ec, int id) :
@@ -343,13 +353,15 @@ public:
       nb_reads++;
       insure_length_buffer(read->seq_e - read->seq_s);
       
+      const char* error = "";
       kmer_t      mer;
       const char *input = read->seq_s + _ec->skip();
       char       *out   = _buffer + _ec->skip();
       //      DBG << V(_ec->skip()) << V((void*)read->seq_s) << V((void*)input);
       //Prime system. Find and write starting k-mer
-      if(!find_starting_mer(mer, input, read->seq_e, out)) {
-        details << "Skipped " << substr(read->header, read->hlen) << "\n";
+      if(!find_starting_mer(mer, input, read->seq_e, out, &error)) {
+        details << "Skipped " << substr(read->header, read->hlen) 
+                << ": " << error << "\n";
         details << jflib::endr;
         output << jflib::endr;
         continue;
@@ -362,7 +374,15 @@ public:
         extend(forward_mer(mer), forward_ptr<const char>(input),
                forward_counter(input - read->seq_s),
                forward_ptr<const char>(read->seq_e),
-               forward_ptr<char>(out), fwd_log);
+               forward_ptr<char>(out), fwd_log,
+               &error);
+      if(!end_out) {
+        details << "Skipped " << substr(read->header, read->hlen) 
+                << ": " << error << "\n";
+        details << jflib::endr;
+        output << jflib::endr;
+        continue;
+      }
       DBG << V((void*)end_out) << V((void*)read->seq_e);
       assert(input > read->seq_s + kmer_t::k());
       assert(out > _buffer + kmer_t::k());
@@ -373,7 +393,15 @@ public:
                backward_ptr<const char>(input - kmer_t::k() - 1),
                backward_counter(input - kmer_t::k() - read->seq_s - 1),
                backward_ptr<const char>(read->seq_s - 1),
-               backward_ptr<char>(out - kmer_t::k() - 1), bwd_log);
+               backward_ptr<char>(out - kmer_t::k() - 1), bwd_log,
+               &error);
+      if(!start_out) {
+        details << "Skipped " << substr(read->header, read->hlen) 
+                << ": " << error << "\n";
+        details << jflib::endr;
+        output << jflib::endr;
+        continue;
+      }
       DBG << V((void*)start_out) << V((void*)read->seq_s);
       start_out++;
       assert(start_out >= _buffer);
@@ -398,7 +426,7 @@ private:
            typename counter, typename elog>
   char * extend(dir_mer mer, in_dir_ptr input, 
                 counter pos, in_dir_ptr end,
-                out_dir_ptr out, elog &log) {
+                out_dir_ptr out, elog &log, const char** error) {
     counter cpos = pos;
     DBG << V((void*)input.ptr()) << V((void*)end.ptr()) << V(cpos);
     for( ; input < end; ++input) {
@@ -415,8 +443,12 @@ private:
         mer.shift((uint64_t)0);
       } else {
         if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-          log.truncation(cpos);
-          goto done;
+          if(_ec->trim_contaminant()) {
+            log.truncation(cpos);
+            goto done;
+          }
+          *error = error_contaminant;
+          return 0;
         }
         ori_code = mer.code(0);
       }
@@ -436,8 +468,12 @@ private:
         if(ucode != ori_code) {
           mer.replace(0, ucode);
           if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-            log.truncation(cpos);
-            goto done;
+            if(_ec->trim_contaminant()) {
+              log.truncation(cpos);
+              goto done;
+            }
+            *error = error_contaminant;
+            return 0;
           }
           if(log.substitution(cpos, base, mer.base(0)))
             goto truncate;
@@ -498,8 +534,12 @@ private:
       if(ncount > 0 && nlevel >= level) { // TODO: Shouldn't we break if this test is false?
         mer.replace(0, check_code);
         if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-          log.truncation(cpos);
-          goto done;
+          if(_ec->trim_contaminant()) {
+            log.truncation(cpos);
+            goto done;
+          }
+          *error = error_contaminant;
+          return 0;
         }
         *out++ = mer.base(0);
         if(check_code != ori_code)
@@ -541,7 +581,8 @@ private:
     }
   }
 
-  bool find_starting_mer(kmer_t &mer, const char * &input, const char *end, char * &out) {
+  bool find_starting_mer(kmer_t &mer, const char * &input, const char *end, char * &out,
+                         const char** error) {
     while(input < end) {
       for(int i = 0; input < end && i < _ec->mer_len(); ++i) {
         char base = *input++;
@@ -552,23 +593,36 @@ private:
       }
       int found = 0;
       while(input < end) {
-        if(!_ec->contaminant()->is_contaminant(mer.canonical())) {
+        bool contaminated = _ec->contaminant()->is_contaminant(mer.canonical());
+        if(contaminated && !_ec->trim_contaminant()) {
+          *error = error_contaminant;
+          return false;
+        }
+
+        if(!contaminated) {
           hval_t val = _af->get_val(mer.canonical());
-     
+          
           found = (int)val >= _ec->anchor() ? found + 1 : 0;
           DBG << V(val) << V(mer) << V(_ec->anchor()) << V(*input) << V(found);
           if(found >= _ec->good())
             return true;
         }
+
         char base = *input++;
         *out++ = base;
         if(!mer.shift_left(base))
           break;
       }
     }
+
+    *error = error_no_starting_mer;
     return false;
   }
 };
+
+const char* error_correct_instance::error_contaminant     = "Contaminated read";
+const char* error_correct_instance::error_no_starting_mer = "No high quality mer";
+
 
 int main(int argc, char *argv[])
 {
@@ -598,11 +652,14 @@ int main(int argc, char *argv[])
   if(args.contaminant_given) {
     mapped_file dbf(args.contaminant_arg);
     dbf.random().will_need().load();
-    contaminant = new contaminant_database(raw_inv_hash_query_t(dbf).get_ary());
+    inv_hash_storage_t ary = *raw_inv_hash_query_t(dbf).get_ary();
+    if(ary.get_key_len() != key_len)
+      die << "Contaminant hash must have same key length as other hashes ("
+          << ary.get_key_len() << " != " << key_len << ")";
+    contaminant = new contaminant_database(ary);
   } else {
     contaminant = new contaminant_no_database();
   }
-
   jellyfish::parse_read parser(args.file_arg.begin(), args.file_arg.end(), 100);
 
   kmer_t::k(key_len / 2);
@@ -614,7 +671,8 @@ int main(int argc, char *argv[])
     .error(args.error_given ? args.error_arg : kmer_t::k() / 2)
     .gzip(args.gzip_flag)
     .combined(args.combined_arg)
-    .contaminant(contaminant);
+    .contaminant(contaminant)
+    .trim_contaminant(args.trim_contaminant_flag);
   correct.do_it(args.thread_arg);
 
   return 0;

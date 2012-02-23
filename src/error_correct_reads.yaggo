@@ -40,6 +40,9 @@ option("output", "o") {
 option("contaminant") {
   description "Jellyfish database of contaminant k-mers"
   c_string; typestr "path" }
+option("trim-contaminant") {
+  description "Trim reads containing contaminated k-mers instead of discarding"
+  flag; off }
 option("gzip") {
   description "Gzip output file"
   flag; off }

@@ -32,6 +32,7 @@ public:
   bool                           output_given;
   const char *                   contaminant_arg;
   bool                           contaminant_given;
+  bool                           trim_contaminant_flag;
   bool                           gzip_flag;
   std::vector<const char *>      file_arg;
   typedef std::vector<const char *>::iterator file_arg_it;
@@ -40,6 +41,7 @@ public:
   enum {
     USAGE_OPT = 1000,
     CONTAMINANT_OPT,
+    TRIM_CONTAMINANT_OPT,
     GZIP_OPT
   };
 
@@ -56,6 +58,7 @@ public:
     error_arg(5), error_given(false),
     output_arg("error_corrected"), output_given(false),
     contaminant_arg(""), contaminant_given(false),
+    trim_contaminant_flag(false),
     gzip_flag(false)
   { }
 
@@ -72,6 +75,7 @@ public:
     error_arg(5), error_given(false),
     output_arg("error_corrected"), output_given(false),
     contaminant_arg(""), contaminant_given(false),
+    trim_contaminant_flag(false),
     gzip_flag(false)
   { parse(argc, argv); }
 
@@ -89,6 +93,7 @@ public:
       {"error", 1, 0, 'e'},
       {"output", 1, 0, 'o'},
       {"contaminant", 1, 0, CONTAMINANT_OPT},
+      {"trim-contaminant", 0, 0, TRIM_CONTAMINANT_OPT},
       {"gzip", 0, 0, GZIP_OPT},
       {"help", 0, 0, 'h'},
       {"usage", 0, 0, USAGE_OPT},
@@ -176,6 +181,9 @@ public:
         contaminant_given = true;
         contaminant_arg = optarg;
         break;
+      case TRIM_CONTAMINANT_OPT:
+        trim_contaminant_flag = true;
+        break;
       case GZIP_OPT:
         gzip_flag = true;
         break;
@@ -211,6 +219,7 @@ public:
   " -e, --error=uint32                       Maximum number of error in a window (5)\n" \
   " -o, --output=prefix                      Output file prefix (error_corrected)\n" \
   "     --contaminant=path                   Jellyfish database of contaminant k-mers\n" \
+  "     --trim-contaminant                   Trim reads containing contaminated k-mers instead of discarding (false)\n" \
   "     --gzip                               Gzip output file (false)\n" \
   "     --usage                              Usage\n" \
   " -h, --help                               This message\n" \
@@ -239,6 +248,7 @@ public:
     os << "error_given:" << error_given << " error_arg:" << error_arg << "\n";
     os << "output_given:" << output_given << " output_arg:" << output_arg << "\n";
     os << "contaminant_given:" << contaminant_given << " contaminant_arg:" << contaminant_arg << "\n";
+    os << "trim_contaminant_flag:" << trim_contaminant_flag << "\n";
     os << "gzip_flag:" << gzip_flag << "\n";
     os << "file_arg:" << yaggo::vec_str(file_arg) << "\n";
   }

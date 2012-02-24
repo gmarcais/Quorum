@@ -484,8 +484,8 @@ private:
 
       // Check that there is at least one more base in the
       // sequence. If not, leave it along
-      if(input >= end) {
-        log.truncation(cpos);
+      if(!(input < (end-1))) {
+        log.truncation(cpos+1);
         goto done;
       }
 

@@ -57,7 +57,7 @@ public:
   }
 
   bool truncation(T pos) {
-    assert(_log.size() == 0 ? true : pos > _log.back().pos);
+    assert(_log.size() == 0 ? true : pos >= _log.back().pos);
     _log.push_back(entry(TRUNCATION, pos));
     return check_nb_error();
   }

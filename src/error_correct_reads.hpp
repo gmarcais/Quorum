@@ -112,6 +112,9 @@ public:
   bool operator>(const forward_counter &c) const {
     return _c > c._c;
   }
+  bool operator>=(const forward_counter &c) const {
+    return _c > c._c || _c == c._c;
+  }
   int operator*() const { return _c; }
   friend std::ostream &operator<<(std::ostream &os, const forward_counter &c);
 };
@@ -130,6 +133,9 @@ public:
   }
   bool operator>(const backward_counter &c) const {
     return _c < c._c;
+  }
+  bool operator>=(const backward_counter &c) const {
+    return _c < c._c || _c == c._c;
   }
   backward_counter operator+(const int x) const {
     return backward_counter(_c - x);

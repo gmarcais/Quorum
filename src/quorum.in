@@ -1,0 +1,124 @@
+#! /usr/bin/env perl
+
+use strict;
+use warnings;
+use Getopt::Long;
+
+# Compile time settings
+my $JF          = "@JELLYFISH@";
+my $COMB        = "@bindir@/quorum_combine_jf_dbs";
+my $EC          = "@bindir@/quorum_error_correct_reads";
+
+# Command line switches
+my $jf_size;    # Mandatory option
+my $nb_threads   = 1;
+my $prefix       = "quorum_";
+my $klen         = 24;
+my $min_q_char; # Autodetect
+my $min_quality  = 5;
+my $window       = 10;
+my $max_err      = 3;
+my $min_count    = 1;
+my $skip         = 1;
+my $anchor       = 1;
+my $anchor_count = 3;
+my ($help, $debug);
+
+my $usage = <<EOS;
+$0 [options] .fastq [.fastq]+
+    
+Run the quorum error corrector on the given fastq file.
+
+Options:
+ -s, --size            Jellyfish hash size (required)
+ -t, --threads         Number of threads (default 1)
+ -p, --prefix          Output prefix (default $prefix)
+ -k, --kmer-len        Kmer length (default $klen)
+ -q, --min-q-char      Minimum quality char. Usually 33 or 64 (autodetect)
+ -m, --min-quality     Minimum above -q for high quality base (defualt $min_quality)
+ -w, --window          Window size for trimming
+ -e, --max-err         Maximum number of errors in a window
+     --min-count       Minimum count for a k-mer to be good (default $min_count)
+     --skip            Number of bases to skip to find anchor kmer (default $skip)
+     --anchor          Numer of good kmer in a row for anchor (default $anchor)
+     --anchor-count    Minimum count for an anchor kmer (default $anchor_count)
+ -d, --debug           Display debugging information
+ -h, --help            This message.
+EOS
+    ; # Make emacs happy
+
+GetOptions("s|size=i"        => \$jf_size,
+           "t|threads=i"     => \$nb_threads,
+           "k|klen=i"        => \$klen,
+           "q|min-q-char=i"  => \$min_q_char,
+           "m|min-quality=i" => \$min_quality,
+           "w|window=i"      => \$window,
+           "e|max-err=i"     => \$max_err,
+           "min-count=i"     => \$min_count,
+           "skip=i"          => \$skip,
+           "anchor=i"        => \$anchor,
+           "anchor-count=i"  => \$anchor_count,
+           "d|debug"         => \$debug,
+           "h|help"          => \$help) or die $usage;
+if($help) {
+  print($usage);
+  exit(0);
+}
+if(!defined($jf_size)) {
+  print STDERR "Must pass the -s switch. See $0 --help.";
+  exit(1);
+}
+
+if(!defined($min_q_char)) {
+  # Read a 1000 reads (or the entire first line and fine the smallest
+  # quality value
+  open(my $io, "<", $ARGV[0]) or die "Can't open file '$ARGV[0]': $!";
+  $min_q_char = 256;
+  while(<$io>) { # Read header
+    last if($. > 4000);
+    <$io>; <$io>; # Skip sequence and qual header
+    my $qstr = <$io>; chomp($qstr); # Read quals
+    die "Invalid fastq format" if(!defined($qstr));
+    my @quals = split(//, $qstr);
+    for my $c (@quals) {
+      $min_q_char = ord($c) if ord($c) < $min_q_char;
+    }
+  }
+  # Special Illumina case where quality 0 and 1 do not appear
+  $min_q_char -= 2 if($min_q_char == 35 || $min_q_char == 66);
+  if($min_q_char != 33 && $min_q_char != 59 && $min_q_char != 64) {
+    print(STDERR "Found an unusual minimum quality char of $min_q_char (", 
+          chr($min_q_char), "). Stopping now. Use option -m to override");
+    exit(1);
+  }
+  print STDERR "Guessed min_q_char = $min_q_char (", chr($min_q_char), ")\n";
+}
+
+sub run {
+  print(STDERR "+ @_\n") if($debug);
+  my $ret = system(@_);
+  die "Failed to exec '$_[0]': $!" if $ret == -1;
+  return $ret;
+}
+
+run($JF, "count", "-t", $nb_threads, "-m", $klen, "-s", $jf_size,
+    "-Crp", 126, "-o", $prefix . "trim",
+    "--quality-start", $min_q_char, "--min-quality", $min_q_char,
+    @ARGV) == 0 or
+    die "First pass of Jellyfish failed";
+die "Failed: Increase the size parameter" if(-f $prefix . "trim_1");
+
+run($JF, "count", "-t", $nb_threads, "-m", $klen, "-s", $jf_size,    
+    "-Crp", 126, "-o", $prefix . "all", @ARGV) == 0 or
+    die "Second pass of Jellyfish failed";
+die "Failed: Increase the size parameter" if(-f $prefix . "trim_1");
+
+run($COMB, "-m", 1, $prefix . "trim_0", $prefix . "all_0",
+    "-o", $prefix . "combined") == 0 or
+    die "Combining Jellyfish databases failed";
+
+run($EC, "-d", $prefix . "combined_0", "-o", $prefix . "corrected", "-t", $nb_threads, 
+    "-Cc", 2, "-m", $min_count, "-s", $skip, "-g", $anchor, "-a", $anchor_count, 
+    "-w", $window, "-e", $max_err,
+    @ARGV) == 0 or
+    die "Error correction failed";

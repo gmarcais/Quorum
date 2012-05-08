@@ -6,8 +6,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
-# Uncomment for creating libraries
-# AC_PROG_LIBTOOL
+
 
 
 # Checks for programs.
@@ -20,9 +19,10 @@ AC_CHECK_LIB([rt], [clock_gettime])
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
-# Uncomment to get libraries via pkg-config
+# Get jellyfish compile flags && executable
 PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
-
+AC_ARG_VAR([JELLYFISH], [Jellyfish executable])
+AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

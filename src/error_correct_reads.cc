@@ -104,7 +104,7 @@ private:
   int get_alternatives__(hashes_t::const_iterator& chash, const dir_mer &mer, uint64_t counts[], uint64_t &ucode) {
     dir_mer  nmer(mer);
     int      count = 0;
-    DBG << V(mer);
+    //    DBG << V(mer);
     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
       nmer.replace(0, i);
       hval_t val = 0;
@@ -135,7 +135,7 @@ public:
   virtual hval_t get_val(uint64_t mer) {
     hval_t res = 0;
     bool found = hash_->get_val(mer, res, true, true);
-    DBG << V(forward_mer(mer)) << V(found) << V(res) << V(res % nb_levels_) << V(res / nb_levels_);
+    //    DBG << V(forward_mer(mer)) << V(found) << V(res) << V(res % nb_levels_) << V(res / nb_levels_);
     if(!found)
       return 0;
     if(res % nb_levels_ != (hval_t)(nb_levels_ - 1))
@@ -150,6 +150,45 @@ public:
   }
 
 private:
+  // template<typename dir_mer>
+  // int get_best_alternatives__(dir_mer& mer, uint64_t counts[], uint64_t& ucode, int& level) {
+  //   int      nlevel;
+  //   uint64_t val;
+  //   dir_mer  nmer(mer);
+  //   int      count = 0;
+  //   level = 0;
+
+  //   for(uint64_t i = 0; i < (uint64_t)4; ++i) {
+  //     nmer.replace(0, i);
+  //     if(!hash_->get_val(nmer.canonical(), val, true, true))
+  //       val = 0;
+  //     nlevel = val % nb_levels_;
+  //     val    = val / nb_levels_;
+  //     if(val == 0 || nlevel < level) {
+  //       counts[i] = 0;
+  //     } else {
+  //       if(val >= (uint64_t)min_count_) {
+  //         if(nlevel > level) {
+  //           for(uint64_t j = 0; j < (uint64_t)i; ++j)
+  //             counts[j] = 0;
+  //           count  = 0;
+  //           level = nlevel;
+  //         }
+  //         counts[i] = val;
+  //         ucode     = i;
+  //         ++count;
+  //       }
+  //     }
+  //   }
+  //   return count;
+  // }
+
+  struct get_val_output {
+    bool     found;
+    size_t   key_id;
+    uint64_t val;
+  };
+
   template<typename dir_mer>
   int get_best_alternatives__(dir_mer& mer, uint64_t counts[], uint64_t& ucode, int& level) {
     int      nlevel;
@@ -158,10 +197,17 @@ private:
     int      count = 0;
     level = 0;
 
+    uint64_t keys[4];
+    get_val_output vals[4];
+
     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
       nmer.replace(0, i);
-      if(!hash_->get_val(nmer.canonical(), val, true, true))
-        val = 0;
+      keys[i] = nmer.canonical();
+    }
+    hash_->get_multi_val(keys, keys + 4, vals, true, true);
+
+    for(uint64_t i = 0; i < (uint64_t)4; ++i) {
+      val = vals[i].found ? vals[i].val : (uint64_t)0;
       nlevel = val % nb_levels_;
       val    = val / nb_levels_;
       if(val == 0 || nlevel < level) {
@@ -367,7 +413,7 @@ public:
         continue;
       }
       //      DBG << V((void*)read->seq_s) << V((void*)input) << V(kmer_t::k());
-      DBG << V(std::string(read->header, 15));
+      //      DBG << V(std::string(read->header, 15));
       // Extend forward and backward
       forward_log fwd_log(_ec->window(), _ec->error());
       char *end_out = 
@@ -383,7 +429,7 @@ public:
         output << jflib::endr;
         continue;
       }
-      DBG << V((void*)end_out) << V((void*)read->seq_e);
+      //      DBG << V((void*)end_out) << V((void*)read->seq_e);
       assert(input > read->seq_s + kmer_t::k());
       assert(out > _buffer + kmer_t::k());
       assert(input - read->seq_s == out - _buffer);
@@ -402,7 +448,7 @@ public:
         output << jflib::endr;
         continue;
       }
-      DBG << V((void*)start_out) << V((void*)read->seq_s);
+      //      DBG << V((void*)start_out) << V((void*)read->seq_s);
       start_out++;
       assert(start_out >= _buffer);
       assert(_buffer + _buff_size >= end_out);
@@ -428,10 +474,10 @@ private:
                 counter pos, in_dir_ptr end,
                 out_dir_ptr out, elog &log, const char** error) {
     counter cpos = pos;
-    DBG << V((void*)input.ptr()) << V((void*)end.ptr()) << V(cpos);
+    //    DBG << V((void*)input.ptr()) << V((void*)end.ptr()) << V(cpos);
     for( ; input < end; ++input) {
       char     base        = *input;
-      DBG << V((void*)input.ptr()) << V((void*)end.ptr()) << V(base);
+      //      DBG << V((void*)input.ptr()) << V((void*)end.ptr()) << V(base);
       if(base == '\n')
         continue;
       cpos = pos;
@@ -458,7 +504,7 @@ private:
       int      level;
 
       count = _af->get_best_alternatives(mer, counts, ucode, level);
-      DBG << V(*cpos) << V(mer) << V(count) << V(level) << V(counts[0]) << V(counts[1]) << V(counts[2]) << V(counts[3]);
+      //      DBG << V(*cpos) << V(mer) << V(count) << V(level) << V(counts[0]) << V(counts[1]) << V(counts[2]) << V(counts[3]);
 
       if(count == 0) {
         log.truncation(cpos);
@@ -530,7 +576,7 @@ private:
       uint64_t   nucode = 0;
       int        nlevel;
       ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
-      DBG << V(*cpos) << V(ncount) << V(nlevel) << V(level) << V(ncounts[0]) << V(ncounts[1]) << V(ncounts[2]) << V(ncounts[3]);
+      //      DBG << V(*cpos) << V(ncount) << V(nlevel) << V(level) << V(ncounts[0]) << V(ncounts[1]) << V(ncounts[2]) << V(ncounts[3]);
       if(ncount > 0 && nlevel >= level) { // TODO: Shouldn't we break if this test is false?
         mer.replace(0, check_code);
         if(_ec->contaminant()->is_contaminant(mer.canonical())) {
@@ -565,7 +611,7 @@ private:
   truncate:
     int diff = log.remove_last_window();
     out = out - diff;
-    DBG << V(*cpos) << V(diff) << V(*(cpos - diff));
+    //    DBG << V(*cpos) << V(diff) << V(*(cpos - diff));
     log.truncation(cpos - diff);
     goto done;
   }
@@ -587,7 +633,7 @@ private:
       for(int i = 0; input < end && i < _ec->mer_len(); ++i) {
         char base = *input++;
         *out++ = base;
-        DBG << V(base) << V(mer);
+        //        DBG << V(base) << V(mer);
         if(!mer.shift_left(base))
           i = -1;        // If an N, skip to next k-mer
       }
@@ -603,7 +649,7 @@ private:
           hval_t val = _af->get_val(mer.canonical());
           
           found = (int)val >= _ec->anchor() ? found + 1 : 0;
-          DBG << V(val) << V(mer) << V(_ec->anchor()) << V(*input) << V(found);
+          //          DBG << V(val) << V(mer) << V(_ec->anchor()) << V(*input) << V(found);
           if(found >= _ec->good())
             return true;
         }

@@ -1,0 +1,43 @@
+Installation
+============
+
+1) Make sure that Jellyfish[1] is installed. One can download Jellyfish from:
+
+http://www.cbcb.umd.edu/software/jellyfish/
+
+2) Make sure that pkg-config has access to the configuration of
+Jellyfish. Check with:
+
+% pkg-config --exists jellyfish-1.1 && echo yes
+yes
+
+If nothing prints, see the README of Jellyfish. Also, make sure that
+the program 'jellyfish' is in your path:
+
+% which jellyfish
+/usr/local/bin/jellyfish
+
+Alternatively, one can set the variable JELLYFISH, JELLYFISH_CFLAGS
+and JELLYFISH_LIBS to './configure'. See './configure --help' for
+help.
+
+3) Compile and install:
+
+% ./configure --prefix=/my/dir
+% make
+% make install
+
+Note that the installation directory (namely here /my/dir/bin) is set
+in the quorum script. Quorum will NOT work if 'make install' is not
+run.
+
+Usage
+=====
+
+See 'quorum --help' for some help. Only the -s switch, specifying the
+size of the Jellyfish hash is required. Hence, the following command
+should be enough in the most simple case:
+
+% quorum -s 50000000 input.fasta
+
+The output will be in 'quorum_corrected.fa'.

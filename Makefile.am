@@ -27,7 +27,7 @@ quorum_combine_jf_dbs_SOURCES += src/combine_jf_dbs.hpp src/yaggo.hpp
 
 bin_SCRIPTS = quorum
 CLEANFILES = $(bin_SCRIPTS)
-EXTRA_DIST = quorum
+EXTRA_DIST = src/quorum.in
 do_subst = sed -e 's|[@]JELLYFISH[@]|$(JELLYFISH)|g' \
                -e 's|[@]bindir[@]|$(bindir)|g'
 quorum: src/quorum.in Makefile

@@ -1,18 +1,20 @@
-/*  This file is part of k_unitig.
+/* SuperRead pipeline
+ * Copyright (C) 2012  Genome group at University of Maryland.
+ * 
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-    k_unitig is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    k_unitig is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with k_unitig.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 #include <vector>
 #include <memory>
@@ -104,7 +106,6 @@ private:
   int get_alternatives__(hashes_t::const_iterator& chash, const dir_mer &mer, uint64_t counts[], uint64_t &ucode) {
     dir_mer  nmer(mer);
     int      count = 0;
-    //    DBG << V(mer);
     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
       nmer.replace(0, i);
       hval_t val = 0;
@@ -135,7 +136,6 @@ public:
   virtual hval_t get_val(uint64_t mer) {
     hval_t res = 0;
     bool found = hash_->get_val(mer, res, true, true);
-    //    DBG << V(forward_mer(mer)) << V(found) << V(res) << V(res % nb_levels_) << V(res / nb_levels_);
     if(!found)
       return 0;
     if(res % nb_levels_ != (hval_t)(nb_levels_ - 1))
@@ -150,45 +150,6 @@ public:
   }
 
 private:
-  // template<typename dir_mer>
-  // int get_best_alternatives__(dir_mer& mer, uint64_t counts[], uint64_t& ucode, int& level) {
-  //   int      nlevel;
-  //   uint64_t val;
-  //   dir_mer  nmer(mer);
-  //   int      count = 0;
-  //   level = 0;
-
-  //   for(uint64_t i = 0; i < (uint64_t)4; ++i) {
-  //     nmer.replace(0, i);
-  //     if(!hash_->get_val(nmer.canonical(), val, true, true))
-  //       val = 0;
-  //     nlevel = val % nb_levels_;
-  //     val    = val / nb_levels_;
-  //     if(val == 0 || nlevel < level) {
-  //       counts[i] = 0;
-  //     } else {
-  //       if(val >= (uint64_t)min_count_) {
-  //         if(nlevel > level) {
-  //           for(uint64_t j = 0; j < (uint64_t)i; ++j)
-  //             counts[j] = 0;
-  //           count  = 0;
-  //           level = nlevel;
-  //         }
-  //         counts[i] = val;
-  //         ucode     = i;
-  //         ++count;
-  //       }
-  //     }
-  //   }
-  //   return count;
-  // }
-
-  struct get_val_output {
-    bool     found;
-    size_t   key_id;
-    uint64_t val;
-  };
-
   template<typename dir_mer>
   int get_best_alternatives__(dir_mer& mer, uint64_t counts[], uint64_t& ucode, int& level) {
     int      nlevel;
@@ -197,17 +158,10 @@ private:
     int      count = 0;
     level = 0;
 
-    uint64_t keys[4];
-    get_val_output vals[4];
-
     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
       nmer.replace(0, i);
-      keys[i] = nmer.canonical();
-    }
-    hash_->get_multi_val(keys, keys + 4, vals, true, true);
-
-    for(uint64_t i = 0; i < (uint64_t)4; ++i) {
-      val = vals[i].found ? vals[i].val : (uint64_t)0;
+      if(!hash_->get_val(nmer.canonical(), val, true, true))
+        val = 0;
       nlevel = val % nb_levels_;
       val    = val / nb_levels_;
       if(val == 0 || nlevel < level) {
@@ -287,17 +241,25 @@ public:
     _combined(0), _contaminant(0), _trim_contaminant(false) { }
 
 private:
-  std::ostream *open_file(const char *suffix) {
-    std::ostream *res;
-    std::string file(_prefix);
-    file += suffix;
-    if(_gzip) {
-      file += ".gz";
-      res = new gzipstream(file.c_str());
-    } else {
-      res = new std::ofstream(file.c_str());
+  // Open the data (error corrected reads) and log files. Default to
+  // STDOUT and STDERR if none specified.
+  std::ostream* open_file(const std::string prefix, const char* suffix,
+                          const std::string def) {
+    std::ostream* res;
+    std::string file;
+
+    if(prefix.empty())
+      file = def;
+    else {
+      file = prefix;
+      file += suffix;
     }
-      
+    if(_gzip) {
+      if(!prefix.empty())
+        file += ".gz";
+      res = new gzipstream(file.c_str());
+    } else
+      res = new std::ofstream(file.c_str());
     if(!res->good())
       eraise(std::runtime_error)
         << "Failed to open file '" << file << "'" << err::no;
@@ -307,9 +269,10 @@ private:
 
 public:
   void do_it(int nb_threads) {
-    std::auto_ptr<std::ostream> details(open_file(".log"));
-    std::auto_ptr<std::ostream> output(open_file(".fa"));
-
+    // Make sure they are deleted when done
+    std::auto_ptr<std::ostream> details(open_file(_prefix, ".log", "/dev/fd/2"));
+    std::auto_ptr<std::ostream> output(open_file(_prefix, ".fa", "/dev/fd/1"));
+    // Multiplexers, same thing
     std::auto_ptr<jflib::o_multiplexer> 
       log_m(new jflib::o_multiplexer(details.get(), 3 * nb_threads, 1024));
     std::auto_ptr<jflib::o_multiplexer>
@@ -403,7 +366,6 @@ public:
       kmer_t      mer;
       const char *input = read->seq_s + _ec->skip();
       char       *out   = _buffer + _ec->skip();
-      //      DBG << V(_ec->skip()) << V((void*)read->seq_s) << V((void*)input);
       //Prime system. Find and write starting k-mer
       if(!find_starting_mer(mer, input, read->seq_e, out, &error)) {
         details << "Skipped " << substr(read->header, read->hlen) 
@@ -412,8 +374,6 @@ public:
         output << jflib::endr;
         continue;
       }
-      //      DBG << V((void*)read->seq_s) << V((void*)input) << V(kmer_t::k());
-      //      DBG << V(std::string(read->header, 15));
       // Extend forward and backward
       forward_log fwd_log(_ec->window(), _ec->error());
       char *end_out = 
@@ -429,7 +389,6 @@ public:
         output << jflib::endr;
         continue;
       }
-      //      DBG << V((void*)end_out) << V((void*)read->seq_e);
       assert(input > read->seq_s + kmer_t::k());
       assert(out > _buffer + kmer_t::k());
       assert(input - read->seq_s == out - _buffer);
@@ -448,7 +407,6 @@ public:
         output << jflib::endr;
         continue;
       }
-      //      DBG << V((void*)start_out) << V((void*)read->seq_s);
       start_out++;
       assert(start_out >= _buffer);
       assert(_buffer + _buff_size >= end_out);
@@ -474,10 +432,9 @@ private:
                 counter pos, in_dir_ptr end,
                 out_dir_ptr out, elog &log, const char** error) {
     counter cpos = pos;
-    //    DBG << V((void*)input.ptr()) << V((void*)end.ptr()) << V(cpos);
     for( ; input < end; ++input) {
       char     base        = *input;
-      //      DBG << V((void*)input.ptr()) << V((void*)end.ptr()) << V(base);
+
       if(base == '\n')
         continue;
       cpos = pos;
@@ -504,7 +461,6 @@ private:
       int      level;
 
       count = _af->get_best_alternatives(mer, counts, ucode, level);
-      //      DBG << V(*cpos) << V(mer) << V(count) << V(level) << V(counts[0]) << V(counts[1]) << V(counts[2]) << V(counts[3]);
 
       if(count == 0) {
         log.truncation(cpos);
@@ -530,8 +486,8 @@ private:
 
       // Check that there is at least one more base in the
       // sequence. If not, leave it along
-      if(!(input < (end-1))) {
-        log.truncation(cpos+1);
+      if(input >= end) {
+        log.truncation(cpos);
         goto done;
       }
 
@@ -576,7 +532,6 @@ private:
       uint64_t   nucode = 0;
       int        nlevel;
       ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
-      //      DBG << V(*cpos) << V(ncount) << V(nlevel) << V(level) << V(ncounts[0]) << V(ncounts[1]) << V(ncounts[2]) << V(ncounts[3]);
       if(ncount > 0 && nlevel >= level) { // TODO: Shouldn't we break if this test is false?
         mer.replace(0, check_code);
         if(_ec->contaminant()->is_contaminant(mer.canonical())) {
@@ -611,7 +566,6 @@ private:
   truncate:
     int diff = log.remove_last_window();
     out = out - diff;
-    //    DBG << V(*cpos) << V(diff) << V(*(cpos - diff));
     log.truncation(cpos - diff);
     goto done;
   }
@@ -633,7 +587,6 @@ private:
       for(int i = 0; input < end && i < _ec->mer_len(); ++i) {
         char base = *input++;
         *out++ = base;
-        //        DBG << V(base) << V(mer);
         if(!mer.shift_left(base))
           i = -1;        // If an N, skip to next k-mer
       }
@@ -649,7 +602,6 @@ private:
           hval_t val = _af->get_val(mer.canonical());
           
           found = (int)val >= _ec->anchor() ? found + 1 : 0;
-          //          DBG << V(val) << V(mer) << V(_ec->anchor()) << V(*input) << V(found);
           if(found >= _ec->good())
             return true;
         }
@@ -712,7 +664,8 @@ int main(int argc, char *argv[])
   error_correct_instance::ec_t correct(&parser, &hashes);
   correct.skip(args.skip_arg).good(args.good_arg)
     .anchor(args.anchor_count_given ? args.anchor_count_arg : args.min_count_arg)
-    .prefix(args.output_arg).min_count(args.min_count_arg)
+    .prefix(args.output_given ? args.output_arg : "")
+    .min_count(args.min_count_arg)
     .window(args.window_given ? args.window_arg : kmer_t::k())
     .error(args.error_given ? args.error_arg : kmer_t::k() / 2)
     .gzip(args.gzip_flag)

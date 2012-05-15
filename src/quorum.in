@@ -37,9 +37,9 @@ Options:
  -p, --prefix          Output prefix (default $prefix)
  -k, --kmer-len        Kmer length (default $klen)
  -q, --min-q-char      Minimum quality char. Usually 33 or 64 (autodetect)
- -m, --min-quality     Minimum above -q for high quality base (defualt $min_quality)
- -w, --window          Window size for trimming
- -e, --max-err         Maximum number of errors in a window
+ -m, --min-quality     Minimum above -q for high quality base (default $min_quality)
+ -w, --window          Window size for trimming (default $window)
+ -e, --max-err         Maximum number of errors in a window (default $max_err)
      --min-count       Minimum count for a k-mer to be good (default $min_count)
      --skip            Number of bases to skip to find anchor kmer (default $skip)
      --anchor          Numer of good kmer in a row for anchor (default $anchor)
@@ -50,7 +50,7 @@ Options:
 EOS
     ; # Make emacs happy
 
-GetOptions("s|size=i"        => \$jf_size,
+GetOptions("s|size=s"        => \$jf_size,
            "t|threads=i"     => \$nb_threads,
            "k|klen=i"        => \$klen,
            "q|min-q-char=i"  => \$min_q_char,
@@ -75,13 +75,11 @@ if(!defined($jf_size)) {
 
 # Export LD_LIBRARY_PATH if needed
 if($JF_LIB_PATH) {
-  print(STDERR "Set LD_LIBRARY_PATH: $JF_LIB_PATH");
-  if($ENV["LD_LIBRARY_PATH"]) {
-    $ENV["LD_LIBRARY_PATH"] = $JF_LIB_PATH . ":" . $ENV["LD_LIBRARY_PATH"};
+  if($ENV{"LD_LIBRARY_PATH"}) {
+    $ENV{"LD_LIBRARY_PATH"} = $JF_LIB_PATH . ":" . $ENV{"LD_LIBRARY_PATH"};
   } else {
-    $ENV["LD_LIBRARY_PATH"] = $JF_LIB_PATH;
+    $ENV{"LD_LIBRARY_PATH"} = $JF_LIB_PATH;
   }
-  print(STDERR "Set LD_LIBRARY_PATH: $LD_LIBRARY_PATH");
 }
 
 sub run {
@@ -100,7 +98,8 @@ if(defined($contaminant)) {
   open(my $cont_io, "<", $contaminant) or
       die "Can't open contaminant file '$contaminant': $!";
   read($cont_io, my $header, 8);
-  my $file_size = stat($cont_io)[7];
+  my @file_stat = stat($cont_io);
+  my $file_size = $file_stat[7];
   close($cont_io);
   if($header ne "JFRHSHDN") {
     if(substr($header, 0, 1) ne ">" && substr($header, 0, 1) ne "@") {
@@ -111,9 +110,9 @@ if(defined($contaminant)) {
     my $cont_prefix = $prefix . "contaminants";
     while(1) {
       unlink($cont_prefix . "_0", $cont_prefix . "_1");
-      run($JELLYFISH, "count", "-s", $hash_size, "-m", $klen, "-Ct", $nb_threads,
-          "-p", $cont_prefix, $contaminant) or
-              die "Failed to run jellyfish on contaminant sequences";
+      my $ret = run($JF, "count", "-s", $hash_size, "-m", $klen, "-t", $nb_threads,
+                    "-Crp", 126, "-o", $cont_prefix, $contaminant);
+      die "Failed to run jellyfish on contaminant sequences" if $ret != 0;
       last if(! -f $cont_prefix . "_1");
       $hash_size *= 2;
     }
@@ -143,12 +142,11 @@ if(!defined($min_q_char)) {
           chr($min_q_char), "). Stopping now. Use option -m to override");
     exit(1);
   }
-  print STDERR "Guessed min_q_char = $min_q_char (", chr($min_q_char), ")\n";
 }
 
 run($JF, "count", "-t", $nb_threads, "-m", $klen, "-s", $jf_size,
     "-Crp", 126, "-o", $prefix . "trim",
-    "--quality-start", $min_q_char, "--min-quality", $min_q_char,
+    "--quality-start", $min_q_char, "--min-quality", $min_q_char + $min_quality,
     @ARGV) == 0 or
     die "First pass of Jellyfish failed";
 die "Failed: Increase the size parameter" if(-f $prefix . "trim_1");

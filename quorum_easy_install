@@ -14,6 +14,10 @@ QUORUM_VERSION = 0.1.0
 QUORUM_URL = ftp://ftp.genome.umd.edu/pub/quorum/quorum-$(QUORUM_VERSION).tar.gz
 
 all: info $(PREFIX)/bin/jellyfish $(PREFIX)/bin/quorum
+	@echo ************************************************************
+	@echo Installation successful
+	@echo For some help see: $(PREFIX)/bin/quorum --help
+	@echo ************************************************************
 
 .PHONY: info
 info:

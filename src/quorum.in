@@ -6,6 +6,7 @@ use Getopt::Long;
 
 # Compile time settings
 my $JF          = "@JELLYFISH@";
+my $JF_LIB_PATH = "@JF_LIB_PATH@";
 my $COMB        = "@bindir@/quorum_combine_jf_dbs";
 my $EC          = "@bindir@/quorum_error_correct_reads";
 
@@ -67,6 +68,17 @@ if($help) {
 if(!defined($jf_size)) {
   print STDERR "Must pass the -s switch. See $0 --help.";
   exit(1);
+}
+
+# Export LD_LIBRARY_PATH if needed
+if($JF_LIB_PATH) {
+  print(STDERR "Set LD_LIBRARY_PATH: $JF_LIB_PATH");
+  if($ENV["LD_LIBRARY_PATH"]) {
+    $ENV["LD_LIBRARY_PATH"] = $JF_LIB_PATH . ":" . $ENV["LD_LIBRARY_PATH"};
+  } else {
+    $ENV["LD_LIBRARY_PATH"] = $JF_LIB_PATH;
+  }
+  print(STDERR "Set LD_LIBRARY_PATH: $LD_LIBRARY_PATH");
 }
 
 if(!defined($min_q_char)) {

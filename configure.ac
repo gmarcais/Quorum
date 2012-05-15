@@ -24,6 +24,8 @@ PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
 AC_ARG_VAR([JELLYFISH], [Jellyfish executable])
 AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])
 
+AC_ARG_VAR([JF_LIB_PATH], [Append this path to LD_LIBRARY_PATH in quorum])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T

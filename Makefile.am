@@ -29,7 +29,9 @@ bin_SCRIPTS = quorum
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = src/quorum.in
 do_subst = sed -e 's|[@]JELLYFISH[@]|$(JELLYFISH)|g' \
-               -e 's|[@]bindir[@]|$(bindir)|g'
+               -e 's|[@]bindir[@]|$(bindir)|g' \
+	       -e 's|[@]JF_LIB_PATH[@]|$(JF_LIB_PATH)|g'
+
 quorum: src/quorum.in Makefile
 	$(do_subst) < $< > $@
 	chmod +x $@

@@ -1,0 +1,40 @@
+#! /bin/sh
+# Next line is a comment for make but executed by /bin/sh \
+exec make -f "$0" "$@"
+
+PREFIX = $(shell pwd)
+WGET = $(shell /bin/which wget_)
+CURL = $(shell /bin/which curl)
+DOWNLOADER = $(if $(WGET), $(WGET) -O, $(if $(CURL), $(CURL) -o, $(error Error: No wget or curl found in PATH)))
+
+JF_VERSION = 1.1.5
+JF_URL = http://www.cbcb.umd.edu/software/jellyfish/jellyfish-$(JF_VERSION).tar.gz
+
+QUORUM_VERSION = 0.1.0
+QUORUM_URL = ftp://ftp.genome.umd.edu/pub/quorum/quorum-$(QUORUM_VERSION).tar.gz
+
+all: info $(PREFIX)/bin/jellyfish $(PREFIX)/bin/quorum
+
+.PHONY: info
+info:
+	@echo "Installing Jellyfish and Quorum in $(PREFIX)"
+
+jellyfish-$(JF_VERSION).tar.gz:
+	$(DOWNLOADER) $@.tmp $(JF_URL)
+	mv $@.tmp $@
+
+quorum-$(QUORUM_VERSION).tar.gz:
+	$(DOWNLOADER) $@.tmp $(QUORUM_URL)
+	mv $@.tmp $@
+
+%/configure: %.tar.gz
+	tar zxf $<
+	touch $@
+
+$(PREFIX)/bin/jellyfish: jellyfish-$(JF_VERSION)/configure
+	cd $(dir $<); ./configure --prefix=$(PREFIX)
+	make -C $(dir $<) install
+
+$(PREFIX)/bin/quorum: quorum-$(QUORUM_VERSION)/configure
+	cd $(dir $<); ./configure --prefix=$(PREFIX) PKG_CONFIG_PATH="$(PREFIX)/lib/pkgconfig" JF_LIB_PATH="$(PREFIX)/lib" JELLYFISH="$(PREFIX)/bin/jellyfish"
+	make -C $(dir $<) install

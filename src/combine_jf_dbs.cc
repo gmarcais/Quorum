@@ -25,28 +25,28 @@ int main(int argc, char *argv[])
     dbf.sequential().will_need();
     char type[8];
     memcpy(type, dbf.base(), sizeof(type));
-    if(!strncmp(type, jellyfish::raw_hash::file_type, sizeof(type))) {
-      raw_inv_hash_query_t hash(dbf);
-      klen        = hash.get_key_len();
-      if(args.verbose_flag)
-        std::cerr << "Key len: " << klen 
-                  << " size: " << hash.get_size() << "\n";
-      ary = new inv_hash_storage_t(hash.get_size(), klen, 
-                                   hash.get_val_len() + ceilLog2(N),
-                                   hash.get_max_reprobe(),
-                                   jellyfish::quadratic_reprobes);
-      SquareBinaryMatrix hash_matrix = hash.get_hash_matrix();
-      ary->set_matrix(hash_matrix);
-      if(args.verbose_flag)
-        std::cerr << "Loading database: " << *db_it << " level " << 0 << "\n";
-      auto it = hash.get_iterator();
-      while(it.next())
-        if(it.get_val() >= args.min_count_arg) {
-          if(!ary->map(it.get_key(), it.get_val() * N))
-            die << "Output hash is full";
-        }
-    } else {
+    if(strncmp(type, jellyfish::raw_hash::file_type, sizeof(type)))
       die << "Invalid file type '" << err::substr(type, sizeof(type)) << "'.";
+    
+    raw_inv_hash_query_t hash(dbf);
+    klen        = hash.get_key_len();
+    if(args.verbose_flag)
+      std::cerr << "Key len: " << klen 
+                << " size: " << hash.get_size() << "\n";
+    ary = new inv_hash_storage_t(hash.get_size(), klen, 
+                                 hash.get_val_len() + ceilLog2(N),
+                                 hash.get_max_reprobe(),
+                                 jellyfish::quadratic_reprobes);
+    SquareBinaryMatrix hash_matrix = hash.get_hash_matrix();
+    ary->set_matrix(hash_matrix);
+    if(args.verbose_flag)
+      std::cerr << "Loading database: " << *db_it << " level " << 0 << "\n";
+    auto it = hash.get_iterator();
+    while(it.next()) {
+      if(it.get_val() >= args.min_count_arg) {
+        if(!ary->map(it.get_key(), it.get_val() * N))
+          die << "Output hash is full";
+      }
     }
   }
 

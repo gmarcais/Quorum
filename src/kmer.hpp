@@ -27,8 +27,8 @@ class kmer_t {
   static uint64_t       _mask;
 
 public:
-  static const uint64_t codes[256];
-  static const char     rev_codes[4];
+  static const char codes[256];
+  static const char rev_codes[4];
 
   kmer_t() : 
     _fmer(0), _rmer(0) {}

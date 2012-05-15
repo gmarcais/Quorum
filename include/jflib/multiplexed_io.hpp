@@ -198,7 +198,7 @@ namespace jflib {
           setp(_elt->base(), _elt->end());
           pbump(old_size);
         } else { // Save part not in a record and release rest.
-          ptrdiff_t in_buf = pptr() - pbase();
+          std::ptrdiff_t in_buf = pptr() - pbase();
           if(_elt->write_len() < in_buf) {
             size_t extra = in_buf - _elt->write_len();
             _overflow_buffer.resize(extra);

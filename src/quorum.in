@@ -23,6 +23,7 @@ my $min_count    = 1;
 my $skip         = 1;
 my $anchor       = 1;
 my $anchor_count = 3;
+my $contaminant;
 my ($help, $debug);
 
 my $usage = <<EOS;
@@ -43,6 +44,7 @@ Options:
      --skip            Number of bases to skip to find anchor kmer (default $skip)
      --anchor          Numer of good kmer in a row for anchor (default $anchor)
      --anchor-count    Minimum count for an anchor kmer (default $anchor_count)
+     --contaminant     Contaminant sequences
  -d, --debug           Display debugging information
  -h, --help            This message.
 EOS
@@ -59,6 +61,7 @@ GetOptions("s|size=i"        => \$jf_size,
            "skip=i"          => \$skip,
            "anchor=i"        => \$anchor,
            "anchor-count=i"  => \$anchor_count,
+           "contaminant=s"   => \$contaminant,
            "d|debug"         => \$debug,
            "h|help"          => \$help) or die $usage;
 if($help) {
@@ -79,6 +82,43 @@ if($JF_LIB_PATH) {
     $ENV["LD_LIBRARY_PATH"] = $JF_LIB_PATH;
   }
   print(STDERR "Set LD_LIBRARY_PATH: $LD_LIBRARY_PATH");
+}
+
+sub run {
+  print(STDERR "+ @_\n") if($debug);
+  my $ret = system(@_);
+  die "Failed to exec '$_[0]': $!" if $ret == -1;
+  return $ret;
+}
+
+# Create a raw Jellyfish hash on disk of the contaminant sequences
+# (unless a hash is passed). The size of the hash is set to be the
+# size of the input fasta file or half the size of a fastq size
+# (remove quality) plus 20%. The overall size of contaminant should be
+# fairly small anyhow.
+if(defined($contaminant)) {
+  open(my $cont_io, "<", $contaminant) or
+      die "Can't open contaminant file '$contaminant': $!";
+  read($cont_io, my $header, 8);
+  my $file_size = stat($cont_io)[7];
+  close($cont_io);
+  if($header ne "JFRHSHDN") {
+    if(substr($header, 0, 1) ne ">" && substr($header, 0, 1) ne "@") {
+      die "Excepted a fast[aq] file or a Jellyfish raw hash for contaminants";
+    }
+    $file_size /= 2 if substr($header, 0, 1) eq "@";
+    my $hash_size = int($file_size * 1.2);
+    my $cont_prefix = $prefix . "contaminants";
+    while(1) {
+      unlink($cont_prefix . "_0", $cont_prefix . "_1");
+      run($JELLYFISH, "count", "-s", $hash_size, "-m", $klen, "-Ct", $nb_threads,
+          "-p", $cont_prefix, $contaminant) or
+              die "Failed to run jellyfish on contaminant sequences";
+      last if(! -f $cont_prefix . "_1");
+      $hash_size *= 2;
+    }
+    $contaminant = $cont_prefix . "_0";
+  }
 }
 
 if(!defined($min_q_char)) {
@@ -106,13 +146,6 @@ if(!defined($min_q_char)) {
   print STDERR "Guessed min_q_char = $min_q_char (", chr($min_q_char), ")\n";
 }
 
-sub run {
-  print(STDERR "+ @_\n") if($debug);
-  my $ret = system(@_);
-  die "Failed to exec '$_[0]': $!" if $ret == -1;
-  return $ret;
-}
-
 run($JF, "count", "-t", $nb_threads, "-m", $klen, "-s", $jf_size,
     "-Crp", 126, "-o", $prefix . "trim",
     "--quality-start", $min_q_char, "--min-quality", $min_q_char,
@@ -129,8 +162,9 @@ run($COMB, "-m", 1, $prefix . "trim_0", $prefix . "all_0",
     "-o", $prefix . "combined") == 0 or
     die "Combining Jellyfish databases failed";
 
-run($EC, "-d", $prefix . "combined_0", "-o", $prefix . "corrected", "-t", $nb_threads, 
-    "-Cc", 2, "-m", $min_count, "-s", $skip, "-g", $anchor, "-a", $anchor_count, 
-    "-w", $window, "-e", $max_err,
-    @ARGV) == 0 or
+my @ec_cmd = ($EC, "-d", $prefix . "combined_0", "-o", $prefix . "corrected",
+              "-t", $nb_threads, "-Cc", 2, "-m", $min_count, "-s", $skip,
+              "-g", $anchor, "-a", $anchor_count, "-w", $window, "-e", $max_err);
+push(@ec_cmd, ("--contaminant", $contaminant)) if(defined($contaminant));
+run(@ec_cmd, @ARGV) == 0 or
     die "Error correction failed";

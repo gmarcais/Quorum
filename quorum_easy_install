@@ -8,7 +8,7 @@ CURL = $(shell /bin/which curl)
 DOWNLOADER = $(if $(WGET), $(WGET) -O, $(if $(CURL), $(CURL) -o, $(error Error: No wget or curl found in PATH)))
 
 JF_VERSION = 1.1.5
-JF_URL = http://www.cbcb.umd.edu/software/jellyfish/jellyfish-$(JF_VERSION).tar.gz
+JF_URL = ftp://ftp.genome.umd.edu/pub/quorum/jellyfish-$(JF_VERSION).tar.gz
 
 QUORUM_VERSION = 0.1.0
 QUORUM_URL = ftp://ftp.genome.umd.edu/pub/quorum/quorum-$(QUORUM_VERSION).tar.gz

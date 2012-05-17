@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <memory>
+#include <limits>
 
 #ifndef typeof
 #define typeof __typeof__
@@ -29,8 +30,9 @@
 #include <jellyfish/mer_counting.hpp>
 
 #include <jflib/multiplexed_io.hpp>
-#include <src/error_correct_reads.hpp>
 #include <gzip_stream.hpp>
+#include <src/error_correct_reads.hpp>
+#include <src/error_correct_reads_cmdline.hpp>
 
 typedef uint64_t hkey_t;
 typedef uint64_t hval_t;
@@ -231,6 +233,7 @@ class error_correct_t : public thread_exec {
   int                    _combined;
   contaminant_check*     _contaminant;
   bool                   _trim_contaminant;
+  int                    _homo_trim;
   jflib::o_multiplexer * _output;
   jflib::o_multiplexer * _log;
 public:
@@ -238,7 +241,8 @@ public:
     _parser(parser), _hashes(hashes),
     _mer_len(_hashes->begin()->get_key_len() / 2),
     _skip(0), _good(1), _min_count(1), _window(0), _error(0), _gzip(false),
-    _combined(0), _contaminant(0), _trim_contaminant(false) { }
+    _combined(0), _contaminant(0), _trim_contaminant(false),
+    _homo_trim(std::numeric_limits<int>::min()) { }
 
 private:
   // Open the data (error corrected reads) and log files. Default to
@@ -301,6 +305,7 @@ public:
   error_correct_t & combined(int c) { _combined = c; return *this; }
   error_correct_t & contaminant(contaminant_check* c) { _contaminant = c; return *this; }
   error_correct_t & trim_contaminant(bool t) { _trim_contaminant = t; return *this; }
+  error_correct_t & homo_trim(int t) { _homo_trim = t; return *this; }
 
   jellyfish::parse_read* parser() const { return _parser; }
   int skip() const { return _skip; }
@@ -316,6 +321,8 @@ public:
   int combined() const { return _combined; }
   contaminant_check* contaminant() const { return _contaminant; }
   bool trim_contaminant() const { return _trim_contaminant; }
+  bool do_homo_trim() const { return _homo_trim != std::numeric_limits<int>::min(); }
+  int homo_trim() const { return _homo_trim; }
 
   jflib::o_multiplexer &output() { return *_output; }
   jflib::o_multiplexer &log() { return *_log; }
@@ -341,6 +348,7 @@ private:
 
   static const char* error_contaminant;
   static const char* error_no_starting_mer;
+  static const char* error_homopolymer;
   
 public:
   error_correct_instance(ec_t *ec, int id) :
@@ -409,6 +417,19 @@ public:
       }
       start_out++;
       assert(start_out >= _buffer);
+      assert(_buffer + _buff_size >= end_out);
+
+      if(_ec->do_homo_trim()) {
+        end_out = homo_trim(_buffer, start_out, end_out, fwd_log, bwd_log, &error);
+        if(!end_out) {
+          details << "Skipped " << substr(read->header, read->hlen)
+                  << ": " << error << "\n";
+          details << jflib::endr;
+          output << jflib::endr;
+          continue;
+        }
+      }
+      assert(end_out >= _buffer);
       assert(_buffer + _buff_size >= end_out);
 
       output << ">" << substr(read->header, read->hlen) 
@@ -570,6 +591,41 @@ private:
     goto done;
   }
 
+  char* homo_trim(const char* start, char* out_start, char* out_end,
+                  forward_log& fwd_log, backward_log& bwd_log, const char** error) {
+    int   max_homo_score = std::numeric_limits<int>::min();
+    char* max_pos        = 0;
+    int   homo_score     = 0;
+    char  pbase          = -1;
+
+    char* ptr = out_end - 1;
+    for( ; ptr >= out_start; --ptr) {
+      char cbase = kmer_t::codes[(unsigned int)*ptr];
+      homo_score += ((pbase == cbase) << 1) - 1; // Add 1 if same as last, -1 if not
+      pbase       = cbase;
+      if(homo_score > max_homo_score) {
+        max_homo_score = homo_score;
+        max_pos        = ptr;
+      }
+    }
+
+    if(max_homo_score < _ec->homo_trim())
+      return out_end; // Not a high score -> return without truncation
+    if(max_pos < start || max_pos < out_start) {
+      std::cerr << (void*)start << " " << (void*)out_start << " " << (void*)max_pos << std::endl;
+    }
+    assert(max_pos >= out_start);
+    assert(max_pos >= start);
+    if(max_pos == out_start) {
+      *error = error_homopolymer;
+      return 0;
+    }
+    fwd_log.force_truncate(forward_counter(max_pos - start));
+    bwd_log.force_truncate(backward_counter(max_pos - start));
+    bwd_log.truncation(backward_counter(max_pos - start));
+    return max_pos;
+  }
+
   void insure_length_buffer(size_t len) {
     if(len > _buff_size) {
       _buff_size = len > 2 * _buff_size ? len + 100 : 2 * _buff_size;
@@ -620,6 +676,7 @@ private:
 
 const char* error_correct_instance::error_contaminant     = "Contaminated read";
 const char* error_correct_instance::error_no_starting_mer = "No high quality mer";
+const char* error_correct_instance::error_homopolymer     = "Entire read is an homopolymer";
 
 
 int main(int argc, char *argv[])
@@ -671,7 +728,8 @@ int main(int argc, char *argv[])
     .gzip(args.gzip_flag)
     .combined(args.combined_arg)
     .contaminant(contaminant)
-    .trim_contaminant(args.trim_contaminant_flag);
+    .trim_contaminant(args.trim_contaminant_flag)
+    .homo_trim(args.homo_trim_given ? args.homo_trim_arg : std::numeric_limits<int>::min());
   correct.do_it(args.thread_arg);
 
   return 0;

@@ -2,6 +2,13 @@ AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir) $(JELLYFISH_CFLAGS)
 AM_CXXFLAGS = -Wall -Werror -g -O2 -std=c++0x
 AM_LDFLAGS = $(JELLYFISH_LIBS)
 
+# Yaggo automatic rules with silencing
+V_YAGGO = $(V_YAGGO_$(V))
+V_YAGGO_ = $(V_YAGGO_$(AM_DEFAULT_VERBOSITY))
+V_YAGGO_0 = @echo "  YAGGO " $@;
+.yaggo.hpp:
+	$(V_YAGGO)$(YAGGO) --license $(srcdir)/header-license -p src/ -o $@ $<
+
 JFLIB_I = include/jflib
 
 bin_PROGRAMS = quorum_error_correct_reads quorum_combine_jf_dbs

@@ -19,6 +19,10 @@ AC_CHECK_LIB([rt], [clock_gettime])
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
+# Check for yaggo
+AC_ARG_VAR([YAGGO], [Yaggo switch parser generator])
+AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
+
 # Get jellyfish compile flags && executable
 PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
 AC_ARG_VAR([JELLYFISH], [Jellyfish executable])

@@ -24,6 +24,7 @@ my $skip         = 1;
 my $anchor       = 1;
 my $anchor_count = 3;
 my $contaminant;
+my $homo_trim;
 my ($help, $debug);
 
 my $usage = <<EOS;
@@ -45,6 +46,7 @@ Options:
      --anchor          Numer of good kmer in a row for anchor (default $anchor)
      --anchor-count    Minimum count for an anchor kmer (default $anchor_count)
      --contaminant     Contaminant sequences
+     --homo-trim       Trim homo-polymer on 3\' end
  -d, --debug           Display debugging information
  -h, --help            This message.
 EOS
@@ -52,6 +54,7 @@ EOS
 
 GetOptions("s|size=s"        => \$jf_size,
            "t|threads=i"     => \$nb_threads,
+           "p|prefix=s"      => \$prefix,
            "k|klen=i"        => \$klen,
            "q|min-q-char=i"  => \$min_q_char,
            "m|min-quality=i" => \$min_quality,
@@ -62,6 +65,7 @@ GetOptions("s|size=s"        => \$jf_size,
            "anchor=i"        => \$anchor,
            "anchor-count=i"  => \$anchor_count,
            "contaminant=s"   => \$contaminant,
+           "homo-trim=i"     => \$homo_trim,
            "d|debug"         => \$debug,
            "h|help"          => \$help) or die $usage;
 if($help) {
@@ -164,5 +168,6 @@ my @ec_cmd = ($EC, "-d", $prefix . "combined_0", "-o", $prefix . "corrected",
               "-t", $nb_threads, "-Cc", 2, "-m", $min_count, "-s", $skip,
               "-g", $anchor, "-a", $anchor_count, "-w", $window, "-e", $max_err);
 push(@ec_cmd, ("--contaminant", $contaminant)) if(defined($contaminant));
+push(@ec_cmd, ("--homo-trim", $homo_trim)) if(defined($homo_trim));
 run(@ec_cmd, @ARGV) == 0 or
     die "Error correction failed";

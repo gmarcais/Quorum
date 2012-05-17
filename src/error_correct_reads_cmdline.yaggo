@@ -43,6 +43,9 @@ option("contaminant") {
 option("trim-contaminant") {
   description "Trim reads containing contaminated k-mers instead of discarding"
   flag; off }
+option("homo-trim") {
+  description "Trim homo-polymer run at the 3' end" 
+  int32 }
 option("gzip") {
   description "Gzip output file"
   flag; off }

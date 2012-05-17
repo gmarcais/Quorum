@@ -14,7 +14,6 @@
 #include <misc.hpp>
 #include <src/kmer.hpp>
 #include <src/err_log.hpp>
-#include <src/error_correct_reads_cmdline.hpp>
 
 // A forward moving pointer.
 template<typename T>
@@ -91,6 +90,7 @@ public:
 class forward_counter {
   int _c;
 public:
+  forward_counter() {}
   forward_counter(int c) : _c(c) {}
   forward_counter &operator++() {
     ++_c;
@@ -122,6 +122,7 @@ public:
 class backward_counter {
   int _c;
 public:
+  backward_counter() {}
   backward_counter(int c) : _c(c) {}
   backward_counter &operator++() {
     --_c;

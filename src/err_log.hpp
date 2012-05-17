@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <vector>
 #include <iostream>
+#include <algorithm>
+#include <functional>
 #include <assert.h>
 #include <misc.hpp>
 
@@ -33,6 +35,7 @@ private:
       sub_t sub;
     };
 
+    entry() {};
     entry(type_t t, T p) : type(t), pos(p) {}
   };
 
@@ -62,7 +65,23 @@ public:
     return check_nb_error();
   }
 
+  // Remove all event log with position >= pos
+  bool force_truncate(T pos) {
+    struct greater_than_pos : std::unary_function<entry, bool> {
+      T pos;
+      bool operator()(entry& e) { return e.pos >= *pos; } // Compare the raw value of pos, not using the operator>=
+      greater_than_pos(T& pos_) : pos(pos_) { }
+    } pred(pos);
+    auto nend = std::remove_if(_log.begin(), _log.end(), pred);
+    _log.resize(nend - _log.begin());
+    _lwin = 0; // Needs to be recomputed
+    return check_nb_error();
+  }
+
+  // Check that the number of errors in the window is less than the
+  // maximum allowed
   bool check_nb_error() {
+    // Update the _lwin member
     if(_log.size() > 0 && _log.back().pos >_window)
       while(_log.back().pos > _log[_lwin].pos + _window) {
         _lwin++;

@@ -596,12 +596,13 @@ private:
     int   max_homo_score = std::numeric_limits<int>::min();
     char* max_pos        = 0;
     int   homo_score     = 0;
-    char  pbase          = -1;
+    char* ptr            = out_end - 1;
+    char  pbase          = kmer_t::codes[(unsigned int)*ptr];
 
-    char* ptr = out_end - 1;
-    for( ; ptr >= out_start; --ptr) {
+    for(--ptr; ptr >= out_start; --ptr) {
       char cbase = kmer_t::codes[(unsigned int)*ptr];
       homo_score += ((pbase == cbase) << 1) - 1; // Add 1 if same as last, -1 if not
+      std::cout << (int)pbase << " " << (int)cbase << " " << homo_score << "\n";
       pbase       = cbase;
       if(homo_score > max_homo_score) {
         max_homo_score = homo_score;
@@ -622,7 +623,7 @@ private:
     }
     fwd_log.force_truncate(forward_counter(max_pos - start));
     bwd_log.force_truncate(backward_counter(max_pos - start));
-    bwd_log.truncation(backward_counter(max_pos - start));
+    fwd_log.truncation(forward_counter(max_pos - start));
     return max_pos;
   }
 

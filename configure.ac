@@ -1,5 +1,5 @@
 AC_PREREQ([2.63])
-AC_INIT([quorum], [0.1.1], [gmarcais@umd.edu])
+AC_INIT([quorum], [0.1.2], [gmarcais@umd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/error_correct_reads.hpp])
 AC_CONFIG_HEADERS([config.h])

@@ -5,10 +5,11 @@ use warnings;
 use Getopt::Long;
 
 # Compile time settings
-my $JF          = "@JELLYFISH@";
-my $JF_LIB_PATH = "@JF_LIB_PATH@";
-my $COMB        = "@bindir@/quorum_combine_jf_dbs";
-my $EC          = "@bindir@/quorum_error_correct_reads";
+my $JF              = "@JELLYFISH@";
+my $JF_LIB_PATH     = "@JF_LIB_PATH@";
+my $COMB            = "@bindir@/quorum_combine_jf_dbs";
+my $EC              = "@bindir@/quorum_error_correct_reads";
+my $PACKAGE_VERSION = "@PACKAGE_VERSION@";
 
 # Command line switches
 my $jf_size;    # Mandatory option
@@ -25,7 +26,7 @@ my $anchor       = 1;
 my $anchor_count = 3;
 my $contaminant;
 my $homo_trim;
-my ($help, $debug);
+my ($help, $debug, $version);
 
 my $usage = <<EOS;
 $0 [options] .fastq [.fastq]+
@@ -48,7 +49,8 @@ Options:
      --contaminant     Contaminant sequences
      --homo-trim       Trim homo-polymer on 3\' end
  -d, --debug           Display debugging information
- -h, --help            This message.
+     --version         Display version
+ -h, --help            This message
 EOS
     ; # Make emacs happy
 
@@ -67,9 +69,14 @@ GetOptions("s|size=s"        => \$jf_size,
            "contaminant=s"   => \$contaminant,
            "homo-trim=i"     => \$homo_trim,
            "d|debug"         => \$debug,
+           "version"         => \$version,
            "h|help"          => \$help) or die $usage;
 if($help) {
   print($usage);
+  exit(0);
+}
+if($version) {
+  print($PACKAGE_VERSION, "\n");
   exit(0);
 }
 if(!defined($jf_size)) {

@@ -37,7 +37,8 @@ CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = src/quorum.in
 do_subst = sed -e 's|[@]JELLYFISH[@]|$(JELLYFISH)|g' \
                -e 's|[@]bindir[@]|$(bindir)|g' \
-	       -e 's|[@]JF_LIB_PATH[@]|$(JF_LIB_PATH)|g'
+	       -e 's|[@]JF_LIB_PATH[@]|$(JF_LIB_PATH)|g' \
+	       -e 's|[@]PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g'
 
 quorum: src/quorum.in Makefile
 	$(do_subst) < $< > $@

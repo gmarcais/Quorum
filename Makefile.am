@@ -32,7 +32,7 @@ quorum_error_correct_reads_SOURCES += src/kmer.hpp				\
 quorum_combine_jf_dbs_SOURCES = src/combine_jf_dbs.cc src/yaggo.cpp
 quorum_combine_jf_dbs_SOURCES += src/combine_jf_dbs.hpp src/yaggo.hpp
 
-bin_SCRIPTS = quorum
+bin_SCRIPTS = quorum 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = src/quorum.in
 do_subst = sed -e 's|[@]JELLYFISH[@]|$(JELLYFISH)|g' \
@@ -43,3 +43,5 @@ do_subst = sed -e 's|[@]JELLYFISH[@]|$(JELLYFISH)|g' \
 quorum: src/quorum.in Makefile
 	$(do_subst) < $< > $@
 	chmod +x $@
+
+-include $(top_srcdir)/local.mk

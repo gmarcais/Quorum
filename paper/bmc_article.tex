@@ -1,0 +1,447 @@
+%% BioMed_Central_Tex_Template_v1.05
+%%                                      %
+%  bmc_article.tex            ver: 1.05 %
+%                                       %
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                     %%
+%%  LaTeX template for BioMed Central  %%
+%%     journal article submissions     %%
+%%                                     %%
+%%         <27 January 2006>           %%
+%%                                     %%
+%%                                     %%
+%% Uses:                               %%
+%% cite.sty, url.sty, bmc_article.cls  %%
+%% ifthen.sty. multicol.sty		       %%
+%%									   %%
+%%                                     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                 %%	
+%% For instructions on how to fill out this Tex template           %%
+%% document please refer to Readme.pdf and the instructions for    %%
+%% authors page on the biomed central website                      %%
+%% http://www.biomedcentral.com/info/authors/                      %%
+%%                                                                 %%
+%% Please do not use \input{...} to include other tex files.       %%
+%% Submit your LaTeX manuscript as one .tex document.              %%
+%%                                                                 %%
+%% All additional figures and files should be attached             %%
+%% separately and not embedded in the \TeX\ document itself.       %%
+%%                                                                 %%
+%% BioMed Central currently use the MikTex distribution of         %%
+%% TeX for Windows) of TeX and LaTeX.  This is available from      %%
+%% http://www.miktex.org                                           %%
+%%                                                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\documentclass[10pt]{bmc_article}    
+
+
+
+% Load packages
+\usepackage{cite} % Make references as [1-4], not [1,2,3,4]
+\usepackage{url}  % Formatting web addresses  
+\usepackage{ifthen}  % Conditional 
+\usepackage{multicol}   %Columns
+\usepackage[utf8]{inputenc} %unicode support
+%\usepackage[applemac]{inputenc} %applemac support if unicode package fails
+%\usepackage[latin1]{inputenc} %UNIX support if unicode package fails
+\usepackage{units}
+\urlstyle{rm}
+ 
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%                                             %%
+%%  If you wish to display your graphics for   %%
+%%  your own use using includegraphic or       %%
+%%  includegraphics, then comment out the      %%
+%%  following two lines of code.               %%   
+%%  NB: These line *must* be included when     %%
+%%  submitting to BMC.                         %% 
+%%  All figure files must be submitted as      %%
+%%  separate graphics through the BMC          %%
+%%  submission process, not included in the    %% 
+%%  submitted article.                         %% 
+%%                                             %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     
+
+
+\def\includegraphic{}
+\def\includegraphics{}
+
+
+
+\setlength{\topmargin}{0.0cm}
+\setlength{\textheight}{21.5cm}
+\setlength{\oddsidemargin}{0cm} 
+\setlength{\textwidth}{16.5cm}
+\setlength{\columnsep}{0.6cm}
+
+\newboolean{publ}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                              %%
+%% You may change the following style settings  %%
+%% Should you wish to format your article       %%
+%% in a publication style for printing out and  %%
+%% sharing with colleagues, but ensure that     %%
+%% before submitting to BMC that the style is   %%
+%% returned to the Review style setting.        %%
+%%                                              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+
+%Review style settings
+%\newenvironment{bmcformat}{\begin{raggedright}\baselineskip20pt\sloppy\setboolean{publ}{false}}{\end{raggedright}\baselineskip20pt\sloppy}
+
+%Publication style settings
+\newenvironment{bmcformat}{\fussy\setboolean{publ}{true}}{\fussy}
+
+
+
+% Begin ...
+\begin{document}
+\begin{bmcformat}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                          %%
+%% Enter the title of your article here     %%
+%%                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{QuorUM: an error corrector for sequence generation sequencing reads}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                          %%
+%% Enter the authors here                   %%
+%%                                          %%
+%% Ensure \and is entered between all but   %%
+%% the last two authors. This will be       %%
+%% replaced by a comma in the final article %%
+%%                                          %%
+%% Ensure there are no trailing spaces at   %% 
+%% the ends of the lines                    %%     	
+%%                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\author{Guillaume Mar\c{c}ais\correspondingauthor$^1$%
+       \email{Guillaume Mar\c{c}ais\correspondingauthor - gmarcais@umd.edu}%
+      \and
+         Aleksey Zimin\correspondingauthor$^1$%
+         \email{Aleksey Ziming\correspondingauthor- alekseyz@ipst.umd.edu}%
+%       \and%
+%         Neza Vodopivec$^1$%
+%         \email{Neza Vodopivec - }
+       and
+         Jim Yorke$^1$%
+         \email{Jim Yorke - yorke@umd.edu}
+      }
+      
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                          %%
+%% Enter the authors' addresses here        %%
+%%                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\address{%
+    \iid(1)Institut for Physical Science and Technology, University of Maryland, College Park, MD
+}%
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                          %%
+%% The Abstract begins here                 %%
+%%                                          %%
+%% The Section headings here are those for  %%
+%% a Research article submitted to a        %%
+%% BMC-Series journal.                      %%  
+%%                                          %%
+%% If your article is not of this type,     %%
+%% then refer to the Instructions for       %%
+%% authors on http://www.biomedcentral.com  %%
+%% and change the section headings          %%
+%% accordingly.                             %%   
+%%                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{abstract}
+  % Do not use inserted blank lines (ie \\) until main body of text.
+\paragraph*{Background:}
+Illumina Sequencing data can provide high coverage of a genome by
+relatively short ($\unit[100]{bp}$ to $\unit[150]{bp}$) reads at a low
+cost.  The base error rates in the reads vary greatly along the read
+sequence. Low quality bases can be trimmed off or
+error-corrected. Trimming, especially based on the quality scores, can
+eliminate large amounts of useful sequence in the reads.  Error
+correction is an alternative to trimming that takes advantage of the
+high coverage of the genome to make the high confidence base
+corrections in the reads. Error correction allows for more effective
+use of the sequencing data thus reducing the coverage depth
+requirements in sequencing projects and increasing the quality of the
+resulting assemblies. The vast majority of errors in Illumina data are
+substitutions, where a base call is incorrect. Also, the sequence
+quality is usually higher on the 5’ end of a read and deteriorates
+toward the 3’ end of the read. Each base in the read has a quality
+score associated with it.
+      
+\paragraph*{Results:} We propose a novel software, called QuorUM,
+for error correcting substitution error in second generation
+sequencing reads. It provides accurate correction and is suitable for
+large data sets ($48$ billion bases corrected per hours on $48$
+threads).
+
+\paragraph*{Conclusions:} 
+The QuorUM software is available under an open source license at
+\url{ftp://ftp.genome.umd.edu/pub/quorum} \ldots
+\end{abstract}
+
+
+
+\ifthenelse{\boolean{publ}}{\begin{multicols}{2}}{}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                          %%
+%% The Main Body begins here                %%
+%%                                          %%
+%% The Section headings here are those for  %%
+%% a Research article submitted to a        %%
+%% BMC-Series journal.                      %%  
+%%                                          %%
+%% If your article is not of this type,     %%
+%% then refer to the instructions for       %%
+%% authors on:                              %%
+%% http://www.biomedcentral.com/info/authors%%
+%% and change the section headings          %%
+%% accordingly.                             %% 
+%%                                          %%
+%% See the Results and Discussion section   %%
+%% for details on how to create sub-sections%%
+%%                                          %%
+%% use \cite{...} to cite references        %%
+%%  \cite{koon} and                         %%
+%%  \cite{oreg,khar,zvai,xjon,schn,pond}    %%
+%%  \nocite{smith,marg,hunn,advi,koha,mouse}%%
+%%                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%
+%% Background %%
+%%
+\section*{Background}
+Text for this section.\cite{koon,oreg,khar,zvai,xjon,schn,pond,smith,marg,hunn,advi,koha,mouse}
+
+
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Results and Discussion %%
+%%
+\section*{Results and Discussion}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing
+elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue
+ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis
+dolor. Praesent et diam eget libero egestas mattis sit amet vitae
+augue. Nam tincidunt congue enim, ut porta lorem lacinia
+consectetur. Donec ut libero sed arcu vehicula ultricies a non
+tortor. Lorem ipsum dolor sit amet, consectetur adipiscing
+elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed,
+adipiscing id dolor. Pellentesque auctor nisi id magna consequat
+sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt
+feugiat nisl imperdiet. Ut convallis libero in urna ultrices
+accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at
+malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis
+parturient montes, nascetur ridiculus mus. In rutrum accumsan
+ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
+
+
+
+
+
+Vivamus fermentum semper porta. Nunc diam velit, adipiscing ut
+tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper
+ultricies. Curabitur ornare, ligula semper consectetur sagittis, nisi
+diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec
+pretium volutpat, arcu ante placerat erat, non tristique elit urna et
+turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et
+orci. Fusce eget orci a orci congue vestibulum. Ut dolor diam,
+elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis
+pulvinar tellus gravida ornare. Sed et erat faucibus nunc euismod
+ultricies ut id justo. Nullam cursus suscipit nisi, et ultrices justo
+sodales nec. Fusce venenatis facilisis lectus ac semper. Aliquam at
+massa ipsum. Quisque bibendum purus convallis nulla ultrices
+ultricies. Nullam aliquam, mi eu aliquam tincidunt, purus velit
+laoreet tortor, viverra pretium nisi quam vitae mi. Fusce vel volutpat
+elit. Nam sagittis nisi dui.
+
+
+Suspendisse lectus leo, consectetur in tempor sit amet, placerat quis
+neque. Etiam luctus porttitor lorem, sed suscipit est rutrum
+non. Curabitur lobortis nisl a enim congue semper. Aenean commodo
+ultrices imperdiet. Vestibulum ut justo vel sapien venenatis
+tincidunt. Phasellus eget dolor sit amet ipsum dapibus condimentum
+vitae quis lectus. Aliquam ut massa in turpis dapibus
+convallis. Praesent elit lacus, vestibulum at malesuada et, ornare et
+est. Ut augue nunc, sodales ut euismod non, adipiscing vitae
+orci. Mauris ut placerat justo. Mauris in ultricies enim. Quisque nec
+est eleifend nulla ultrices egestas quis ut quam. Donec sollicitudin
+lectus a mauris pulvinar id aliquam urna cursus. Cras quis ligula sem,
+vel elementum mi. Phasellus non ullamcorper urna.
+
+
+Class aptent taciti sociosqu ad litora torquent per conubia nostra,
+per inceptos himenaeos. In euismod ultrices facilisis. Vestibulum
+porta sapien adipiscing augue congue id pretium lectus molestie. Proin
+quis dictum nisl. Morbi id quam sapien, sed vestibulum sem. Duis
+elementum rutrum mauris sed convallis. Proin vestibulum magna
+mi. Aenean tristique hendrerit magna, ac facilisis nulla hendrerit
+ut. Sed non tortor sodales quam auctor elementum. Donec hendrerit nunc
+eget elit pharetra pulvinar. Suspendisse id tempus tortor. Aenean
+luctus, elit commodo laoreet commodo, justo nisi consequat massa, sed
+vulputate quam urna quis eros. Donec vel.
+
+
+    
+
+%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusions}
+  Text for this section \ldots
+
+
+  
+%%%%%%%%%%%%%%%%%%
+\section*{Methods}
+
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Authors contributions}
+
+
+    
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgements}
+  \ifthenelse{\boolean{publ}}{\small}{}
+  Text for this section \ldots
+
+
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                  The Bibliography                       %%
+%%                                                         %%              
+%%  Bmc_article.bst  will be used to                       %%
+%%  create a .BBL file for submission, which includes      %%
+%%  XML structured for BMC.                                %%
+%%                                                         %%
+%%                                                         %%
+%%  Note that the displayed Bibliography will not          %% 
+%%  necessarily be rendered by Latex exactly as specified  %%
+%%  in the online Instructions for Authors.                %% 
+%%                                                         %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+{
+  \ifthenelse{\boolean{publ}}{\footnotesize}{\small}
+  \bibliographystyle{bmc_article}  % Style BST file
+  \bibliography{bmc_article}
+}     % Bibliography file (usually '*.bib' ) 
+
+%%%%%%%%%%%
+
+\ifthenelse{\boolean{publ}}{\end{multicols}}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                               %%
+%% Figures                       %%
+%%                               %%
+%% NB: this is for captions and  %%
+%% Titles. All graphics must be  %%
+%% submitted separately and NOT  %%
+%% included in the Tex document  %%
+%%                               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%
+%% Do not use \listoffigures as most will included as separate files
+
+\section*{Figures}
+\subsection*{Figure 1 - Sample figure title}
+A short description of the figure content
+should go here.
+
+\subsection*{Figure 2 - Sample figure title}
+Figure legend text.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                               %%
+%% Tables                        %%
+%%                               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Use of \listoftables is discouraged.
+%%
+\section*{Tables}
+\subsection*{Table 1 - Sample table title}
+Here is an example of a \emph{small} table in \LaTeX\ using  
+\verb|\tabular{...}|. This is where the description of the table 
+should go. \par \mbox{}
+\par
+\mbox{
+  \begin{tabular}{|c|c|c|}
+    \hline \multicolumn{3}{|c|}{My Table}\\ \hline
+    A1 & B2  & C3 \\ \hline
+    A2 & ... & .. \\ \hline
+    A3 & ..  & .  \\ \hline
+  \end{tabular}
+}
+\subsection*{Table 2 - Sample table title}
+Large tables are attached as separate files but should
+still be described here.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                               %%
+%% Additional Files              %%
+%%                               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Additional Files}
+\subsection*{Additional file 1 --- Sample additional file title}
+Additional file descriptions text (including details of how to
+view the file, if it is in a non-standard format or the file extension).  This might
+refer to a multi-page table or a figure.
+
+\subsection*{Additional file 2 --- Sample additional file title}
+Additional file descriptions text.
+
+
+\end{bmcformat}
+\end{document}
+
+
+
+
+
+
+

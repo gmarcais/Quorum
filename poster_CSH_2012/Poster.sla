@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SCRIBUSUTF8NEW Version="1.4.0">
+    <DOCUMENT ANZPAGES="1" PAGEWIDTH="2592" PAGEHEIGHT="2592" BORDERLEFT="40" BORDERRIGHT="40" BORDERTOP="40" BORDERBOTTOM="40" PRESET="0" BleedTop="0" BleedLeft="0" BleedRight="0" BleedBottom="0" ORIENTATION="0" PAGESIZE="Custom" FIRSTNUM="1" BOOK="0" AUTOSPALTEN="1" ABSTSPALTEN="11" UNITS="0" DFONT="Bitstream Charter Bold" DSIZE="12" DCOL="1" DGAP="0" TabFill="" TabWidth="36" AUTHOR="" COMMENTS="" KEYWORDS="" PUBLISHER="" DOCDATE="" DOCTYPE="" DOCFORMAT="" DOCIDENT="" DOCSOURCE="" DOCLANGINFO="" DOCRELATION="" DOCCOVER="" DOCRIGHTS="" DOCCONTRIB="" TITLE="" VHOCH="33" VHOCHSC="66" VTIEF="33" VTIEFSC="66" VKAPIT="75" BASEGRID="14.4" BASEO="0" AUTOL="20" UnderlinePos="-1" UnderlineWidth="-1" StrikeThruPos="-1" StrikeThruWidth="-1" GROUPC="3" HCMS="0" DPSo="0" DPSFo="0" DPuse="0" DPgam="0" DPbla="1" DPMo="sRGB IEC61966-2.1" DPPr="Fogra27L CMYK Coated Press" DPIn="sRGB IEC61966-2.1" DPInCMYK="Fogra27L CMYK Coated Press" DPIn2="sRGB IEC61966-2.1" DPIn3="Fogra27L CMYK Coated Press" DISc="1" DIIm="0" ALAYER="0" LANGUAGE="English" MINWORDLEN="3" HYCOUNT="2" AUTOMATIC="1" AUTOCHECK="0" GUIDELOCK="0" SnapToGuides="1" SnapToGrid="0" MINGRID="20" MAJGRID="100" SHOWGRID="0" SHOWGUIDES="1" showcolborders="1" SHOWFRAME="1" SHOWLAYERM="0" SHOWMARGIN="1" SHOWBASE="0" SHOWPICT="1" SHOWControl="0" SHOWLINK="0" rulerMode="1" showrulers="1" showBleed="1" rulerXoffset="0" rulerYoffset="0" GuideRad="10" GRAB="4" POLYC="4" POLYF="0.707106781186548" POLYR="0" POLYCUR="0" POLYFD="0" POLYS="0" AutoSave="1" AutoSaveTime="600000" ScratchBottom="20" ScratchLeft="100" ScratchRight="100" ScratchTop="20" GapHorizontal="0" GapVertical="40" StartArrow="0" EndArrow="0" PEN="Black" BRUSH="None" PENLINE="Black" PENTEXT="Black" StrokeText="Black" TextBackGround="None" TextLineColor="None" TextBackGroundShade="100" TextLineShade="100" TextPenShade="100" TextStrokeShade="100" STIL="1" STILLINE="1" WIDTH="1" WIDTHLINE="1" PENSHADE="100" LINESHADE="100" BRUSHSHADE="100" MAGMIN="10" MAGMAX="3200" MAGSTEP="200" CPICT="None" PICTSHADE="100" PICTSCX="1" PICTSCY="1" PSCALE="1" PASPECT="1" EmbeddedPath="0" HalfRes="1" dispX="10" dispY="10" constrain="15" MINORC="#00ff00" MAJORC="#00ff00" GuideC="#000080" BaseC="#c0c0c0" GuideZ="10" BACKG="1" PAGEC="#ffffff" MARGC="#0000ff" RANDF="0" currentProfile="PDF 1.4">
+        <CheckProfile Name="PDF 1.3" ignoreErrors="0" autoCheck="1" checkGlyphs="1" checkOrphans="1" checkOverflow="1" checkPictures="1" checkResolution="1" checkTransparency="1" minResolution="144" maxResolution="2400" checkAnnotations="0" checkRasterPDF="1" checkForGIF="1" ignoreOffLayers="0" checkOffConflictLayers="0"/>
+        <CheckProfile Name="PDF 1.4" ignoreErrors="0" autoCheck="1" checkGlyphs="1" checkOrphans="1" checkOverflow="1" checkPictures="1" checkResolution="1" checkTransparency="0" minResolution="144" maxResolution="2400" checkAnnotations="0" checkRasterPDF="1" checkForGIF="1" ignoreOffLayers="0" checkOffConflictLayers="0"/>
+        <CheckProfile Name="PDF 1.5" ignoreErrors="0" autoCheck="1" checkGlyphs="1" checkOrphans="1" checkOverflow="1" checkPictures="1" checkResolution="1" checkTransparency="0" minResolution="144" maxResolution="2400" checkAnnotations="0" checkRasterPDF="1" checkForGIF="1" ignoreOffLayers="0" checkOffConflictLayers="0"/>
+        <CheckProfile Name="PDF/X-3" ignoreErrors="0" autoCheck="1" checkGlyphs="1" checkOrphans="1" checkOverflow="1" checkPictures="1" checkResolution="1" checkTransparency="1" minResolution="144" maxResolution="2400" checkAnnotations="1" checkRasterPDF="1" checkForGIF="1" ignoreOffLayers="0" checkOffConflictLayers="0"/>
+        <CheckProfile Name="PostScript" ignoreErrors="0" autoCheck="1" checkGlyphs="1" checkOrphans="1" checkOverflow="1" checkPictures="1" checkResolution="1" checkTransparency="1" minResolution="144" maxResolution="2400" checkAnnotations="0" checkRasterPDF="1" checkForGIF="1" ignoreOffLayers="0" checkOffConflictLayers="0"/>
+        <COLOR NAME="Black" CMYK="#000000ff" Spot="0" Register="0"/>
+        <COLOR NAME="Blue" RGB="#0000ff" Spot="0" Register="0"/>
+        <COLOR NAME="Cool Black" CMYK="#990000ff" Spot="0" Register="0"/>
+        <COLOR NAME="Cyan" CMYK="#ff000000" Spot="0" Register="0"/>
+        <COLOR NAME="Green" RGB="#00ff00" Spot="0" Register="0"/>
+        <COLOR NAME="Magenta" CMYK="#00ff0000" Spot="0" Register="0"/>
+        <COLOR NAME="Red" RGB="#ff0000" Spot="0" Register="0"/>
+        <COLOR NAME="Registration" CMYK="#ffffffff" Spot="0" Register="1"/>
+        <COLOR NAME="Rich Black" CMYK="#996666ff" Spot="0" Register="0"/>
+        <COLOR NAME="Warm Black" CMYK="#00994cff" Spot="0" Register="0"/>
+        <COLOR NAME="White" CMYK="#00000000" Spot="0" Register="0"/>
+        <COLOR NAME="Yellow" CMYK="#0000ff00" Spot="0" Register="0"/>
+        <HYPHEN/>
+        <STYLE NAME="Default Paragraph Style" DefaultStyle="1" ALIGN="3" LINESPMode="1" LINESP="15" INDENT="0" RMARGIN="0" FIRST="0" VOR="0" NACH="0" DROP="0" DROPLIN="2" DROPDIST="0" CPARENT="Default Character Style" FONT="Liberation Sans Regular" FONTSIZE="30"/>
+        <STYLE NAME="Citation" ALIGN="0" FIRST="19" CPARENT="Default Character Style"/>
+        <CHARSTYLE CNAME="Default Character Style" DefaultStyle="1" FONT="Liberation Sans Regular" FONTSIZE="20" FEATURES="inherit" FCOLOR="Black" FSHADE="100" SCOLOR="Black" SSHADE="100" TXTSHX="5" TXTSHY="-5" TXTOUT="1" TXTULP="-0.1" TXTULW="-0.1" TXTSTP="-0.1" TXTSTW="-0.1" SCALEH="100" SCALEV="100" BASEO="0" KERN="0" LANGUAGE="English"/>
+        <LAYERS NUMMER="0" LEVEL="0" NAME="Background" SICHTBAR="1" DRUCKEN="1" EDIT="1" FLOW="1" TRANS="1" BLEND="0" OUTL="0" LAYERC="#000000"/>
+        <Printer firstUse="1" toFile="1" useAltPrintCommand="1" outputSeparations="1" useSpotColors="1" useColor="1" mirrorH="1" mirrorV="1" useICC="1" doGCR="1" doClip="1" setDevParam="1" useDocBleeds="1" cropMarks="1" bleedMarks="1" registrationMarks="1" colorMarks="1" includePDFMarks="1" PSLevel="-4606285" PDLanguage="-4606285" markOffset="-1.80567630144012e+307" BleedTop="0" BleedLeft="0" BleedRight="0" BleedBottom="0" printer="" filename="" separationName="" printerCommand=""/>
+        <PDF firstUse="0" Thumbnails="0" Articles="0" Bookmarks="0" Compress="1" CMethod="0" Quality="0" MirrorH="0" MirrorV="0" Clip="0" RotateDeg="0" PresentMode="0" RecalcPic="0" Grayscale="0" RGBMode="1" UseProfiles="0" UseProfiles2="0" Binding="0" PicRes="300" Resolution="300" Version="14" Intent="1" Intent2="0" SolidP="sRGB IEC61966-2.1" ImageP="sRGB IEC61966-2.1" PrintP="Fogra27L CMYK Coated Press" InfoString="" BTop="0" BLeft="0" BRight="0" BBottom="0" useDocBleeds="0" cropMarks="0" bleedMarks="0" registrationMarks="0" colorMarks="0" docInfoMarks="0" markOffset="0" ImagePr="0" PassOwner="" PassUser="" Permissions="-4" Encrypt="0" UseLayers="0" UseLpi="0" UseSpotColors="1" doMultiFile="0" displayBookmarks="0" displayFullscreen="0" displayLayers="0" displayThumbs="0" hideMenuBar="0" hideToolBar="0" fitWindow="0" PageLayout="0" openAction="">
+            <Fonts Name="Liberation Sans Bold"/>
+            <Fonts Name="Liberation Sans Italic"/>
+            <Fonts Name="Liberation Sans Regular"/>
+            <Effekte pageEffectDuration="1" pageViewDuration="1" effectType="0" Dm="0" M="0" Di="0"/>
+            <LPI Color="" Frequency="133" Angle="45" SpotFunction="3"/>
+            <LPI Color="Black" Frequency="133" Angle="45" SpotFunction="3"/>
+            <LPI Color="Cyan" Frequency="133" Angle="105" SpotFunction="3"/>
+            <LPI Color="Magenta" Frequency="133" Angle="75" SpotFunction="3"/>
+            <LPI Color="Yellow" Frequency="133" Angle="90" SpotFunction="3"/>
+        </PDF>
+        <DocItemAttributes/>
+        <TablesOfContents/>
+        <PageSets>
+            <Set Name="Single Page" FirstPage="0" Rows="1" Columns="1"/>
+            <Set Name="Double Sided" FirstPage="1" Rows="1" Columns="2">
+                <PageNames Name="Left Page"/>
+                <PageNames Name="Right Page"/>
+            </Set>
+            <Set Name="3-Fold" FirstPage="0" Rows="1" Columns="3">
+                <PageNames Name="Left Page"/>
+                <PageNames Name="Middle"/>
+                <PageNames Name="Right Page"/>
+            </Set>
+            <Set Name="4-Fold" FirstPage="0" Rows="1" Columns="4">
+                <PageNames Name="Left Page"/>
+                <PageNames Name="Middle Left"/>
+                <PageNames Name="Middle Right"/>
+                <PageNames Name="Right Page"/>
+            </Set>
+        </PageSets>
+        <Sections>
+            <Section Number="0" Name="0" From="0" To="0" Type="Type_1_2_3" Start="1" Reversed="0" Active="1"/>
+        </Sections>
+        <MASTERPAGE PAGEXPOS="100" PAGEYPOS="20" PAGEWIDTH="2592" PAGEHEIGHT="2592" BORDERLEFT="40" BORDERRIGHT="40" BORDERTOP="40" BORDERBOTTOM="40" NUM="0" NAM="Normal" MNAM="" Size="Custom" Orientation="0" LEFT="0" PRESET="0" VerticalGuides="" HorizontalGuides="" AGhorizontalAutoGap="0" AGverticalAutoGap="0" AGhorizontalAutoCount="0" AGverticalAutoCount="0" AGhorizontalAutoRefer="0" AGverticalAutoRefer="0" AGSelection="0 0 0 0"/>
+        <PAGE PAGEXPOS="100" PAGEYPOS="20" PAGEWIDTH="2592" PAGEHEIGHT="2592" BORDERLEFT="40" BORDERRIGHT="40" BORDERTOP="40" BORDERBOTTOM="40" NUM="0" NAM="" MNAM="Normal" Size="Custom" Orientation="0" LEFT="0" PRESET="0" VerticalGuides="852.5 892.5 1747.5 1709 " HorizontalGuides="355 " AGhorizontalAutoGap="0" AGverticalAutoGap="0" AGhorizontalAutoCount="0" AGverticalAutoCount="0" AGhorizontalAutoRefer="0" AGverticalAutoRefer="0" AGSelection="0 0 0 0"/>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="140" YPOS="60" WIDTH="2512" HEIGHT="127.5" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 2512 0 2512 0 2512 0 2512 0 2512 127.5 2512 127.5 2512 127.5 2512 127.5 0 127.5 0 127.5 0 127.5 0 127.5 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 2512 0 2512 0 2512 0 2512 0 2512 127.5 2512 127.5 2512 127.5 2512 127.5 0 127.5 0 127.5 0 127.5 0 127.5 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" ALIGN="1" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONTSIZE="60" CH="QuorUM (QUality Optimized Reads from the University of Maryland):"/>
+            <para/>
+            <ITEXT FONTSIZE="60" CH="An error correction software for second generation sequencing reads."/>
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="9" XPOS="992.5" YPOS="869" WIDTH="816.5" HEIGHT="309" RADRECT="0" FRTYPE="0" CLIPEDIT="1" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="-20.5" LOCALY="14" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 309 816.5 309 816.5 309 816.5 309 0 309 0 309 0 309 0 309 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 309 816.5 309 816.5 309 816.5 309 0 309 0 309 0 309 0 309 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="0" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="198" gWidth="815" gHeight="439.285714285714" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <LATEX ConfigFile="100_latex.xml" DPI="0" USE_PREAMBLE="1">
+                <PROPERTY name="additionalheaders" value="\usepackage{amsmath}&#10;\usepackage{nicefrac}&#10;\usepackage{booktabs}&#10;\usepackage{multirow}&#10;\usepackage{siunitx}&#10;\usepackage{etoolbox}"/>
+                <PROPERTY name="font" value="\usepackage{helvet}"/>
+                <PROPERTY name="fontsize" value="20pt"/>\sf
+\large
+\newcommand{\cellc}[1]{\multicolumn{1}{c}{#1}}
+\robustify\bfseries
+\center
+
+\begin{tabular}
+{lS[detect-weight,detect-family,table-format=2.1]S[detect-all,table-format=2.2]} 
+\toprule
+\multirow{2}{*}{Corrector} &amp; \cellc{error after}  &amp; \multirow{2}{*}{Mistakes} \\
+\cmidrule(lr){2-2}         &amp; \cellc{error before} &amp;                           \\
+                           &amp; \cellc{\%}           &amp; \cellc{\%}                \\
+\midrule
+ECHO                       &amp; 40.7                 &amp; 17.1                      \\
+HiTEC                      &amp; 33.7                 &amp; 19.8                      \\
+Coral                      &amp; 32.5                 &amp; 18.3                      \\
+Quake                      &amp; 89.8                 &amp; {\bfseries1.29}           \\
+QuorUM                     &amp; {\bfseries24.9}      &amp; 2.47                      \\
+\bottomrule
+\end{tabular}
+</LATEX>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="994" YPOS="375" WIDTH="815" HEIGHT="486" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" ISIZE="20" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 815 0 815 0 815 0 815 0 815 486 815 486 815 486 815 486 0 486 0 486 0 486 0 486 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 815 0 815 0 815 0 815 0 815 486 815 486 815 486 815 486 0 486 0 486 0 486 0 486 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="815" gHeight="439.285714285714" ALIGN="3" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="Error correction statistics"/>
+            <para PARENT="Default Paragraph Style" ALIGN="1"/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="The sequencing reads are aligned against the finished sequence using BWA. Then, the error corrected reads are compared to their corresponding uncorrected reads to measure the number of errors properly corrected."/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="In the following table, the ratio &quot;error after / error after&quot; is the percentage of errors that are remaining after the error correction procedure. The mistakes column represent, in percentage of the total number of errors, the number of new errors introduced."/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="QuorUM corrects the largest number of errors initially present in the sequencing reads while introducing relatively few new errors."/>
+            <trail PARENT="Default Paragraph Style"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="6" XPOS="992.5" YPOS="1263" WIDTH="816.5" HEIGHT="637.75" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="0" PCOLOR="None" PCOLOR2="Black" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="Group7" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="1" groupsLastItem="2" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 637.75 816.5 637.75 816.5 637.75 816.5 637.75 0 637.75 0 637.75 0 637.75 0 637.75 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 637.75 816.5 637.75 816.5 637.75 816.5 637.75 0 637.75 0 637.75 0 637.75 0 637.75 0 0 0 0 " NUMGROUP="1" GROUPS="1 " startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="9" XPOS="994" YPOS="1633.45454545455" WIDTH="815" HEIGHT="267.29545454545" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 815 0 815 0 815 0 815 0 815 267.295 815 267.295 815 267.295 815 267.295 0 267.295 0 267.295 0 267.295 0 267.295 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 815 0 815 0 815 0 815 0 815 267.295 815 267.295 815 267.295 815 267.295 0 267.295 0 267.295 0 267.295 0 267.295 0 0 0 0 " NUMGROUP="1" GROUPS="1 " startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="1.5" gYpos="370.45454545455" gWidth="816.5" gHeight="637.75" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <LATEX ConfigFile="100_latex.xml" DPI="0" USE_PREAMBLE="1">
+                <PROPERTY name="additionalheaders" value="\usepackage{amsmath}&#10;\usepackage{booktabs}&#10;\usepackage{siunitx}&#10;\usepackage{etoolbox}"/>
+                <PROPERTY name="font" value="\usepackage{helvet}"/>
+                <PROPERTY name="fontsize" value="20pt"/>\sf
+\large
+\newcommand{\cellc}[1]{\multicolumn{1}{c}{#1}}
+\robustify\bfseries
+\center
+
+\begin{tabular}{lS[detect-weight,detect-family,table-format=2.2]S[detect-weight,detect-family,table-format=2.2]S[detect-weight,detect-family,table-format=2.2]}
+\toprule
+Corrector &amp; \cellc{N25}     &amp; \cellc{N50}     &amp; \cellc{N90}     \\ 
+          &amp; \cellc{kb}      &amp; \cellc{kb}      &amp; \cellc{kb}      \\
+\midrule
+None      &amp; 20.7            &amp; 12.1            &amp; 3.54            \\
+ECHO      &amp; 33.6            &amp; 20.6            &amp; 5.74            \\
+HiTEC     &amp; 15.6            &amp; 9.76            &amp; 2.75            \\
+Coral     &amp; 32.2            &amp; 18.0            &amp; 5.48            \\
+Quake     &amp; 20.3            &amp; 12.7            &amp; 3.38            \\
+QuorUM    &amp; {\bfseries42.4} &amp; {\bfseries26.3} &amp; {\bfseries7.10} \\
+\bottomrule
+\end{tabular}
+</LATEX>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="992.5" YPOS="1263" WIDTH="816.5" HEIGHT="342.5" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" IFONT="Liberation Sans Regular" ISIZE="20" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 342.5 816.5 342.5 816.5 342.5 816.5 342.5 0 342.5 0 342.5 0 342.5 0 342.5 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 342.5 816.5 342.5 816.5 342.5 816.5 342.5 0 342.5 0 342.5 0 342.5 0 342.5 0 0 0 0 " NUMGROUP="1" GROUPS="1 " startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="816.5" gHeight="637.75" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" FONTSIZE="30" CH="Idealized contig sizes"/>
+            <para PARENT="Default Paragraph Style" ALIGN="1"/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT FONTSIZE="30" CH="The reads are mapped to the finished sequence allowing for at most 1 error. An idealized contig is a stretch of sequence covered by reads overlapping by at least 10 bases. A read can be placed multiple times. The idealized N25, N50 and N90 are approximations of the best assembly obtainable with these error corrected reads."/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="QuorUM error corrected reads give larger idealized contig sizes for all three measures."/>
+            <para PARENT="Default Paragraph Style"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="2" XPOS="1847.5" YPOS="841" WIDTH="804.5" HEIGHT="494" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1.96031746031746" LOCALSCY="1.96031746031746" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="0" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="error_vs_reads_abs_histogram.pdf" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="0" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 494 804.5 494 804.5 494 804.5 494 0 494 0 494 0 494 0 494 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 494 804.5 494 804.5 494 804.5 494 0 494 0 494 0 494 0 494 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="0" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="2" XPOS="140" YPOS="60" WIDTH="250" HEIGHT="250" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1.62337662337662" LOCALSCY="1.62337662337662" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="0" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="../UMDIcons/UMD-Seal-Informal.pdf" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="0" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 250 0 250 0 250 0 250 0 250 250 250 250 250 250 250 250 0 250 0 250 0 250 0 250 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 250 0 250 0 250 0 250 0 250 250 250 250 250 250 250 250 0 250 0 250 0 250 0 250 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="2" XPOS="2402" YPOS="60" WIDTH="250" HEIGHT="250" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1.62337662337662" LOCALSCY="1.62337662337662" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="0" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="../UMDIcons/UMD-Seal-Informal.pdf" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="0" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 250 0 250 0 250 0 250 0 250 250 250 250 250 250 250 250 0 250 0 250 0 250 0 250 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 250 0 250 0 250 0 250 0 250 250 250 250 250 250 250 250 0 250 0 250 0 250 0 250 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="140" YPOS="199.96992481203" WIDTH="2512" HEIGHT="112.03007518797" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" IFONT="Liberation Sans Regular" ISIZE="25" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 2512 0 2512 0 2512 0 2512 0 2512 112.03 2512 112.03 2512 112.03 2512 112.03 0 112.03 0 112.03 0 112.03 0 112.03 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 2512 0 2512 0 2512 0 2512 0 2512 112.03 2512 112.03 2512 112.03 2512 112.03 0 112.03 0 112.03 0 112.03 0 112.03 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" ALIGN="1" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Regular" FONTSIZE="40" CH="Guillaume Marçais, Aleksey Zimin, Jim Yorke"/>
+            <para/>
+            <ITEXT FONTSIZE="30" CH="Institut for Physical Science and Technology"/>
+            <para/>
+            <ITEXT FONTSIZE="30" CH="University of Maryland, College Park, MD 20742-2431"/>
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="6" XPOS="1847.5" YPOS="2274" WIDTH="804.5" HEIGHT="298" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="0" PCOLOR="None" PCOLOR2="Black" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="Group6" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="1" groupsLastItem="3" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 298 804.5 298 804.5 298 804.5 298 0 298 0 298 0 298 0 298 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 298 804.5 298 804.5 298 804.5 298 0 298 0 298 0 298 0 298 0 0 0 0 " NUMGROUP="1" GROUPS="2 " startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="1847.5" YPOS="2274" WIDTH="804.5" HEIGHT="103.81954887218" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 103.82 804.5 103.82 804.5 103.82 804.5 103.82 0 103.82 0 103.82 0 103.82 0 103.82 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 103.82 804.5 103.82 804.5 103.82 804.5 103.82 0 103.82 0 103.82 0 103.82 0 103.82 0 0 0 0 " NUMGROUP="1" GROUPS="2 " startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="804.5" gHeight="298" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT CH="This project is supported by the following grants: NIH R01HG002945, USDA sub-award 201015739-01, USDA CSREES 2008-04049."/>
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="2" XPOS="1967.5" YPOS="2412" WIDTH="236" HEIGHT="160" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="4" LOCALSCY="4" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="../../Logos/USDA_logo.pdf" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="0" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 236 0 236 0 236 0 236 0 236 160 236 160 236 160 236 160 0 160 0 160 0 160 0 160 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 236 0 236 0 236 0 236 0 236 160 236 160 236 160 236 160 0 160 0 160 0 160 0 160 0 0 0 0 " NUMGROUP="1" GROUPS="2 " startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="120" gYpos="138" gWidth="804.5" gHeight="298" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="2" XPOS="2342" YPOS="2380" WIDTH="192" HEIGHT="192" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="0.3" LOCALSCY="0.3" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="../../Logos/NIH_logo.pdf" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="0" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 192 0 192 0 192 0 192 0 192 192 192 192 192 192 192 192 0 192 0 192 0 192 0 192 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 192 0 192 0 192 0 192 0 192 192 192 192 192 192 192 192 0 192 0 192 0 192 0 192 0 0 0 0 " NUMGROUP="1" GROUPS="2 " startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="494.5" gYpos="106" gWidth="804.5" gHeight="298" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="1847.5" YPOS="375" WIDTH="804.5" HEIGHT="450" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 450 804.5 450 804.5 450 804.5 450 0 450 0 450 0 450 0 450 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 450 804.5 450 804.5 450 804.5 450 0 450 0 450 0 450 0 450 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="Percentage of initial bases aligned"/>
+            <para PARENT="Default Paragraph Style" ALIGN="1"/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="The error corrected reads are aligned against the finished sequence. The number of errors in a read is defined as the length of the read minus the number of unaligned bases (i.e. mismatches and indels). The following plot represents the number of bases (as a percentage of total number of bases in the uncorrected reads) which aligned in reads with 0, 1, 2, 3, 4, or more than 5 errors."/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="Despite the trimming, QuorUM output the most sequence which aligns to the finished genome. As seen on the following table, almost all of the bases in QuorUM's error corrected reads are in perfect reads (reads with zero errors). "/>
+            <trail PARENT="Default Paragraph Style"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="9" XPOS="140" YPOS="2332.5" WIDTH="812.5" HEIGHT="239.5" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 239.5 812.5 239.5 812.5 239.5 812.5 239.5 0 239.5 0 239.5 0 239.5 0 239.5 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 239.5 812.5 239.5 812.5 239.5 812.5 239.5 0 239.5 0 239.5 0 239.5 0 239.5 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <LATEX ConfigFile="100_latex.xml" DPI="0" USE_PREAMBLE="1">
+                <PROPERTY name="additionalheaders" value="\usepackage{amsmath}&#10;\usepackage{booktabs}&#10;\usepackage{siunitx}&#10;\usepackage{etoolbox}"/>
+                <PROPERTY name="font" value="\usepackage{helvet}"/>
+                <PROPERTY name="fontsize" value="20pt"/>\sf
+\large
+\center
+\begin{tabular}{lr}
+  \toprule
+  Corrector &amp; {\# of chimeric reads} \\
+  \midrule
+  None      &amp; 1555                 \\
+  ECHO      &amp; 1764                 \\
+  HiTEC     &amp; 3810                 \\
+  Coral     &amp; 1253                 \\
+  Quake     &amp; 302                    \\
+  Quorum    &amp; {\bfseries111}         \\
+ \bottomrule
+\end{tabular}
+</LATEX>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="140" YPOS="375" WIDTH="812.5" HEIGHT="1065" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 1065 812.5 1065 812.5 1065 812.5 1065 0 1065 0 1065 0 1065 0 1065 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 1065 812.5 1065 812.5 1065 812.5 1065 0 1065 0 1065 0 1065 0 1065 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="Abstract."/>
+            <para PARENT="Default Paragraph Style" ALIGN="1"/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="Illumina Sequencing data can provide high coverage of a genome by relatively short (100-150bp) reads at a low cost. The base error rates in the reads vary greatly along the read sequence. Low quality bases can be trimmed off or error-corrected. Trimming, especially based on the quality scores, can eliminate large amounts of useful sequence in the reads. Error correction is an alternative to trimming that takes advantage of the high coverage of the genome to make the high confidence base corrections in the reads. Error correction allows for more effective use of the sequencing data thus reducing the coverage depth requirements in sequencing projects and increasing the quality of the resulting assemblies. A conservative error correction is also useful for re-sequencing projects: error corrected reads map to the reference much better than the original sequenced reads. The vast majority of errors in Illumina data are substitutions, where a base is read incorrectly. Also, the sequence quality is usually higher on the 5’ end of a read and deteriorates toward the 3’ end of the read. Each base in the read has a quality score associated with it. Based on these observations we developed an error correction technique called QuorUM (Quality Optimized Reads from the University of Maryland, pronounced Quorum). QuorUM corrects substitution errors in Illumina reads with high throughput: 4 billion bases per hour on a 48–core computer. We present the comparisons and timings of QuorUM performance to other available error correction techniques: ECHO, HiTEC, Coral and Quake."/>
+            <trail PARENT="Default Paragraph Style"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="140" YPOS="1499" WIDTH="812.5" HEIGHT="423" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 423 812.5 423 812.5 423 812.5 423 0 423 0 423 0 423 0 423 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 423 812.5 423 812.5 423 812.5 423 0 423 0 423 0 423 0 423 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="Methods"/>
+            <para PARENT="Default Paragraph Style" ALIGN="1"/>
+            <para PARENT="Default Paragraph Style"/>
+            <ITEXT CH="The error correctors are compared on the Illumina reads from the PE library of the bacteria "/>
+            <ITEXT FONT="Liberation Sans Italic" CH="Rhodobacter sphaeroides"/>
+            <ITEXT FONT="Liberation Sans Regular" CH=" (accession SRX033397). The dataset contains 2 million reads 101bp in length. For the comparison we use the Error Correction Evaluation Toolkit from the Aluru HPC Group (Error correction statistics) and our own metrics (Chimeric reads, Idealized contig sizes and Percentage of initial bases aligned). "/>
+            <para/>
+            <ITEXT CH="ECHO, HiTEC and Coral only correct reads while Quake and Quorum also trim reads."/>
+            <trail/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="9" XPOS="992.5" YPOS="2328.25" WIDTH="816.5" HEIGHT="243.75" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="148.75" LOCALY="6.5" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 243.75 816.5 243.75 816.5 243.75 816.5 243.75 0 243.75 0 243.75 0 243.75 0 243.75 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 243.75 816.5 243.75 816.5 243.75 816.5 243.75 0 243.75 0 243.75 0 243.75 0 243.75 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <LATEX ConfigFile="100_latex.xml" DPI="0" USE_PREAMBLE="1">
+                <PROPERTY name="additionalheaders" value="\usepackage{amsmath}&#10;\usepackage{booktabs}&#10;\usepackage{siunitx}&#10;\usepackage{etoolbox}"/>
+                <PROPERTY name="font" value="\usepackage{helvet}"/>
+                <PROPERTY name="fontsize" value="20pt"/>\sf
+\large
+%\center
+
+\begin{tabular}{lrrS[detect-weight,detect-family,table-format=2.2]}
+    \toprule
+    Corrector &amp; 1 thread     &amp; 16 threads   &amp; \multicolumn{1}{c}{Speed up\hspace{4mm}} \\
+              &amp; (minutes)    &amp; (minutes)    &amp;                                          \\ 
+    \midrule
+    ECHO      &amp; 151          &amp; 141          &amp; 1.07                                     \\
+    HiTEC     &amp; 42           &amp; -            &amp;                                          \\
+    Coral     &amp; 87           &amp; 10           &amp; 8.70                                     \\
+    Quake     &amp; {\bfseries9} &amp; {\bfseries5} &amp; 1.80                                     \\
+    QuorUM    &amp; 61           &amp; {\bfseries5} &amp; {\bfseries12.2}                          \\
+    \bottomrule
+\end{tabular}
+</LATEX>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="992.5" YPOS="2051" WIDTH="816.5" HEIGHT="275" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 275 816.5 275 816.5 275 816.5 275 0 275 0 275 0 275 0 275 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 816.5 0 816.5 0 816.5 0 816.5 0 816.5 275 816.5 275 816.5 275 816.5 275 0 275 0 275 0 275 0 275 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="Scalability"/>
+            <para PARENT="Default Paragraph Style" ALIGN="1"/>
+            <para/>
+            <ITEXT CH="Every error corrector tested, except HiTEC, can work in multi-threaded mode to take advantage of multi-CPU/multi-core machines. For the following table, the timing was performed on a 16-core AMD 2.9Ghz computer with 128GB of RAM running Linux 2.6.35.6."/>
+            <para PARENT="Default Paragraph Style" ALIGN="3"/>
+            <ITEXT CH="QuorUM scales well in that setting."/>
+            <trail PARENT="Default Paragraph Style"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="140" YPOS="1974" WIDTH="812.5" HEIGHT="342" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 342 812.5 342 812.5 342 812.5 342 0 342 0 342 0 342 0 342 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 812.5 0 812.5 0 812.5 0 812.5 0 812.5 342 812.5 342 812.5 342 812.5 342 0 342 0 342 0 342 0 342 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="Chimeric reads"/>
+            <para ALIGN="1"/>
+            <para/>
+            <ITEXT CH="A read is considered chimeric if it two parts (at least 20 bases long) of the read aligns to far apart region of the finished sequence and the read does not align as a whole to the finished sequence."/>
+            <para PARENT="Default Paragraph Style" ALIGN="3"/>
+            <ITEXT CH="The error correctors that do not perform trimming (ECHO, HiTEC and Coral) provide only a small improvement or even create new chimeric reads. Only Quake and QuorUM provide a significant improvement."/>
+            <trail PARENT="Default Paragraph Style"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="1847.5" YPOS="1683" WIDTH="804.5" HEIGHT="228" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 228 804.5 228 804.5 228 804.5 228 0 228 0 228 0 228 0 228 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 228 804.5 228 804.5 228 804.5 228 0 228 0 228 0 228 0 228 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="Conclusion"/>
+            <para PARENT="Default Paragraph Style" ALIGN="1"/>
+            <para/>
+            <ITEXT CH="QuorUM correct and trims Illumina reads with high accuracy and high speed on multi-core machines. The code is available under an open source license at:"/>
+            <para PARENT="Default Paragraph Style" ALIGN="3"/>
+            <ITEXT CH="ftp://ftp.genome.umd.edu/pub/quorum/."/>
+            <trail PARENT="Default Paragraph Style" ALIGN="3"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="1847.5" YPOS="1926" WIDTH="804.5" HEIGHT="324" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 324 804.5 324 804.5 324 804.5 324 0 324 0 324 0 324 0 324 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 324 804.5 324 804.5 324 804.5 324 0 324 0 324 0 324 0 324 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT FONT="Liberation Sans Bold" CH="References"/>
+            <para ALIGN="1"/>
+            <para/>
+            <ITEXT FONTSIZE="20" CH="Kao, W.-C., Chan, A. H., &amp; Song, Y. S. (2011). ECHO: A reference-free short-read error correction algorithm. Genome research, 21(7), 1181-1192. doi:10.1101/gr.111351.110"/>
+            <para PARENT="Citation"/>
+            <ITEXT CH="Ilie, L., Fazayeli, F., &amp; Ilie, S. (2011). HiTEC: accurate error correction in high-throughput sequencing data. Bioinformatics, 27(3), 295-302."/>
+            <para PARENT="Citation"/>
+            <ITEXT CH="Salmela, L., &amp; Schröder, J. (2011). Correcting errors in short reads by multiple alignments. Bioinformatics, 27(11), 1455. Oxford Univ Press."/>
+            <para PARENT="Citation"/>
+            <ITEXT CH="Kelley, D. R., Schatz, M. C., &amp; Salzberg, S. L. (2010). Quake: quality-aware detection and correction of sequencing errors. Genome Biol, 11(11), R116. doi:10.1186/gb-2010-11-11-r116"/>
+            <para PARENT="Citation"/>
+            <ITEXT CH="Yang, X. (2012). A survey of error-correction methods for next-generation sequencing. Briefings in Bioinformatics."/>
+            <para PARENT="Citation"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="9" XPOS="1847.5" YPOS="1424" WIDTH="804.5" HEIGHT="241" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="120.5" LOCALY="1.25" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="0" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 241 804.5 241 804.5 241 804.5 241 0 241 0 241 0 241 0 241 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 241 804.5 241 804.5 241 804.5 241 0 241 0 241 0 241 0 241 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <trail/>
+            <LATEX ConfigFile="100_latex.xml" DPI="0" USE_PREAMBLE="1">
+                <PROPERTY name="additionalheaders" value="\usepackage{amsmath}&#10;\usepackage{siunitx}&#10;\usepackage{etoolbox}&#10;\usepackage{booktabs}"/>
+                <PROPERTY name="font" value="\usepackage{helvet}"/>
+                <PROPERTY name="fontsize" value="20pt"/>\sf
+\large
+\robustify\bfseries
+
+\begin{tabular}
+{l@{\hspace{10mm}}S[detect-weight,detect-family]}
+\toprule
+Corrector &amp; {\% bases in perfect reads} \\
+\midrule
+None   &amp; 27.4 \\
+ECHO   &amp; 68.4 \\
+HiTEC  &amp; 71.3 \\
+Coral  &amp; 73.0 \\
+Quake  &amp; 74.6 \\
+QuorUM &amp; {\bfseries98.9} \\
+\bottomrule
+\end{tabular}
+</LATEX>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+        <PAGEOBJECT OwnPage="0" PTYPE="4" XPOS="1847.5" YPOS="1346.75" WIDTH="804.5" HEIGHT="67.75" RADRECT="0" FRTYPE="0" CLIPEDIT="0" PWIDTH="1" PCOLOR="None" PCOLOR2="None" COLUMNS="1" COLGAP="0" NAMEDLST="" SHADE="100" SHADE2="100" GRTYP="0" ROT="0" PLINEART="1" PLINEEND="0" PLINEJOIN="0" LOCALSCX="1" LOCALSCY="1" LOCALX="0" LOCALY="0" PICART="1" PLTSHOW="0" BASEOF="0" textPathType="0" textPathFlipped="0" FLIPPEDH="0" FLIPPEDV="0" SCALETYPE="1" RATIO="1" PRINTABLE="1" ANNOTATION="0" ANNAME="" TEXTFLOWMODE="0" TEXTFLOW="0" TEXTFLOW2="0" TEXTFLOW3="0" AUTOTEXT="0" EXTRA="0" TEXTRA="0" BEXTRA="0" REXTRA="0" FLOP="0" PFILE="" PFILE2="" PFILE3="" PRFILE="" EPROF="" IRENDER="1" EMBEDDED="1" LOCK="0" LOCKR="0" REVERS="0" TransValue="0" TransValueS="0" TransBlend="0" TransBlendS="0" isTableItem="0" TopLine="0" LeftLine="0" RightLine="0" BottomLine="0" isGroupControl="0" NUMDASH="0" DASHS="" DASHOFF="0" NUMPO="16" POCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 67.75 804.5 67.75 804.5 67.75 804.5 67.75 0 67.75 0 67.75 0 67.75 0 67.75 0 0 0 0 " NUMCO="16" COCOOR="0 0 0 0 804.5 0 804.5 0 804.5 0 804.5 0 804.5 67.75 804.5 67.75 804.5 67.75 804.5 67.75 0 67.75 0 67.75 0 67.75 0 67.75 0 0 0 0 " NUMGROUP="0" GROUPS="" startArrowIndex="0" endArrowIndex="0" OnMasterPage="" ImageClip="" ImageRes="1" Pagenumber="0" isInline="0" fillRule="1" doOverprint="0" gXpos="0" gYpos="0" gWidth="0" gHeight="0" LAYER="0" BOOKMARK="0" NEXTITEM="-1" BACKITEM="-1">
+            <ITEXT CH="Percentage of error corrected bases that aligned against the finished genome which are in error free reads."/>
+            <trail PARENT="Default Paragraph Style"/>
+            <PageItemAttributes/>
+        </PAGEOBJECT>
+    </DOCUMENT>
+</SCRIBUSUTF8NEW>

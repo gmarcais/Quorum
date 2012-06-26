@@ -73,7 +73,7 @@ public:
   alternative_multiple_dbs(const hashes_t* hashes, int min_count) :
     hashes_(hashes), min_count_(min_count) { }
 
-  virtual ~alternative_multiple_dbs() { std::cerr << __PRETTY_FUNCTION__ << "\n"; }
+  virtual ~alternative_multiple_dbs() { }
 
   virtual hval_t get_val(uint64_t mer) {
     hashes_t::const_iterator chash = hashes_->begin();
@@ -453,6 +453,8 @@ private:
                 counter pos, in_dir_ptr end,
                 out_dir_ptr out, elog &log, const char** error) {
     counter cpos = pos;
+    //    int pocc = _af->get_val(mer.canonical()); // # of occurences of previous mer
+
     for( ; input < end; ++input) {
       char     base        = *input;
 
@@ -506,7 +508,7 @@ private:
       }
 
       // Check that there is at least one more base in the
-      // sequence. If not, leave it along
+      // sequence. If not, leave it alone
       if(input >= end) {
         log.truncation(cpos);
         goto done;
@@ -553,32 +555,25 @@ private:
       uint64_t   nucode = 0;
       int        nlevel;
       ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
-      if(ncount > 0 && nlevel >= level) { // TODO: Shouldn't we break if this test is false?
-        mer.replace(0, check_code);
-        if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-          if(_ec->trim_contaminant()) {
-            log.truncation(cpos);
-            goto done;
-          }
-          *error = error_contaminant;
-          return 0;
-        }
-        *out++ = mer.base(0);
-        if(check_code != ori_code)
-          if(log.substitution(cpos, base, mer.base(0)))
-            goto truncate;
-        // if(ncount == 1) { // While we are at it, there is a uniq continuation
-        //   mer    = nmer;
-        //   input  = ninput;
-        //   ++pos;
-        //   if(nucode != mer.code(0)) {
-        //     mer.replace(0, nucode);
-        //     if(log.substitution(cpos, nbase, mer.base(0)))
-        //       goto truncate;
-        //   }
-        //   *out++ = mer.base(0);
-        // }
+      if(ncount == 0 || nlevel < level) { // It does not continue -> trim
+        log.truncation(cpos);
+        goto done;
       }
+       
+      mer.replace(0, check_code);
+      if(_ec->contaminant()->is_contaminant(mer.canonical())) {
+        if(_ec->trim_contaminant()) {
+          log.truncation(cpos);
+          goto done;
+        }
+        *error = error_contaminant;
+        return 0;
+      }
+
+      *out++ = mer.base(0);
+      if(check_code != ori_code)
+        if(log.substitution(cpos, base, mer.base(0)))
+          goto truncate;
     }
     
   done:
@@ -602,7 +597,6 @@ private:
     for(--ptr; ptr >= out_start; --ptr) {
       char cbase = kmer_t::codes[(unsigned int)*ptr];
       homo_score += ((pbase == cbase) << 1) - 1; // Add 1 if same as last, -1 if not
-      std::cout << (int)pbase << " " << (int)cbase << " " << homo_score << "\n";
       pbase       = cbase;
       if(homo_score > max_homo_score) {
         max_homo_score = homo_score;
@@ -612,9 +606,6 @@ private:
 
     if(max_homo_score < _ec->homo_trim())
       return out_end; // Not a high score -> return without truncation
-    if(max_pos < start || max_pos < out_start) {
-      std::cerr << (void*)start << " " << (void*)out_start << " " << (void*)max_pos << std::endl;
-    }
     assert(max_pos >= out_start);
     assert(max_pos >= start);
     if(max_pos == out_start) {

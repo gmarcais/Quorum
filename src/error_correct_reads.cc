@@ -523,7 +523,7 @@ private:
       if(ori_count < (uint64_t)_ec->min_count())
         ori_count = 0;
 
-      uint64_t max_count = 10000000000;
+      uint64_t max_count = std::numeric_limits<uint64_t>::max();
       if(ori_count <= (uint64_t)_ec->anchor())
         max_count  = 3 * ori_count;
 

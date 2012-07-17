@@ -39,6 +39,12 @@ private:
     entry(type_t t, T p) : type(t), pos(p) {}
   };
 
+  struct greater_than_pos : std::unary_function<entry, bool> {
+    T pos;
+    bool operator()(entry& e) { return e.pos >= *pos; } // Compare the raw value of pos, not using the operator>=
+    greater_than_pos(T& pos_) : pos(pos_) { }
+  };
+
   typedef std::vector<entry>  log_t;
   const unsigned int          _window;
   const unsigned int          _error;
@@ -67,13 +73,11 @@ public:
 
   // Remove all event log with position >= pos
   bool force_truncate(T pos) {
-    struct greater_than_pos : std::unary_function<entry, bool> {
-      T pos;
-      bool operator()(entry& e) { return e.pos >= *pos; } // Compare the raw value of pos, not using the operator>=
-      greater_than_pos(T& pos_) : pos(pos_) { }
-    } pred(pos);
+    greater_than_pos pred(pos);
     auto nend = std::remove_if(_log.begin(), _log.end(), pred);
-    _log.resize(nend - _log.begin());
+    // The second argument is useless: we only truncate. But some
+    // version of gcc complain if not present (e.g. 4.4).
+    _log.resize(nend - _log.begin(), entry(SUBSTITUTION, 0));
     _lwin = 0; // Needs to be recomputed
     return check_nb_error();
   }

@@ -18,7 +18,7 @@ option("both-strands", "C") {
   flag; on }
 option("min-count", "m") {
   description "Minimum count for a k-mer to be considered \"good\""
-  uint32; default "2" }
+  uint32; default "1" }
 option("skip", "s") {
   description "Number of bases to skip for start k-mer"
   uint32; default "2" }
@@ -26,8 +26,8 @@ option("good", "g") {
   description "Number of good k-mer in a row for anchor"
   uint32; default "2" }
 option("anchor-count", "a") {
-  description "Minimum count for an anchor k-mer (default=min-count)"
-  uint32 }
+  description "Minimum count for an anchor k-mer"
+  uint32; default "3" }
 option("window", "w") {
   description "Size of window (default=mer length)"
   uint32 }

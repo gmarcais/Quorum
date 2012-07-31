@@ -712,7 +712,7 @@ int main(int argc, char *argv[])
   kmer_t::k(key_len / 2);
   error_correct_instance::ec_t correct(&parser, &hashes);
   correct.skip(args.skip_arg).good(args.good_arg)
-    .anchor(args.anchor_count_given ? args.anchor_count_arg : args.min_count_arg)
+    .anchor(args.anchor_count_arg)
     .prefix(args.output_given ? args.output_arg : "")
     .min_count(args.min_count_arg)
     .window(args.window_given ? args.window_arg : kmer_t::k())

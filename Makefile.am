@@ -8,6 +8,10 @@ V_YAGGO_ = $(V_YAGGO_$(AM_DEFAULT_VERBOSITY))
 V_YAGGO_0 = @echo "  YAGGO " $@;
 .yaggo.hpp:
 	$(V_YAGGO)$(YAGGO) --license $(srcdir)/header-license -p src/ -o $@ $<
+YAGGO_SOURCES = src/error_correct_reads_cmdline.hpp src/combine_jf_dbs.hpp
+
+BUILT_SOURCES = $(YAGGO_SOURCES)
+noinst_HEADERS = $(YAGGO_SOURCES)
 
 JFLIB_I = include/jflib
 
@@ -15,10 +19,10 @@ bin_PROGRAMS = quorum_error_correct_reads quorum_combine_jf_dbs
 
 quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc src/kmer.cc	\
                                      src/err_log.cc src/yaggo.cpp
+
 quorum_error_correct_reads_SOURCES += src/kmer.hpp				\
                                       src/error_correct_reads.hpp		\
                                       src/err_log.hpp				\
-                                      src/error_correct_reads_cmdline.hpp	\
                                       src/yaggo.hpp				\
                                       include/gzip_stream.hpp			\
                                       include/misc.hpp				\
@@ -30,7 +34,7 @@ quorum_error_correct_reads_SOURCES += src/kmer.hpp				\
                                       $(JFLIB_I)/pool.hpp
 
 quorum_combine_jf_dbs_SOURCES = src/combine_jf_dbs.cc src/yaggo.cpp
-quorum_combine_jf_dbs_SOURCES += src/combine_jf_dbs.hpp src/yaggo.hpp
+quorum_combine_jf_dbs_SOURCES += src/yaggo.hpp
 
 bin_SCRIPTS = quorum 
 CLEANFILES = $(bin_SCRIPTS)

@@ -32,6 +32,7 @@
 #include <jflib/multiplexed_io.hpp>
 #include <gzip_stream.hpp>
 #include <src/error_correct_reads.hpp>
+#include <divisor64.hpp>
 #include <src/error_correct_reads_cmdline.hpp>
 
 typedef uint64_t hkey_t;
@@ -125,9 +126,10 @@ private:
   }
 };
 
+//  const int                nb_levels_;
 class alternative_combined_dbs : public alternative_finder {
   hashes_t::const_iterator hash_;
-  const int                nb_levels_;
+  quorum::divisor64        nb_levels_;
   int                      min_count_;
 
 public:
@@ -140,9 +142,11 @@ public:
     bool found = hash_->get_val(mer, res, true, true);
     if(!found)
       return 0;
-    if(res % nb_levels_ != (hval_t)(nb_levels_ - 1))
+    uint64_t nlevel, val;
+    nb_levels_.division(res, val, nlevel);
+    if(nlevel != nb_levels_.d() - 1) //    if(res % nb_levels_ != (hval_t)(nb_levels_ - 1))
       return 0;
-    return res / nb_levels_;
+    return val; //   return res / nb_levels_;
   }
   virtual int get_best_alternatives(forward_mer& m, uint64_t counts[], uint64_t& ucode, int& level) {
     return get_best_alternatives__(m, counts, ucode, level);
@@ -154,7 +158,7 @@ public:
 private:
   template<typename dir_mer>
   int get_best_alternatives__(dir_mer& mer, uint64_t counts[], uint64_t& ucode, int& level) {
-    int      nlevel;
+    uint64_t      nlevel;
     uint64_t val;
     dir_mer  nmer(mer);
     int      count = 0;
@@ -164,13 +168,12 @@ private:
       nmer.replace(0, i);
       if(!hash_->get_val(nmer.canonical(), val, true, true))
         val = 0;
-      nlevel = val % nb_levels_;
-      val    = val / nb_levels_;
-      if(val == 0 || nlevel < level) {
+      nb_levels_.division(val, val, nlevel);
+      if(val == 0 || (int)nlevel < level) {
         counts[i] = 0;
       } else {
         if(val >= (uint64_t)min_count_) {
-          if(nlevel > level) {
+          if((int)nlevel > level) {
             for(uint64_t j = 0; j < (uint64_t)i; ++j)
               counts[j] = 0;
             count  = 0;

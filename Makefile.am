@@ -20,18 +20,18 @@ bin_PROGRAMS = quorum_error_correct_reads quorum_combine_jf_dbs
 quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc src/kmer.cc	\
                                      src/err_log.cc src/yaggo.cpp
 
-quorum_error_correct_reads_SOURCES += src/kmer.hpp				\
-                                      src/error_correct_reads.hpp		\
-                                      src/err_log.hpp				\
-                                      src/yaggo.hpp				\
-                                      include/gzip_stream.hpp			\
-                                      include/misc.hpp				\
-                                      $(JFLIB_I)/atomic_field.hpp		\
-                                      $(JFLIB_I)/circular_buffer.hpp		\
-                                      $(JFLIB_I)/compare_and_swap.hpp		\
-                                      $(JFLIB_I)/locks_pthread.hpp		\
-                                      $(JFLIB_I)/multiplexed_io.hpp		\
-                                      $(JFLIB_I)/pool.hpp
+quorum_error_correct_reads_SOURCES += src/kmer.hpp			\
+                                      src/error_correct_reads.hpp	\
+                                      src/err_log.hpp src/yaggo.hpp	\
+                                      include/gzip_stream.hpp		\
+                                      include/misc.hpp			\
+                                      $(JFLIB_I)/atomic_field.hpp	\
+                                      $(JFLIB_I)/circular_buffer.hpp	\
+                                      $(JFLIB_I)/compare_and_swap.hpp	\
+                                      $(JFLIB_I)/locks_pthread.hpp	\
+                                      $(JFLIB_I)/multiplexed_io.hpp	\
+                                      $(JFLIB_I)/pool.hpp		\
+                                      include/divisor64.hpp
 
 quorum_combine_jf_dbs_SOURCES = src/combine_jf_dbs.cc src/yaggo.cpp
 quorum_combine_jf_dbs_SOURCES += src/yaggo.hpp

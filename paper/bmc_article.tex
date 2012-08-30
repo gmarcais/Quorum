@@ -226,7 +226,7 @@ The QuorUM software is available under an open source license at \url{ftp://ftp.
 %%  \cite{koon} and                         %%
 %%  \cite{oreg,khar,zvai,xjon,schn,pond}    %%
 %%  \nocite{smith,marg,hunn,advi,koha,mouse}%%
-%%                                          %%
+%%                                          %%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -236,12 +236,14 @@ The QuorUM software is available under an open source license at \url{ftp://ftp.
 %% Background %%
 %%
 \section*{Background}
-\cite{blank}
 While second generation sequencing technologies have progressed tremendously and offer ever longer reads with low overall sequencing error rate ($\approx 1\%$), correcting errors in sequencing reads remains an important prepossessing step in \emph{de novo} genome assembly.
 In general, error correcting the sequencing reads leads to assemblies with longer contiguous sequences and fewer misassemblies.
 
+
+
+
 As the quality of base calling usually degrades toward the 3' ends of reads, an obvious error correction method is to trim all the reads on the 3' end, either by a fix amount or based on the quality values reported by the sequencing machine.
-Although this simple trimming scheme will reduce the number of erroneous bases, it still leaves many errors in the reads and needlessly throws away a lot of valid sequence.
+Although this simple trimming scheme will reduce the number of erroneous bases, it still leaves many errors in the reads and needlessly discard a lot of valid sequence.
 Aggressive trimming results in fragmented assemblies.
 
 On the other hand, trimming is an integral part of error correction.
@@ -250,13 +252,20 @@ It is important to trim those reads to avoid misassemblies.
 
 % We need a paragraph or two on the various way to error correct: k-mer spectrum, alignment of reads, what else?
 
-We propose a new error correction procedure and software package, named QuorUM (QUality Optimized Reads from the University of Maryland), that provides accurate trimming and error correction.
+We propose a new error correction procedure and software package, named QuorUM (Quality Optimized Reads from the University of Maryland), that provides accurate trimming and error correction.
+In addition, QuorUM is flexible: it can correct reads of varying length and reads containing ambiguous base calls (Ns).
+It is also fast and can tackle the large data sets produced by today's high throughput sequencing machine.
+
+We compare the error corrector by comparing the error corrected reads to the finished sequence of the organism.
+We use the evaluation toolkit of~\cite{Yang2012} with some modifications (see~\ref{sec:Methods}).
 
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Results and Discussion %%
 %%
 \section*{Results and Discussion}
+
+We evaluated the error correction software using multiple metrics.
 
 
 
@@ -269,6 +278,42 @@ We propose a new error correction procedure and software package, named QuorUM (
   
 %%%%%%%%%%%%%%%%%%
 \section*{Methods}
+\label{sec:Methods}
+
+\subsection*{Error correction}
+
+QuorUM uses the Jellyfish~\cite{Marcais2011} software to count the number of occurrences of the $k$-mers in the input reads twice.
+First for all $k$-mers and second for the $k$-mers in which all bases have a quality value greater than a threshold (by default $5$ above the minimum quality).
+Then, every read is examined in turn.
+QuorUM searches for an \emph{anchor} $k$-mer: a $k$-mer whose number of occurrences is higher than a threshold $a$ ($a = 3$ by default). 
+Starting from this anchor, QuorUM will look at every base, extending toward the 5' and 3' ends, and decide to make a correction based on the $k$-mer ending at that base.
+Let $m = xb$ bet the $k$-mer, where $|m| = k$, $x$ is a prefix with $|x| = k - 1$, and $b$ is the base under consideration.
+If $m$ has a number of occurrences greater than $a$, then no correction is made.
+Otherwise, if there is a unique alternative $k$-mer obtained by substituting $b$ with another nucleotide $b'$ with count at least $3$ times higher, QuorUM substitute $b$ for $b'$ in the read.
+In the case where no substitution is found, QuorUM trims the read at that position.
+The maximum of correction made in a window of length $10$ is by default capped at $3$.
+QuorUM will trim the read at the beginning of the window if the number of errors is too high.
+
+The procedure uses the high-quality $k$-mer database in priority.
+Precisely, if any of the occurrence counts for the four possible base $b$ is non-zero in the high quality database, then QuorUM uses the high quality database.
+Otherwise, the database with all $k$-mers is used.
+In effect, QuorUM will replace low quality $k$-mers by high quality $k$-mers when possible.
+
+\subsection*{Evaluation}
+
+We use the evaluation toolkit of Yang \emph{et al.}~\cite{Yang2012} with the following modifications.
+First, we use Bowtie2~{\bf cite} in local mode, rather than BWA~{\bf cite} to align the reads to the finished sequence.
+By default, BWA imposes that a read aligns on its entire length.
+In other words, clipped sequences at the 3' and 5' ends decrease the alignment score.
+Bowtie2 in local mode does not penalize for clipped sequences.
+As the sequence quality degrades toward the 3' end, many reads containing significant amount of valid sequence would not align with BWA because of bad sequence on the 3' end.
+But all these reads, after proper trimming, can be used for assembly, and therefore should be included for evaluating error correctors.
+
+% Do we care about this?
+Second, we report the gain, defined as $G = (TP - FP) / (TP + FN)$ and the false positive rate, defined $FPR = FP / (TP + FN)$.
+
+
+
 
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

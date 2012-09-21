@@ -1,5 +1,5 @@
 AC_PREREQ([2.63])
-AC_INIT([quorum], [0.1.5], [gmarcais@umd.edu])
+AC_INIT([quorum], [0.1.6beta], [gmarcais@umd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/error_correct_reads.hpp])
 AC_CONFIG_HEADERS([config.h])
@@ -25,6 +25,8 @@ AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 
 # Get jellyfish compile flags && executable
 PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
+JELLYFISH_VERSION=$(pkg-config --modversion jellyfish-1.1)
+AC_SUBST([JELLYFISH_VERSION])
 AC_ARG_VAR([JELLYFISH], [Jellyfish executable])
 AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])
 

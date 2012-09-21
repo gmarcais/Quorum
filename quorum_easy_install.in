@@ -7,7 +7,7 @@ WGET = $(shell which wget 2>/dev/null)
 CURL = $(shell which curl 2>/dev/null)
 DOWNLOADER = $(if $(WGET), $(WGET) -O, $(if $(CURL), $(CURL) -o, $(error Error: No wget or curl found in PATH)))
 
-JF_VERSION = 1.1.5
+JF_VERSION = @JELLYFISH_VERSION@
 JF_URL = ftp://ftp.genome.umd.edu/pub/quorum/jellyfish-$(JF_VERSION).tar.gz
 
 QUORUM_VERSION = @PACKAGE_VERSION@

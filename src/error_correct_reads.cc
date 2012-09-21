@@ -38,7 +38,7 @@
 typedef uint64_t hkey_t;
 typedef uint64_t hval_t;
 //typedef jellyfish::invertible_hash::array<uint64_t,atomic::gcc,allocators::mmap> inv_hash_storage_t;
-typedef std::vector<inv_hash_storage_t> hashes_t;
+typedef std::vector<inv_hash_storage_t*> hashes_t;
 
 std::ostream &operator<<(std::ostream &os, const forward_counter &c) {
   return os << c._c;
@@ -80,7 +80,7 @@ public:
     hashes_t::const_iterator chash = hashes_->begin();
     hval_t                   res   = 0;
 
-    if(!chash->get_val(mer, res, true))
+    if(!(*chash)->get_val(mer, res, true))
       return 0;
     return res;
   }
@@ -112,7 +112,7 @@ private:
     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
       nmer.replace(0, i);
       hval_t val = 0;
-      if(chash->get_val(nmer.canonical(), val, true)) {
+      if((*chash)->get_val(nmer.canonical(), val, true)) {
         counts[i] = val;
         if(val >= (uint64_t)min_count_) {
           count++;
@@ -139,7 +139,7 @@ public:
   virtual ~alternative_combined_dbs() { }
   virtual hval_t get_val(uint64_t mer) {
     hval_t res = 0;
-    bool found = hash_->get_val(mer, res, true, true);
+    bool found = (*hash_)->get_val(mer, res, true, true);
     if(!found)
       return 0;
     uint64_t nlevel, val;
@@ -166,7 +166,7 @@ private:
 
     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
       nmer.replace(0, i);
-      if(!hash_->get_val(nmer.canonical(), val, true, true))
+      if(!(*hash_)->get_val(nmer.canonical(), val, true, true))
         val = 0;
       nb_levels_.division(val, val, nlevel);
       if(val == 0 || (int)nlevel < level) {
@@ -242,7 +242,7 @@ class error_correct_t : public thread_exec {
 public:
   error_correct_t(jellyfish::parse_read* parser, hashes_t *hashes) :
     _parser(parser), _hashes(hashes),
-    _mer_len(_hashes->begin()->get_key_len() / 2),
+    _mer_len((*_hashes->begin())->get_key_len() / 2),
     _skip(0), _good(1), _min_count(1), _window(0), _error(0), _gzip(false),
     _combined(0), _contaminant(0), _trim_contaminant(false),
     _homo_trim(std::numeric_limits<int>::min()) { }
@@ -686,13 +686,14 @@ int main(int argc, char *argv[])
   unsigned int key_len = 0;
   for(auto it = args.db_arg.begin(); it != args.db_arg.end(); ++it) {
     mapped_file dbf(*it);
+    SquareBinaryMatrix hash, inv_hash;
     dbf.random().will_need().load();
-    hashes.push_back(*raw_inv_hash_query_t(dbf).get_ary());
+    hashes.push_back(raw_inv_hash_query_t::init(dbf, hash, inv_hash));
     
     if(key_len == 0)
-      key_len = hashes.front().get_key_len();
-    else if(key_len != hashes.back().get_key_len())
-      die << "Different key length (" << hashes.back().get_key_len() 
+      key_len = hashes.front()->get_key_len();
+    else if(key_len != hashes.back()->get_key_len())
+      die << "Different key length (" << hashes.back()->get_key_len() 
           << " != " << key_len
           << ") for hash '" << *it << "'";
   }

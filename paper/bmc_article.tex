@@ -53,7 +53,10 @@
 \usepackage[utf8]{inputenc} %unicode support
 %\usepackage[applemac]{inputenc} %applemac support if unicode package fails
 %\usepackage[latin1]{inputenc} %UNIX support if unicode package fails
-\usepackage{units}
+\usepackage{siunitx}
+\usepackage{etoolbox}
+\usepackage{booktabs}
+\usepackage{xspace}
 \urlstyle{rm}
  
  
@@ -116,8 +119,9 @@
 %% Enter the title of your article here     %%
 %%                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\quorum}{QuorUM\xspace}
 
-\title{QuorUM: an error corrector for sequence generation sequencing reads}
+\title{\quorum: an error corrector for Illumina reads}
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                          %%
@@ -137,13 +141,10 @@
        \email{Guillaume Mar\c{c}ais\correspondingauthor - gmarcais@umd.edu}%
       \and
          Aleksey Zimin\correspondingauthor$^1$%
-         \email{Aleksey Ziming\correspondingauthor- alekseyz@ipst.umd.edu}%
-%       \and%
-%         Neza Vodopivec$^1$%
-%         \email{Neza Vodopivec - }
-       and
-         Jim Yorke$^1$%
-         \email{Jim Yorke - yorke@umd.edu}
+         \email{Aleksey Zimin\correspondingauthor- alekseyz@ipst.umd.edu}%
+       \ and
+         James A. Yorke$^1$%
+         \email{James Yorke - yorke@umd.edu}
       }
       
 
@@ -154,7 +155,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \address{%
-    \iid(1)Institut for Physical Science and Technology, University of Maryland, College Park, MD
+    \iid(1)University of Maryland, College Park, MD
 }%
 
 \maketitle
@@ -179,21 +180,20 @@
 \begin{abstract}
   % Do not use inserted blank lines (ie \\) until main body of text.
 \paragraph*{Background:}
-Illumina Sequencing data can provide high coverage of a genome by relatively short ($\unit[100]{bp}$ to $\unit[150]{bp}$) reads at a low cost.
+Illumina Sequencing data can provide high coverage of a genome by relatively short (\SI{100}{bp} to \SI{150}{bp}) reads at a low cost.
 The base error rates in the reads vary greatly along the read sequence.
 Low quality bases can be trimmed off or error-corrected.
 Trimming, especially based on the quality scores, can eliminate large amounts of useful sequence in the reads.
 Error correction is an alternative to trimming that takes advantage of the high coverage of the genome to make the high confidence base corrections in the reads.
 Error correction allows for more effective use of the sequencing data thus reducing the coverage depth requirements in sequencing projects and increasing the quality of the resulting assemblies.
-The vast majority of errors in Illumina data are substitutions, where a base call is incorrect.
-Also, the sequence quality is usually higher on the 5’ end of a read and deteriorates toward the 3’ end of the read. Each base in the read has a quality score associated with it.
+The vast majority of errors in Illumina data are substitutions, where a base call is incorrect, and \quorum focuses on this type of error.
       
 \paragraph*{Results:}
-We propose a novel software, called QuorUM, for error correcting substitution error in second generation sequencing reads.
+We propose software, called \quorum, for error correcting substitution error in Illumina reads.
 It provides accurate correction and is suitable for large data sets ($48$ billion bases corrected per hours on $48$ threads).
 
 \paragraph*{Conclusions:} 
-The QuorUM software is available under an open source license at \url{ftp://ftp.genome.umd.edu/pub/quorum}.
+The software is available under the GPL open source license at \url{ftp://ftp.genome.umd.edu/pub/quorum}.
 
 \end{abstract}
 
@@ -236,28 +236,57 @@ The QuorUM software is available under an open source license at \url{ftp://ftp.
 %% Background %%
 %%
 \section*{Background}
-While second generation sequencing technologies have progressed tremendously and offer ever longer reads with low overall sequencing error rate ($\approx 1\%$), correcting errors in sequencing reads remains an important prepossessing step in \emph{de novo} genome assembly.
-In general, error correcting the sequencing reads leads to assemblies with longer contiguous sequences and fewer misassemblies.
+While second generation sequencing technologies have progressed tremendously and offer ever longer reads with low overall sequencing error rate, correcting errors in reads remains an important prepossessing step in \emph{de novo} genome assembly.
+In general, error correcting the reads leads to assemblies with longer contiguous sequences and fewer misassemblies.
 
 
-
-
-As the quality of base calling usually degrades toward the 3' ends of reads, an obvious error correction method is to trim all the reads on the 3' end, either by a fix amount or based on the quality values reported by the sequencing machine.
-Although this simple trimming scheme will reduce the number of erroneous bases, it still leaves many errors in the reads and needlessly discard a lot of valid sequence.
+As the quality of base calling usually degrades toward the 3' ends of reads, an obvious error correction method is to trim all the reads on the 3' end, either by a fixed amount or based on the quality values reported by the sequencing machine.
+Although this simple trimming scheme will reduce the number of erroneous bases, it still leaves many errors in the reads and needlessly discards a lot of valid sequence. 
+% G: You should add a trimmer that trims at 5 percent
 Aggressive trimming results in fragmented assemblies.
 
-On the other hand, trimming is an integral part of error correction.
-The distribution of sequencing errors on the sequencing reads is complex and for some percentage of the reads, the sequence beyond a certain point contains too many errors to be corrected or, even worse, does not correspond to any sequence in the original genome.
+On the other hand, trimming can be an integral part of error correction.
+The distribution of sequencing errors on the reads is complex and for some percentage of the reads, the sequence beyond a certain point contains too many errors to be corrected or, even worse, does not correspond to any sequence in the original genome.
 It is important to trim those reads to avoid misassemblies.
+See [[Gage Reference]].
 
 % We need a paragraph or two on the various way to error correct: k-mer spectrum, alignment of reads, what else?
+Genomes are sequenced at some depth.
+Meaning that every part of the genome should be present in more than one sequencing read.
+As sequencing machine make a mistake reading a base, this error can be detected by comparing the read to others covering the same region of the genome.
+Put another way, erroneous base should follow a different probability distribution that correct bases.
 
-We propose a new error correction procedure and software package, named QuorUM (Quality Optimized Reads from the University of Maryland), that provides accurate trimming and error correction.
-In addition, QuorUM is flexible: it can correct reads of varying length and reads containing ambiguous base calls (Ns).
-It is also fast and can tackle the large data sets produced by today's high throughput sequencing machine.
+Existing error correctors use different techniques to detect and correct these erroneous bases.
+Coral~\cite{salmela2011correcting} and Echo~\cite{Kao2011} use multiple alignment of the reads.
+Then, a statistical model of sequencing is used to correct misaligned bases.
+HiTec~\cite{Ilie2011b} uses a suffix array to find and correct potentially erroneous bases.
+Quake~\cite{Kelley:2010fk} uses the distribution of $k$-mers, or the $k$-spectrum, to detect $k$-mers containing erroneous bases.
 
-We compare the error corrector by comparing the error corrected reads to the finished sequence of the organism.
-We use the evaluation toolkit of~\cite{Yang2012} with some modifications (see~\ref{sec:Methods}).
+We propose a new error correction procedure and software package, named \quorum (Quality Optimized Reads from the University of Maryland), that provides accurate trimming and error correction.
+\quorum uses both the $k$-spectrum and the quality scores reported by the sequencing machine.
+In addition, \quorum is flexible: it can correct reads of varying length and reads containing ambiguous base calls (Ns).
+% TODOcheck number below
+It is also fast (1 billion $\SI{100}{bases}$ long reads in a day) and can tackle the large data sets produced by today's high throughput sequencing machine.
+
+For evaluation we investigate two genomes that have Illumina reads and have genome assemblies of finished quality.
+We compare the error correctors by aligning the error corrected reads to the finished sequence of the organism and using the following metrics.
+
+% First, we report the number of substitution errors left after error correction and the number of new errors introduced (i.e.\@ false positive rate) (Table~\ref{table:left-introduced}).
+% This measures how well the software corrects individual substitution errors.
+% %
+% Second, we measure the number of chimeric reads before and after error correction (Table~\ref{table:chimeric}).
+% % Def chimeric has been added. Is this OK?
+% A read is called chimeric if it does not match the finished genome in one piece but the read can be split into two parts that match the genome in two widely separated places.
+% This measures the likelihood  of the software to over correct by gluing sequences that do not belong together.
+% %
+% Third, we report the amount of sequence which is error free reads (i.e.\@ reads which aligns perfectly to the finished sequence) (Table~\ref{table:perfect-reads}).
+% These reads are easy for assemblers to use, and this is a measure of how well the correction and trimming work.
+% %
+% Fourth, we report the contig sizes of ``idealized contigs'' created by aligning error corrected reads to the finished sequence (Table~\ref{table:icontigs}).
+% This procedure, similar to a guided assembly, provides some estimate of the maximum contig size achievable through assembly, without the bias of using a particular assembler.
+% Finally, we will report the time and memory consumption to carry out the correction.
+
+% We use the evaluation toolkit of~\cite{Yang2012} with some modifications (see~\ref{sec:Methods}).
 
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -265,11 +294,33 @@ We use the evaluation toolkit of~\cite{Yang2012} with some modifications (see~\r
 %%
 \section*{Results and Discussion}
 
-We evaluated the error correction software using multiple metrics.
+We evaluated the error correction software by error correcting the reads of two organisms for which a finished sequence is available: \emph{Rhodobacter sphareoides} and \emph{Mus musculus} (house mouse).
+These genomes present different type of challenges for error correction.
+The \emph{Rhodobacter sphaeroides} bacteria genome (\SI{4.6}{Mb} long) has a high GC content and is consequently difficult to sequence using Illumina technology.
+The mouse genome, being a mammalian genome, is larger and more complex.
+For the sake of simplicity, we only use chromosome 16 of the mouse genome which has \SI{98}{Mb} in finished sequence.
 
+We ran the following error correctors on the Rhodobacter data set: Echo, HiTEC, Coral, \quorum, and Quake.
+Echo and HiTEC did not run on the larger mouse data.
 
+As can be seen in Table~\ref{table:perfect-reads}, \quorum produces the largest amount of sequence in perfect reads.
+And these perfect reads represent a large proportion of the error corrected reads ($94.3\%$ in the mouse and $98.7\%$ in the Rhodobacter).
+Although \quorum trims and discards some reads (see Table~\ref{table:left-introduced} and \ref{table:perfect-reads}), the amount of perfect sequence is larger than that produce by the correctors that do not trim or discard any read, such as Echo, HiTEC and Coral.
+Moreover, \quorum trims less aggressively than Quake while still producing a high percentage of perfect reads.
 
-    
+When comparing the error corrected reads to the original reads (see Table~\ref{table:left-introduced}), \quorum outputs reads with the fewest errors while introducing only a small fraction of new errors (False Positive Rate).
+% In the current version of the paper, we cannot tell how many errors are left. We can only tell how many are left in the trimmed region. It might be getting 99 percent of the errors, for all we know.
+Quake has a smaller false positive rate but at the cost of leaving many errors, despite trimming the reads more aggressively. 
+
+The Illumina technology generates few chimeric reads (usually less than $1\%$ of all the reads).
+When doing very aggressive error correction, one runs the risk of creating new chimeric reads;
+i.e.\@ sequence from a distant region of the genome is used to rewrite significant portion of a read.
+Table~\ref{table:chimeric} shows that Quake and \quorum decrease significantly the number of chimeric reads.
+%Echo, HiTEC and Coral do not change or 
+HiTEC actually  increases the number of chimeric reads while while Echo and Coral make only small decreases in chimeric reads.\\
+
+Finally, Table~\ref{table:chimeric} shows that reads error corrected by \quorum leads to larger contigs than with the other error correctors.
+
 
 %%%%%%%%%%%%%%%%%%%%%%
 \section*{Conclusions}
@@ -281,36 +332,54 @@ We evaluated the error correction software using multiple metrics.
 \label{sec:Methods}
 
 \subsection*{Error correction}
+\label{sec:meth-error-correction}
 
-QuorUM uses the Jellyfish~\cite{Marcais2011} software to count the number of occurrences of the $k$-mers in the input reads twice.
-First for all $k$-mers and second for the $k$-mers in which all bases have a quality value greater than a threshold (by default $5$ above the minimum quality).
+\quorum error corrects reads by replacing low quality $k$-mers in the input reads with high quality $k$-mers.
+The quality of a $k$-mer is based first on the quality values reported by the sequencing machine of the bases in the mer and second by its number of occurrences in the reads.
+
+\quorum uses the Jellyfish~\cite{Marcais2011} software to count the number of occurrences of the $k$-mers in the input reads.
+First it counts the occurrences of all $k$-mers and second it counts the occurrences $k$-mers in which all bases have a quality value greater than a threshold (by default $5$ above the minimum quality). We call the latter $k$-mers ``high quality''.
+%This second set of $k$-mers is the set of high-quality $k$-mers.
 Then, every read is examined in turn.
-QuorUM searches for an \emph{anchor} $k$-mer: a $k$-mer whose number of occurrences is higher than a threshold $a$ ($a = 3$ by default). 
-Starting from this anchor, QuorUM will look at every base, extending toward the 5' and 3' ends, and decide to make a correction based on the $k$-mer ending at that base.
+\quorum searches for an \emph{anchor} $k$-mer: a $k$-mer whose number of occurrences is higher than a threshold $a$ ($a = 3$ by default).
+\quorum searches for an \emph{anchor} $k$-mer: a $k$-mer whose number of occurrences is higher than a threshold $a$ ($a = 3$ by default). 
+Starting from this anchor, \quorum will look at every base, extending toward the 5' and 3' ends, and decide to make a correction based on the $k$-mer ending at that base.
 Let $m = xb$ bet the $k$-mer, where $|m| = k$, $x$ is a prefix with $|x| = k - 1$, and $b$ is the base under consideration.
 If $m$ has a number of occurrences greater than $a$, then no correction is made.
-Otherwise, if there is a unique alternative $k$-mer obtained by substituting $b$ with another nucleotide $b'$ with count at least $3$ times higher, QuorUM substitute $b$ for $b'$ in the read.
-In the case where no substitution is found, QuorUM trims the read at that position.
-The maximum of correction made in a window of length $10$ is by default capped at $3$.
-QuorUM will trim the read at the beginning of the window if the number of errors is too high.
+Otherwise, the 3 possible alternatives $b'$ are considered.
+\quorum considers in priority the $k$-mers $m' = xb'$ in the high-quality set.
+Only if all $m'$ have count 0 in the high-quality set is the set containing all $k$-mers considered.
+\quorum substitutes base $b$ by $b'$ if only one of the alternative has a occurrence count at least 3 times that of $m$.
+Moreover, \quorum checks that this substitution is not a dead-end.
+I.e.\@ that at least one the of four extensions of $m'$ is present in the input reads, where the extensions of $m'$ are the four possible $k$-suffixes of $m'b''$ and $b''$ is a base.
 
-The procedure uses the high-quality $k$-mer database in priority.
-Precisely, if any of the occurrence counts for the four possible base $b$ is non-zero in the high quality database, then QuorUM uses the high quality database.
-Otherwise, the database with all $k$-mers is used.
-In effect, QuorUM will replace low quality $k$-mers by high quality $k$-mers when possible.
+{\bf Correcting a base in a read.}
+Starting from this anchor, \quorum will look at every base, extending toward the 5' and 3' ends.  Here we consider extension toward the 3' end and leave the reverse to the reader. As \quorum shifts the k-mer toward the 3' end on base at a time, it and decides whether 
+% [[]]
+to make a correction based on the $k$-mer ending at that base.
+Let $m = xb$ be the anchor $k$-mer, where the length $|m| = k$, and $x$ is a prefix with length $|x| = k - 1$, and $b$ is the base under consideration.
+If $m$ has a number of occurrences greater than $a$ in the entire database, then no correction is made; otherwise, the 3 possible alternative bases $b'$ are considered.
+\quorum determines if any of the three $k$-mers $m' = xb'$ are in the high-quality set.
+Only if all three $m'$ have count 0 in the high-quality set is the set containing all $k$-mers considered. Then
+\quorum substitutes base $b'$ for $b$ if only one of the alternative $xb'$ considered has an occurrence count at least 3 times that of $m$.
+Moreover, \quorum checks that this substitution is not a dead-end; i.e.\@ at least one the of four extensions of $m'$ is present in the input reads, where the extensions of $m'$ are the four possible $k$-suffixes of $m'b''$ and $b''$ is a base. If there were two base errors in a row, \quorum would be very unlikely to make a change. 
+
+The maximum number of corrections made in a window of length $10$ is by default capped at $3$.
+\quorum will trim the read at the beginning of the window if the number of errors is higher.
+% Jim: Is this last sentence correct?
+% Gus: Not sure what it means
+The sequence in $m$ and beyond to the 5' end is trimmed off the read. 
+
+% These options were not used in the work on this paper. Yes or No???
+% The first option was not used. The second one was the Rhodobacter data.
+In addition, \quorum has two extra optional procedure for trimming reads. 
+It takes as input a set of contaminant $k$-mers and it will trim a read wherever it contains such a contaminant mer. In particular the contaminant is deleted.
+
+Also, in high or low GC genome, the Illumina sequencers tend to erroneously generate long homo-polymer run toward the 3' end of the reads.
+\quorum can optionally detect and trim off these homo-polymer.
+
 
 \subsection*{Evaluation}
-
-We use the evaluation toolkit of Yang \emph{et al.}~\cite{Yang2012} with the following modifications.
-First, we use Bowtie2~{\bf cite} in local mode, rather than BWA~{\bf cite} to align the reads to the finished sequence.
-By default, BWA imposes that a read aligns on its entire length.
-In other words, clipped sequences at the 3' and 5' ends decrease the alignment score.
-Bowtie2 in local mode does not penalize for clipped sequences.
-As the sequence quality degrades toward the 3' end, many reads containing significant amount of valid sequence would not align with BWA because of bad sequence on the 3' end.
-But all these reads, after proper trimming, can be used for assembly, and therefore should be included for evaluating error correctors.
-
-% Do we care about this?
-Second, we report the gain, defined as $G = (TP - FP) / (TP + FN)$ and the false positive rate, defined $FPR = FP / (TP + FN)$.
 
 
 
@@ -368,13 +437,13 @@ Second, we report the gain, defined as $G = (TP - FP) / (TP + FN)$ and the false
 %%
 %% Do not use \listoffigures as most will included as separate files
 
-\section*{Figures}
-\subsection*{Figure 1 - Sample figure title}
-A short description of the figure content
-should go here.
+% \section*{Figures}
+% \subsection*{Figure 1 - Sample figure title}
+% A short description of the figure content
+% should go here.
 
-\subsection*{Figure 2 - Sample figure title}
-Figure legend text.
+% \subsection*{Figure 2 - Sample figure title}
+% Figure legend text.
 
 
 
@@ -384,26 +453,159 @@ Figure legend text.
 %%                               %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% \newrobustcmd{\bnum}[1]{\bfseries #1}
+
 %% Use of \listoftables is discouraged.
 %%
-\section*{Tables}
-\subsection*{Table 1 - Sample table title}
-Here is an example of a \emph{small} table in \LaTeX\ using  
-\verb|\tabular{...}|. This is where the description of the table 
-should go. \par \mbox{}
-\par
-\mbox{
-  \begin{tabular}{|c|c|c|}
-    \hline \multicolumn{3}{|c|}{My Table}\\ \hline
-    A1 & B2  & C3 \\ \hline
-    A2 & ... & .. \\ \hline
-    A3 & ..  & .  \\ \hline
-  \end{tabular}
+\newcounter{tablecounter}
+\newcommand{\tabledesc}[1]{%
+\refstepcounter{tablecounter}%
+\subsection*{Table \thetablecounter\  - #1}%
 }
-\subsection*{Table 2 - Sample table title}
-Large tables are attached as separate files but should
-still be described here.
+%% Winner number in a table
+\newcommand{\winner}[1]{\bfseries #1}
 
+\section*{Tables}
+\robustify\bfseries
+
+%
+%
+\tabledesc{Mapping contig lengths}
+\label{table:icontigs}
+
+We map the corrected reads onto the finished sequence.
+We require $\ge 99\%$ agreement; that is, since the reads are $101$ bases long, we allow at most one error reads that retain full length after correcting, and perfect matches for trimmed reads.
+We allow each read to be mapped to at most $5$ distinct locations.
+Each contiguous segment of the genome that is covered by overlapping reads is called a ``mapping contig''.
+Two consecutive mapping contigs are separated by a gap in coverage.
+This table shows the statistics on the mapping contig lengths (N25, N50 and N90) in kilo bases.
+
+%% TODO move following to text
+Trimming inevitably discards some correct sequence.
+There is a trade-off between trying to correct errors and trimming off hard-to-correct ends of a read.
+We note that the contig sizes are reduced when reads are trimmed and when errors remain.
+A trimmed read covers fewer bases and aggressive trimming will unnecessarily shorten reads and mapping contigs.
+On the other hand, a read may fail to align because of untrimmed errors.
+
+
+\bigskip
+
+\begin{tabular}{@{}lS[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]S[detect-weight,table-format=1.2]S[detect-weight,table-format=2]S[detect-weight,table-format=2]S[detect-weight,table-format=2.1]@{}}
+\toprule
+Corrector & \multicolumn{3}{c}{Rhodobacter} & \multicolumn{3}{c}{Mouse} \\
+\cmidrule(r){2-4} \cmidrule(l){5-7}
+{}     & {N25 kb}    & {N50 kb}    & {N90 kb}     & {N25 kb}    & {N50 kb}    & {N90 kb}    \\
+\midrule
+none   & 4.8         & 2.6         & 0.61         & 63          & 35          & 8.9         \\
+coral  & 11          & 6.2         & 1.6          & 33          & 18          & 2.8         \\
+echo   & 13          & 7.0         & 1.9          &             &             &             \\
+hitec  & 11          & 6.6         & 1.8          &             &             &             \\
+quake  & 9.5         & 5.5         & 1.5          & 48          & 28          & 6.7         \\
+quorum & \winner{36} & \winner{21} & \winner{5.9} & \winner{89} & \winner{52} & \winner{12} \\
+\bottomrule
+\end{tabular}
+
+
+
+%
+%
+\tabledesc{Error left and introduced}
+\label{table:left-introduced}
+
+The ``Bases trimmed'' is the percentage of bases in trimmed reads compared with bases in the original reads.
+All the bases in a discarded read count as bases trimmed off.
+The ``Errors not trimmed from reads'' is the percentage of errors in the trimmed reads compared with the errors in the original reads.
+The ``errors left in trimmed reads'' is the percentage of errors in the corrected reads compared with the errors in the trimmed reads.
+The ``Errors introduced'' is the false positive rate.
+These are counted in the previous column ``errors left in trimmed reads''.
+xFinally, the ``Errors in corrected trimmed reads'' is the percentage of errors in corrected reads compared with the errors in the original reads.
+If we name the four ``errors'' columns as $E1$, $E2$, $E3$, and $E4$, then $E1 * E2 = E4$.
+
+The two correctors that both trim and error correct what is left do the two steps of trimming and correcting concurrently.
+
+\bigskip
+
+\begin{tabular}{@{}lS[detect-weight,table-format=3.1]S[detect-weight,table-format=3.1]S[detect-weight,table-format=2.2]S[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]@{}}
+\toprule
+          & {\% bases} & {\% errors not}      & {\% of errors left} & {\% errors}    & {\% errors in corrected} \\
+Corrector & {trimmed}  & {trimmed from reads} & {in trimmed reads}  & {introduced}   & {trimmed reads}          \\
+\midrule
+{} & \multicolumn{5}{c}{Rhodobacter} \\
+\cmidrule{2-6} 
+trim20B   & 19.8       & 43.9                 & 100                 & 0.00           & 43.9                     \\
+trimQual5 & 36.0       & 11.2                 & 100                 & 0.00           & 11.2                     \\
+coral     & 0.00       & 100                  & 77.7                & 0.766          & 77.7                     \\
+echo      & 0.00       & 100                  & 65.1                & 2.11           & 65.1                     \\
+hitec     & 0.00       & 100                  & 61.1                & 10.4           & 61.1                     \\
+quake     & 30         & 81.5                 & 98.2                & 0.365          & 80.1                     \\ 
+quorum    & 31         & \winner{21.7}        & \winner{10.8}       & \winner{.0700} & \winner{2.33}            \\
+\cmidrule{2-6}
+{} & \multicolumn{5}{c}{Mouse} \\
+\cmidrule{2-6}
+trim20B   & 19.8       & 29.0                 & 100                 & 0.00          & 29.0                     \\
+trimQual5 & 10.5       & 28.0                 & 100                 & 0.00          & 28.0                     \\
+coral     & 0.00       & 100                  & 69.0                & 12.5          & 69.0                     \\
+quake     & 15         & \winner{7.81}        & 54.0                & \winner{.148} & \winner{4.22}            \\
+quorum    & 6.5        & 29.4                 & \winner{34.7}       & .786          & 10.2                     \\
+\bottomrule
+\end{tabular}
+
+%
+%
+\tabledesc{Chimeric reads}
+
+
+\label{table:chimeric}
+
+% Jim: We have to make sure that our definitions agree with what I put in the main text. Two distinct pieces allows one to be extremely small and it does not say that the whole read is the union of the two pieces.
+A chimeric read is defined here as a read that does not align in one piece while it has two disjoint subsequences that align to far apart regions of the finished sequence. 
+The table shows the number of chimeric reads after error correction. ``None'' denote the number without any error correction.
+
+\bigskip
+
+\begin{tabular}{@{}lS[detect-weight,table-format=4]S[detect-weight,table-format=6]@{}}
+\toprule
+{Corrector} & {Rhodobacter} & {Mouse}        \\
+\midrule
+none        & 2086          & 296772         \\
+coral       & 2047          & 225052         \\
+echo        & 1809          &                \\
+hitec       & 6375          &                \\
+quake       & \winner{302}  & \winner{42195} \\
+quorum      & 490           & 93158          \\
+\bottomrule
+\end{tabular}
+
+%
+%
+\tabledesc{Output bases in perfect reads \& percent of output bases in perfect reads}
+\label{table:perfect-reads}
+
+The columns labeled ``Perfect'' show the sum of the lengths of the perfect reads after error correction.
+A perfect read is a read (possibly trimmed) that aligns with no error on its full length to the finish sequence.
+The columns labeled ``\%'' show the number of bases in perfect corrected reads over the number of bases in corrected reads, shown as a percentage.
+
+%% TODO: number for coral worst than none seems bad. Check this number.
+
+\bigskip
+
+\begin{tabular}{@{}lS[detect-weight,table-format=3.1]S[detect-weight,table-format=2.1]S[detect-weight,table-format=1.2]S[detect-weight,table-format=2.1]@{}}
+\toprule
+Corrector & \multicolumn{2}{c}{Rhodobacter} & \multicolumn{2}{c}{Mouse} \\
+\cmidrule(r){2-3} \cmidrule(l){4-5}
+{}     & {Perfect (Mb)} & {\%}          & {Perfect (Gb)} & \%            \\
+\midrule
+none   & 42             & 32.0          & 2.01           & 54.5          \\
+coral  & 118            & 85.6          & 3.37           & 89.8          \\
+echo   & 114            & 75.0          &                &               \\
+hitec  & 123            & 78.2          &                &               \\
+quake  & 98.2           & 76.4          & 3.45           & \winner{98.3} \\
+quorum & \winner{156}   & \winner{98.7} & \winner{3.62}  & 94.3          \\
+\bottomrule
+\end{tabular}
+
+%
+%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -412,14 +614,14 @@ still be described here.
 %%                               %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section*{Additional Files}
-\subsection*{Additional file 1 --- Sample additional file title}
-Additional file descriptions text (including details of how to
-view the file, if it is in a non-standard format or the file extension).  This might
-refer to a multi-page table or a figure.
+% \section*{Additional Files}
+% \subsection*{Additional file 1 --- Sample additional file title}
+% Additional file descriptions text (including details of how to
+% view the file, if it is in a non-standard format or the file extension).  This might
+% refer to a multi-page table or a figure.
 
-\subsection*{Additional file 2 --- Sample additional file title}
-Additional file descriptions text.
+% \subsection*{Additional file 2 --- Sample additional file title}
+% Additional file descriptions text.
 
 
 \end{bmcformat}
@@ -431,3 +633,6 @@ Additional file descriptions text.
 
 
 
+
+% LocalWords:  QuORUM HiTEC misassemblies Illumina Rhodobacter
+% LocalWords:  contigs

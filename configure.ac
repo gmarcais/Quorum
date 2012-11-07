@@ -6,7 +6,8 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 
-
+# Compile using libtool to get the path to jellyfish added to exec
+LT_INIT
 
 # Checks for programs.
 AC_PROG_CXX
@@ -50,6 +51,10 @@ AC_ARG_WITH([relative-jf-path],
             [with_relative_jf_path= ])
 AC_SUBST([RELATIVE_JF_PATH], $with_relative_jf_path)
 AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [test x$with_relative_jf_path != x])
+
+AC_CHECK_TYPE([__int128],
+              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

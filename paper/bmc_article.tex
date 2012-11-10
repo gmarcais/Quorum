@@ -381,9 +381,10 @@ Also, in high or low GC genome, the Illumina sequencers tend to erroneously gene
 
 \subsection*{Evaluation}
 
+Need to add the access IDs of the reads and finished sequence use. Add some statistics: number of reads, coverage, size of genomes.
+Mention the aligner used and the parameter used.
 
-
-
+Couple of sentences on the benefit of using finished quality genome with real sequencing reads (not artificially sequenced).
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Authors contributions}
@@ -464,96 +465,145 @@ Also, in high or low GC genome, the Illumina sequencers tend to erroneously gene
 }
 %% Winner number in a table
 \newcommand{\winner}[1]{\bfseries #1}
+\newcommand{\tn}[1]{S[detect-weight,table-format=#1]}
 
 \section*{Tables}
 \robustify\bfseries
 
 %
 %
-\tabledesc{Mapping contig lengths}
-\label{table:icontigs}
+% \tabledesc{Mapping contig lengths}
+% \label{table:icontigs}
 
-We map the corrected reads onto the finished sequence.
-We require $\ge 99\%$ agreement; that is, since the reads are $101$ bases long, we allow at most one error reads that retain full length after correcting, and perfect matches for trimmed reads.
-We allow each read to be mapped to at most $5$ distinct locations.
-Each contiguous segment of the genome that is covered by overlapping reads is called a ``mapping contig''.
-Two consecutive mapping contigs are separated by a gap in coverage.
-This table shows the statistics on the mapping contig lengths (N25, N50 and N90) in kilo bases.
+% We map the corrected reads onto the finished sequence.
+% We require $\ge 99\%$ agreement; that is, since the reads are $101$ bases long, we allow at most one error reads that retain full length after correcting, and perfect matches for trimmed reads.
+% We allow each read to be mapped to at most $5$ distinct locations.
+% Each contiguous segment of the genome that is covered by overlapping reads is called a ``mapping contig''.
+% Two consecutive mapping contigs are separated by a gap in coverage.
+% This table shows the statistics on the mapping contig lengths (N25, N50 and N90) in kilo bases.
 
-%% TODO move following to text
-Trimming inevitably discards some correct sequence.
-There is a trade-off between trying to correct errors and trimming off hard-to-correct ends of a read.
-We note that the contig sizes are reduced when reads are trimmed and when errors remain.
-A trimmed read covers fewer bases and aggressive trimming will unnecessarily shorten reads and mapping contigs.
-On the other hand, a read may fail to align because of untrimmed errors.
-
-
-\bigskip
-
-\begin{tabular}{@{}lS[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]S[detect-weight,table-format=1.2]S[detect-weight,table-format=2]S[detect-weight,table-format=2]S[detect-weight,table-format=2.1]@{}}
-\toprule
-Corrector & \multicolumn{3}{c}{Rhodobacter} & \multicolumn{3}{c}{Mouse} \\
-\cmidrule(r){2-4} \cmidrule(l){5-7}
-{}     & {N25 kb}    & {N50 kb}    & {N90 kb}     & {N25 kb}    & {N50 kb}    & {N90 kb}    \\
-\midrule
-none   & 4.8         & 2.6         & 0.61         & 63          & 35          & 8.9         \\
-coral  & 11          & 6.2         & 1.6          & 33          & 18          & 2.8         \\
-echo   & 13          & 7.0         & 1.9          &             &             &             \\
-hitec  & 11          & 6.6         & 1.8          &             &             &             \\
-quake  & 9.5         & 5.5         & 1.5          & 48          & 28          & 6.7         \\
-quorum & \winner{36} & \winner{21} & \winner{5.9} & \winner{89} & \winner{52} & \winner{12} \\
-\bottomrule
-\end{tabular}
+% %% TODO move following to text
+% Trimming inevitably discards some correct sequence.
+% There is a trade-off between trying to correct errors and trimming off hard-to-correct ends of a read.
+% We note that the contig sizes are reduced when reads are trimmed and when errors remain.
+% A trimmed read covers fewer bases and aggressive trimming will unnecessarily shorten reads and mapping contigs.
+% On the other hand, a read may fail to align because of untrimmed errors.
 
 
+% \bigskip
+
+% % Table 1: E values look wrong for the mouse. Recompute.
+
+% % Table 1 as is goes to supplementary material. New table 1 is for
+% % perfect reads only; N50, E and percentage of perfect reads in output reads
+
+% % Quake throws away lots of read but does an excellent job on what it
+% % outputs. It seems likely that this deficiency could be compensated
+% % by extra sequencing.
+
+% \begin{tabular}{@{}lS[detect-weight,table-format=2.2]S[detect-weight,table-format=2.2]S[detect-weight,table-format=1.3]S[detect-weight,table-format=2.2]cS[detect-weight,table-format=3.1]S[detect-weight,table-format=2.1]S[detect-weight,table-format=2.2]S[detect-weight,table-format=2.1]@{}}
+% \toprule
+% Corrector & \multicolumn{4}{c}{Rhodobacter}                              & & \multicolumn{4}{c}{Mouse} \\
+% \cmidrule(r){2-5} \cmidrule(l){7-10}
+% {}        & {N25 kb}      & {N50 kb}      & {N90 kb}      & {E kb}       & &  {N25 kb}     & {N50 kb}      & {N90 kb}      & {E kb}        \\
+% \midrule                                                                     
+% none      & 4.77          & 2.56          & 0.614         & 3.99         & &  62.8         & 35.7          & 8.58          & \winner{26.4} \\
+% trim20B   & 13.4          & 7.88          & 2.42          & 10.8         & &  98.2         & 59.5          & 14.5          & 25.6          \\
+% trimQual5 & 10.9          & 5.88          & 1.73          & 7.87         & &  \winner{105} & 62.3          & 14.8          & 25.3          \\
+% coral     & 10.8          & 6.10          & 1.61          & 8.50         & &  32.6         & 18.3          & 2.81          & 20.2          \\
+% echo      & 12.6          & 6.96          & 1.86          & 9.00         & &               &               &               &               \\
+% hitec     & 11.3          & 6.56          & 1.80          & 9.19         & &               &               &               &               \\
+% quake     & 11.2          & 6.50          & 1.81          & 9.41         & &  50.2         & 29.5          & 7.08          & 25.9          \\
+% quorum    & \winner{38.2} & \winner{23.8} & \winner{7.02} & \winner{24.1}& &  104          & \winner{62.8} & \winner{14.9} & 26.0          \\
+% \bottomrule
+% \end{tabular}
+
+% \bigskip
+
+% Original data
+% Mouse:
+% \begin{tabular}{|c|c|c|c|c|}
+% corrector     & N25     & N50    & N90    & E      \\
+% identity      & 62,758  & 35,735 & 8,581  & 26,350 \\
+% trimmer       & 98,222  & 59,540 & 14,452 & 25,603 \\
+% qual\_trimmer & 104,540 & 62,252 & 14,778 & 25,289 \\
+% coral         & 32,580  & 18,311 & 2,807  & 20,220 \\
+% quorum        & 104,357 & 62,837 & 14,926 & 26,049 \\
+% quake         & 93,219  & 53,358 & 12,925 & 26,155 \\
+% quake2        & 50,164  & 29,520 & 7,084  & 25,942 \\
+% \end{tabular}
+
+% \bigskip
+
+% Rhodobacter:
+% \begin{tabular}{|c|c|c|c|c|}
+% corrector     & N25   & N50   & N90  & E       \\
+% identity      & 4767  & 2563  & 614  & 3993.29 \\
+% trimmer       & 13413 & 7881  & 2415 & 10833.2 \\
+% qual\_trimmer & 10926 & 5881  & 1731 & 7870.86 \\
+% quorum        & 38190 & 23829 & 7021 & 24082.7 \\
+% echo          & 12567 & 6957  & 1861 & 8996.44 \\
+% hitec         & 11292 & 6557  & 1795 & 9190.29 \\
+% quakedk       & 11241 & 6504  & 1809 & 9409.1  \\
+% coral         & 10801 & 6096  & 1610 & 8497.04 \\
+% \end{tabular}
 
 %
 %
-\tabledesc{Error left and introduced}
+\tabledesc{Errors in output including introduced errors}
 \label{table:left-introduced}
 
 The ``Bases trimmed'' is the percentage of bases in trimmed reads compared with bases in the original reads.
 All the bases in a discarded read count as bases trimmed off.
 The ``Errors not trimmed from reads'' is the percentage of errors in the trimmed reads compared with the errors in the original reads.
 The ``errors left in trimmed reads'' is the percentage of errors in the corrected reads compared with the errors in the trimmed reads.
-The ``Errors introduced'' is the false positive rate.
+The ``Errors introduced'' is the number of errors introduced divided by the number of errors in the original reads.
 These are counted in the previous column ``errors left in trimmed reads''.
-xFinally, the ``Errors in corrected trimmed reads'' is the percentage of errors in corrected reads compared with the errors in the original reads.
+Finally, the ``Errors in corrected trimmed reads'' is the percentage of errors in corrected reads compared with the errors in the original reads.
 If we name the four ``errors'' columns as $E1$, $E2$, $E3$, and $E4$, then $E1 * E2 = E4$.
 
 The two correctors that both trim and error correct what is left do the two steps of trimming and correcting concurrently.
 
 \bigskip
 
-\begin{tabular}{@{}lS[detect-weight,table-format=3.1]S[detect-weight,table-format=3.1]S[detect-weight,table-format=2.2]S[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]@{}}
+\begin{tabular}{@{}lS[detect-weight,table-format=2.1]S[detect-weight,table-format=3.1]S[detect-weight,table-format=2.2]S[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]@{}}
 \toprule
-          & {\% bases} & {\% errors not}      & {\% of errors left} & {\% errors}    & {\% errors in corrected} \\
+{}        & {\% bases} & {\% errors not}      & {\% of errors left} & {\% errors}    & {\% errors in corrected} \\
 Corrector & {trimmed}  & {trimmed from reads} & {in trimmed reads}  & {introduced}   & {trimmed reads}          \\
 \midrule
-{} & \multicolumn{5}{c}{Rhodobacter} \\
+{}        & \multicolumn{5}{c}{Rhodobacter}                                                                     \\
 \cmidrule{2-6} 
 trim20B   & 19.8       & 43.9                 & 100                 & 0.00           & 43.9                     \\
 trimQual5 & 36.0       & 11.2                 & 100                 & 0.00           & 11.2                     \\
 coral     & 0.00       & 100                  & 77.7                & 0.766          & 77.7                     \\
 echo      & 0.00       & 100                  & 65.1                & 2.11           & 65.1                     \\
 hitec     & 0.00       & 100                  & 61.1                & 10.4           & 61.1                     \\
-quake     & 30         & 81.5                 & 98.2                & 0.365          & 80.1                     \\ 
-quorum    & 31         & \winner{21.7}        & \winner{10.8}       & \winner{.0700} & \winner{2.33}            \\
+quake     & 30.6       & 81.5                 & 98.2                & 0.365          & 80.1                     \\ 
+quorum    & 31.0       & \winner{21.7}        & \winner{10.8}       & \winner{.0700} & \winner{2.33}            \\
 \cmidrule{2-6}
-{} & \multicolumn{5}{c}{Mouse} \\
+{}        & \multicolumn{5}{c}{Mouse}                                                                           \\
 \cmidrule{2-6}
-trim20B   & 19.8       & 29.0                 & 100                 & 0.00          & 29.0                     \\
-trimQual5 & 10.5       & 28.0                 & 100                 & 0.00          & 28.0                     \\
-coral     & 0.00       & 100                  & 69.0                & 12.5          & 69.0                     \\
-quake     & 15         & \winner{7.81}        & 54.0                & \winner{.148} & \winner{4.22}            \\
-quorum    & 6.5        & 29.4                 & \winner{34.7}       & .786          & 10.2                     \\
+trim20B   & 19.8       & 29.0                 & 100                 & 0.00           & 29.0                     \\
+trimQual5 & 10.5       & 28.0                 & 100                 & 0.00           & 28.0                     \\
+coral     & 0.00       & 100                  & 69.0                & 12.5           & 69.0                     \\
+quake     & 14.2       & \winner{10.4}        & 71.5                & \winner{.494}  & \winner{7.40}            \\
+quorum    & 6.75       & 29.4                 & \winner{34.7}       & .786           & 10.2                     \\
+\cmidrule{2-6}
+{}        & \multicolumn{5}{c}{Staphylococcus}                                                                  \\
+\cmidrule{2-6}
+trim20B   & 19.8       & 53.8                 & 100                 & 0.00           & 53.8                     \\
+trimQual5 & 1.30       & 91.7                 & 100                 & 0.00           & 91.7                     \\
+coral     & 0.00       & 100                  & 52.8                & 1.08           & 52.8                     \\
+echo      & 0.00       & 100                  & 38.6                & .628           & .386                     \\
+hitec     & 0.00       & 100                  & 21.3                & 1.57           & 21.3                     \\
+quake     & 42.0       & \winner{13 .7}       & \winner{4.98}       & \winner{.115}  & \winner{.682}            \\
+quorum    & 18.3       & 55.1                 & 7.38                & .271           & 4.07                     \\
 \bottomrule
 \end{tabular}
 
 %
 %
 \tabledesc{Chimeric reads}
-
 
 \label{table:chimeric}
 
@@ -563,16 +613,18 @@ The table shows the number of chimeric reads after error correction. ``None'' de
 
 \bigskip
 
-\begin{tabular}{@{}lS[detect-weight,table-format=4]S[detect-weight,table-format=6]@{}}
+\begin{tabular}{@{}lS[detect-weight,table-format=4]S[detect-weight,table-format=6]S[detect-weight,table-format=4]@{}}
 \toprule
-{Corrector} & {Rhodobacter} & {Mouse}        \\
-\midrule
-none        & 2086          & 296772         \\
-coral       & 2047          & 225052         \\
-echo        & 1809          &                \\
-hitec       & 6375          &                \\
-quake       & \winner{302}  & \winner{42195} \\
-quorum      & 490           & 93158          \\
+{Corrector} & {Rhodobacter} & {Mouse}        & {Staphylococcus} \\
+\midrule                                                   
+none        & 2086          & 296772         & 733              \\
+trim20B     & 1655          & 250382         & 597              \\
+trimQual5   & 649           & 148439         & 720              \\
+coral       & 2047          & 225052         & 1024             \\
+echo        & 1809          &                & 704              \\
+hitec       & 6375          &                & 1200             \\
+quake       & 1007          & \winner{63079} & 651              \\
+quorum      & \winner{490}  & 93158          & \winner{514}     \\
 \bottomrule
 \end{tabular}
 
@@ -585,22 +637,29 @@ The columns labeled ``Perfect'' show the sum of the lengths of the perfect reads
 A perfect read is a read (possibly trimmed) that aligns with no error on its full length to the finish sequence.
 The columns labeled ``\%'' show the number of bases in perfect corrected reads over the number of bases in corrected reads, shown as a percentage.
 
-%% TODO: number for coral worst than none seems bad. Check this number.
+Hitec and Echo did not run on the mouse data set within the 24 hour time frame.
+
+% Number for coral worse than none seems bad. Check this number. Justification to add: it collapses repeats, hence it creates gaps.
+
+% Check the number in this table: do not seem to match definition. Add numbers for the trimmers.
+% The number we care about is the percentage of perfect reads in the output reads (not amount of sequence).
 
 \bigskip
 
-\begin{tabular}{@{}lS[detect-weight,table-format=3.1]S[detect-weight,table-format=2.1]S[detect-weight,table-format=1.2]S[detect-weight,table-format=2.1]@{}}
+\begin{tabular}{@{}lS[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]S[detect-weight,table-format=1.2]S[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]S[detect-weight,table-format=2.1]@{}}
 \toprule
-Corrector & \multicolumn{2}{c}{Rhodobacter} & \multicolumn{2}{c}{Mouse} \\
-\cmidrule(r){2-3} \cmidrule(l){4-5}
-{}     & {Perfect (Mb)} & {\%}          & {Perfect (Gb)} & \%            \\
+Corrector & \multicolumn{2}{c}{Rhodobacter} & \multicolumn{2}{c}{Mouse} &\multicolumn{2}{c}{Staphylococcus}                      \\
+\cmidrule(r){2-3} \cmidrule(l){4-5} \cmidrule(l){6-7}
+{}        & {Reads (\%)}  & {Sequence (\%)} & {Reads (\%)}  & {Sequence (\%)} & {Reads (\%)}  & {Sequence (\%)} \\
 \midrule
-none   & 42             & 32.0          & 2.01           & 54.5          \\
-coral  & 118            & 85.6          & 3.37           & 89.8          \\
-echo   & 114            & 75.0          &                &               \\
-hitec  & 123            & 78.2          &                &               \\
-quake  & 98.2           & 76.4          & 3.45           & \winner{98.3} \\
-quorum & \winner{156}   & \winner{98.7} & \winner{3.62}  & 94.3          \\
+none      & 20.9          & 20.9            & 48.3          & 48.3            & 33.1          & 33.1            \\
+trim20B   & 44.4          & 35.6            & 79.4          & 63.6            & 46.3          & 37.2            \\
+trimQual5 & 76.2          & 51.2            & 78.0          & 71.9            & 35.3          & 35.1            \\
+coral     & 58.2          & 58.2            & 80.9          & 80.9            & 73.5          & 73.5            \\
+echo      & 56.3          & 56.3            &               &                 & 65.1          & 65.1            \\
+hitec     & 60.8          & 60.8            &               &                 & 77.9          & 77.9            \\
+quake     & 61.9          & 48.5            & 88.7          & 81.3            & 68.2          & 57.6            \\
+\quorum   & \winner{88.8} & \winner{77.1}   & \winner{90.9} & \winner{86.9}   & \winner{81.9} & \winner{78.4}   \\
 \bottomrule
 \end{tabular}
 

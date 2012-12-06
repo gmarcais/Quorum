@@ -1,5 +1,5 @@
 AC_PREREQ([2.63])
-AC_INIT([quorum], [0.1.6beta], [gmarcais@umd.edu])
+AC_INIT([quorum], [0.1.7], [gmarcais@umd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/error_correct_reads.hpp])
 AC_CONFIG_HEADERS([config.h])
@@ -27,10 +27,30 @@ AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
 JELLYFISH_VERSION=$(pkg-config --modversion jellyfish-1.1)
 AC_SUBST([JELLYFISH_VERSION])
-AC_ARG_VAR([JELLYFISH], [Jellyfish executable])
+AC_ARG_VAR([JELLYFISH], [Jellyfish executable absolute path (default to looking in PATH)])
 AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])
 
 AC_ARG_VAR([JF_LIB_PATH], [Append this path to LD_LIBRARY_PATH in quorum])
+
+# --enable-all-static
+AC_ARG_ENABLE([all-static],
+              [AC_HELP_STRING([--enable-all-static], [create statically linked executable])])
+STATIC_FLAGS=
+AS_IF([test "x$enable_all_static" != xno],
+      [AC_SUBST([STATIC_FLAGS], ["-static -static-libstdc++"])])
+
+# --enable-relative-paths
+AC_ARG_ENABLE([relative-paths],
+              [AC_HELP_STRING([--enable-relative-paths], [store relative paths in quorum Perl script])])
+AM_CONDITIONAL([RELATIVE_PATHS], [test x$enable_relative_paths = xyes])
+
+# --with-relative-jf-path
+AC_ARG_WITH([relative-jf-path],
+            [AC_HELP_STRING([--with-relative-jf-path], [relative path from quorum to jellyfish (use an absolute path if not given. default to "." if given with no argument)])],
+            [case "$withval" in (yes) with_relative_jf_path="jellyfish" ;; (no) with_relative_jf_path= ;; (*) with_relative_jf_path=$withval/jellyfish ;; esac],
+            [with_relative_jf_path= ])
+AC_SUBST([RELATIVE_JF_PATH], $with_relative_jf_path)
+AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [test x$with_relative_jf_path != x])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

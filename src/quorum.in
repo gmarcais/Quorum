@@ -3,6 +3,9 @@
 use strict;
 use warnings;
 use Getopt::Long;
+use File::Basename;
+
+my $dir = dirname(__FILE__);
 
 # Compile time settings
 my $JF              = "@JELLYFISH@";

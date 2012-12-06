@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir) $(JELLYFISH_CFLAGS)
-AM_CXXFLAGS = -Wall -Werror -g -O2 -std=c++0x
-AM_LDFLAGS = $(JELLYFISH_LIBS)
+AM_CXXFLAGS = -Wall -Werror -g -O2 -std=c++0x $(STATIC_FLAGS)
+LDADD = $(JELLYFISH_LIBS)
 
 # Yaggo automatic rules with silencing
 V_YAGGO = $(V_YAGGO_$(V))
@@ -39,8 +39,21 @@ quorum_combine_jf_dbs_SOURCES += src/yaggo.hpp
 bin_SCRIPTS = quorum 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = src/quorum.in
-do_subst = sed -e 's|[@]JELLYFISH[@]|$(JELLYFISH)|g' \
-               -e 's|[@]bindir[@]|$(bindir)|g' \
+
+if RELATIVE_PATHS
+quorum_bindir=$$dir
+else
+quorum_bindir=$(bindir)
+endif
+
+if HAVE_RELATIVE_JF_PATH
+quorum_jellyfish=$$dir/$(RELATIVE_JF_PATH)
+else
+quorum_jellyfish=$(JELLYFISH)
+endif
+
+do_subst = sed -e 's|[@]JELLYFISH[@]|$(quorum_jellyfish)|g' \
+               -e 's|[@]bindir[@]|$(quorum_bindir)|g' \
 	       -e 's|[@]JF_LIB_PATH[@]|$(JF_LIB_PATH)|g' \
 	       -e 's|[@]PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
 	       -e 's|[@]JELLYFISH_VERSION[@]|$(JELLYFISH_VERSION)|g'

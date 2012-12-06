@@ -1,5 +1,5 @@
 AC_PREREQ([2.63])
-AC_INIT([quorum], [0.1.6beta], [gmarcais@umd.edu])
+AC_INIT([quorum], [0.1.7], [gmarcais@umd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/error_correct_reads.hpp])
 AC_CONFIG_HEADERS([config.h])
@@ -38,13 +38,11 @@ AC_ARG_ENABLE([all-static],
 STATIC_FLAGS=
 AS_IF([test "x$enable_all_static" != xno],
       [AC_SUBST([STATIC_FLAGS], ["-static -static-libstdc++"])])
-AC_MSG_NOTICE([enable_all_static set to $enable_all_static])
 
 # --enable-relative-paths
 AC_ARG_ENABLE([relative-paths],
               [AC_HELP_STRING([--enable-relative-paths], [store relative paths in quorum Perl script])])
 AM_CONDITIONAL([RELATIVE_PATHS], [test x$enable_relative_paths = xyes])
-AC_MSG_NOTICE([enable_relative_paths set to $enable_relative_paths])
 
 # --with-relative-jf-path
 AC_ARG_WITH([relative-jf-path],
@@ -53,7 +51,6 @@ AC_ARG_WITH([relative-jf-path],
             [with_relative_jf_path= ])
 AC_SUBST([RELATIVE_JF_PATH], $with_relative_jf_path)
 AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [test x$with_relative_jf_path != x])
-AC_MSG_NOTICE([with_relative_jf_path set to $with_relative_jf_path])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

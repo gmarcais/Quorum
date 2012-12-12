@@ -36,7 +36,7 @@ AC_ARG_VAR([JF_LIB_PATH], [Append this path to LD_LIBRARY_PATH in quorum])
 AC_ARG_ENABLE([all-static],
               [AC_HELP_STRING([--enable-all-static], [create statically linked executable])])
 STATIC_FLAGS=
-AS_IF([test "x$enable_all_static" != xno],
+AS_IF([test "x$enable_all_static" = xyes],
       [AC_SUBST([STATIC_FLAGS], ["-static -static-libstdc++"])])
 
 # --enable-relative-paths

@@ -1,7 +1,8 @@
 ACLOCAL_AMFLAGS=-I m4
 
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir) $(JELLYFISH_CFLAGS)
-AM_CXXFLAGS = -Wall -Werror -g -O2 -std=c++0x $(STATIC_FLAGS)
+AM_CXXFLAGS = -Wall -Werror -g -O2 -std=c++0x
+AM_LDFLAGS = $(STATIC_FLAGS)
 LDADD = $(JELLYFISH_LIBS)
 
 # Yaggo automatic rules with silencing

@@ -37,7 +37,7 @@ AC_ARG_ENABLE([all-static],
               [AC_HELP_STRING([--enable-all-static], [create statically linked executable])])
 STATIC_FLAGS=
 AS_IF([test "x$enable_all_static" = xyes],
-      [AC_SUBST([STATIC_FLAGS], ["-static -static-libstdc++"])])
+      [AC_SUBST([STATIC_FLAGS], [-all-static])])
 
 # --enable-relative-paths
 AC_ARG_ENABLE([relative-paths],

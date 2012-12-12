@@ -1,6 +1,6 @@
 /* SuperRead pipeline
  * Copyright (C) 2012  Genome group at University of Maryland.
- * 
+ *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -55,7 +55,7 @@ std::ostream &operator<<(std::ostream &os, const backward_counter &c) {
 // the highest possible level. The best level is recorded. The
 // get_alternatives version gets all the possible continuation at the
 // currently recorded level.
-class alternative_finder { 
+class alternative_finder {
 public:
   virtual ~alternative_finder() { }
 
@@ -91,7 +91,7 @@ public:
     return get_best_alternatives__(m, counts, ucode, level);
   }
 
-private:  
+private:
   template<typename dir_mer>
   int get_best_alternatives__(const dir_mer &mer, uint64_t counts[], uint64_t &ucode, int& level) {
     hashes_t::const_iterator chash = hashes_->begin();
@@ -195,7 +195,7 @@ private:
 class contaminant_check {
 public:
   virtual ~contaminant_check() { }
-  
+
   virtual bool is_contaminant(uint64_t m) = 0;
   virtual void debug(const char*msg) = 0;
 };
@@ -280,7 +280,7 @@ public:
     std::auto_ptr<std::ostream> details(open_file(_prefix, ".log", "/dev/fd/2"));
     std::auto_ptr<std::ostream> output(open_file(_prefix, ".fa", "/dev/fd/1"));
     // Multiplexers, same thing
-    std::auto_ptr<jflib::o_multiplexer> 
+    std::auto_ptr<jflib::o_multiplexer>
       log_m(new jflib::o_multiplexer(details.get(), 3 * nb_threads, 1024));
     std::auto_ptr<jflib::o_multiplexer>
       output_m(new jflib::o_multiplexer(output.get(), 3 * nb_threads, 1024));
@@ -289,7 +289,7 @@ public:
 
     exec_join(nb_threads);
   }
-  
+
   virtual void start(int id) {
     instance_t(this, id).start();
   }
@@ -352,7 +352,7 @@ private:
   static const char* error_contaminant;
   static const char* error_no_starting_mer;
   static const char* error_homopolymer;
-  
+
 public:
   error_correct_instance(ec_t *ec, int id) :
     _ec(ec), _id(id), _buff_size(0), _buffer(0) { }
@@ -360,7 +360,7 @@ public:
   void start() {
     jellyfish::parse_read::thread parser = _ec->parser()->new_thread();
     _af = _ec->new_af();
-    
+
     const jellyfish::read_parser::read_t *read;
 
     jflib::omstream output(_ec->output());
@@ -372,14 +372,14 @@ public:
       parity = !parity;
       nb_reads++;
       insure_length_buffer(read->seq_e - read->seq_s);
-      
+
       const char* error = "";
       kmer_t      mer;
       const char *input = read->seq_s + _ec->skip();
       char       *out   = _buffer + _ec->skip();
       //Prime system. Find and write starting k-mer
       if(!find_starting_mer(mer, input, read->seq_e, out, &error)) {
-        details << "Skipped " << substr(read->header, read->hlen) 
+        details << "Skipped " << substr(read->header, read->hlen)
                 << ": " << error << "\n";
         details << jflib::endr;
         output << jflib::endr;
@@ -387,14 +387,14 @@ public:
       }
       // Extend forward and backward
       forward_log fwd_log(_ec->window(), _ec->error());
-      char *end_out = 
+      char *end_out =
         extend(forward_mer(mer), forward_ptr<const char>(input),
                forward_counter(input - read->seq_s),
                forward_ptr<const char>(read->seq_e),
                forward_ptr<char>(out), fwd_log,
                &error);
       if(!end_out) {
-        details << "Skipped " << substr(read->header, read->hlen) 
+        details << "Skipped " << substr(read->header, read->hlen)
                 << ": " << error << "\n";
         details << jflib::endr;
         output << jflib::endr;
@@ -405,14 +405,14 @@ public:
       assert(input - read->seq_s == out - _buffer);
       backward_log bwd_log(_ec->window(), _ec->error());
       char *start_out =
-        extend(backward_mer(mer), 
+        extend(backward_mer(mer),
                backward_ptr<const char>(input - kmer_t::k() - 1),
                backward_counter(input - kmer_t::k() - read->seq_s - 1),
                backward_ptr<const char>(read->seq_s - 1),
                backward_ptr<char>(out - kmer_t::k() - 1), bwd_log,
                &error);
       if(!start_out) {
-        details << "Skipped " << substr(read->header, read->hlen) 
+        details << "Skipped " << substr(read->header, read->hlen)
                 << ": " << error << "\n";
         details << jflib::endr;
         output << jflib::endr;
@@ -435,7 +435,7 @@ public:
       assert(end_out >= _buffer);
       assert(_buffer + _buff_size >= end_out);
 
-      output << ">" << substr(read->header, read->hlen) 
+      output << ">" << substr(read->header, read->hlen)
              << " " << fwd_log << " " << bwd_log << "\n"
              << substr(start_out, end_out) << "\n";
       if(parity)
@@ -452,7 +452,7 @@ private:
   // out point to the next character to be written.
   template<typename dir_mer, typename in_dir_ptr, typename out_dir_ptr,
            typename counter, typename elog>
-  char * extend(dir_mer mer, in_dir_ptr input, 
+  char * extend(dir_mer mer, in_dir_ptr input,
                 counter pos, in_dir_ptr end,
                 out_dir_ptr out, elog &log, const char** error) {
     counter cpos = pos;
@@ -562,7 +562,7 @@ private:
         log.truncation(cpos);
         goto done;
       }
-       
+
       mer.replace(0, check_code);
       if(_ec->contaminant()->is_contaminant(mer.canonical())) {
         if(_ec->trim_contaminant()) {
@@ -578,7 +578,7 @@ private:
         if(log.substitution(cpos, base, mer.base(0)))
           goto truncate;
     }
-    
+
   done:
     return out.ptr();
 
@@ -651,7 +651,7 @@ private:
 
         if(!contaminated) {
           hval_t val = _af->get_val(mer.canonical());
-          
+
           found = (int)val >= _ec->anchor() ? found + 1 : 0;
           if(found >= _ec->good())
             return true;
@@ -689,11 +689,11 @@ int main(int argc, char *argv[])
     SquareBinaryMatrix hash, inv_hash;
     dbf.random().will_need().load();
     hashes.push_back(raw_inv_hash_query_t::init(dbf, hash, inv_hash));
-    
+
     if(key_len == 0)
       key_len = hashes.front()->get_key_len();
     else if(key_len != hashes.back()->get_key_len())
-      die << "Different key length (" << hashes.back()->get_key_len() 
+      die << "Different key length (" << hashes.back()->get_key_len()
           << " != " << key_len
           << ") for hash '" << *it << "'";
   }
@@ -717,7 +717,7 @@ int main(int argc, char *argv[])
   error_correct_instance::ec_t correct(&parser, &hashes);
   correct.skip(args.skip_arg).good(args.good_arg)
     .anchor(args.anchor_count_arg)
-    .prefix(args.output_given ? args.output_arg : "")
+    .prefix(args.output_given ? (std::string)args.output_arg : "")
     .min_count(args.min_count_arg)
     .window(args.window_given ? args.window_arg : kmer_t::k())
     .error(args.error_given ? args.error_arg : kmer_t::k() / 2)

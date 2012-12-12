@@ -1,4 +1,4 @@
-AC_INIT([quorum], [0.2.0], [gmarcais@umd.edu])
+AC_INIT([quorum], [0.2.1], [gmarcais@umd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/error_correct_reads.hpp])
 AC_CONFIG_HEADERS([config.h])
@@ -6,7 +6,8 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 
-
+# Compile using libtool to get the path to jellyfish added to exec
+LT_INIT
 
 # Checks for programs.
 AC_PROG_CXX
@@ -36,7 +37,7 @@ AC_ARG_ENABLE([all-static],
               [AC_HELP_STRING([--enable-all-static], [create statically linked executable])])
 STATIC_FLAGS=
 AS_IF([test "x$enable_all_static" = xyes],
-      [AC_SUBST([STATIC_FLAGS], ["-static -static-libstdc++"])])
+      [AC_SUBST([STATIC_FLAGS], [-all-static])])
 
 # --enable-relative-paths
 AC_ARG_ENABLE([relative-paths],
@@ -50,6 +51,10 @@ AC_ARG_WITH([relative-jf-path],
             [with_relative_jf_path= ])
 AC_SUBST([RELATIVE_JF_PATH], $with_relative_jf_path)
 AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [test x$with_relative_jf_path != x])
+
+AC_CHECK_TYPE([__int128],
+              [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

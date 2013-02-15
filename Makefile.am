@@ -39,8 +39,19 @@ quorum_error_correct_reads_SOURCES += src/kmer.hpp			\
 
 quorum_combine_jf_dbs_SOURCES = src/combine_jf_dbs.cc
 
+###############################
+# Adapter database generation #
+###############################
+dist_data_DATA = data/adapter_0
+CLEANFILES = data/adapter_0
+SUFFIXES = _0 .fa
+
+.fa_0:
+	$(AM_V_GEN)mkdir -p $(@D); jellyfish count -m 24 -s 5k -C -t 10 -r -o $$(dirname $@)/$$(basename $@ _0) $<
+
+
 bin_SCRIPTS = quorum 
-CLEANFILES = $(bin_SCRIPTS)
+CLEANFILES += $(bin_SCRIPTS)
 EXTRA_DIST = src/quorum.in
 
 if RELATIVE_PATHS

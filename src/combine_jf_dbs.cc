@@ -16,6 +16,13 @@ int main(int argc, char *argv[])
   if(args.verbose_flag)
     std::cerr << "Merging " << N << " databases\n";
 
+  std::ofstream coverage_info;
+  if(args.coverage_given) {
+    coverage_info.open(args.coverage_arg);
+    if(!coverage_info.good())
+      die << "Failed to open file '" << args.coverage_arg << "'";
+  }
+
   // Get information from the first database. Other database must
   // match.
   auto db_it = args.db_jf_arg.rbegin();
@@ -27,13 +34,13 @@ int main(int argc, char *argv[])
     memcpy(type, dbf.base(), sizeof(type));
     if(strncmp(type, jellyfish::raw_hash::file_type, sizeof(type)))
       die << "Invalid file type '" << err::substr(type, sizeof(type)) << "'.";
-    
+
     raw_inv_hash_query_t hash(dbf);
     klen        = hash.get_key_len();
     if(args.verbose_flag)
-      std::cerr << "Key len: " << klen 
+      std::cerr << "Key len: " << klen
                 << " size: " << hash.get_size() << "\n";
-    ary = new inv_hash_storage_t(hash.get_size(), klen, 
+    ary = new inv_hash_storage_t(hash.get_size(), klen,
                                  hash.get_val_len() + ceilLog2(N),
                                  hash.get_max_reprobe(),
                                  jellyfish::quadratic_reprobes);
@@ -41,13 +48,22 @@ int main(int argc, char *argv[])
     ary->set_matrix(hash_matrix);
     if(args.verbose_flag)
       std::cerr << "Loading database: " << *db_it << " level " << 0 << "\n";
+    uint64_t all_mers = 0, distinct_mers = 0;
     auto it = hash.get_iterator();
     while(it.next()) {
       if(it.get_val() >= args.min_count_arg) {
+        all_mers += it.get_val();
+        ++distinct_mers;
         if(!ary->map(it.get_key(), it.get_val() * N))
           die << "Output hash is full";
       }
     }
+    if(args.verbose_flag)
+      std::cerr << "coverage " << ((double)all_mers / (double)distinct_mers) << " "
+                << all_mers << " " << distinct_mers << "\n";
+    if(args.coverage_given)
+      coverage_info << ((double)all_mers / (double)distinct_mers) << " "
+                    << all_mers << " " << distinct_mers << "\n";
   }
 
   ++db_it;
@@ -64,16 +80,28 @@ int main(int argc, char *argv[])
             << " expected " << klen;
       if(args.verbose_flag)
         std::cerr << "Loading database: " << *db_it << " level " << nb << "\n";
+      uint64_t all_mers = 0, distinct_mers = 0;
       auto it = hash.get_iterator();
-      while(it.next())
-        if(it.get_val() >= args.min_count_arg)
+      while(it.next()) {
+        if(it.get_val() >= args.min_count_arg) {
+          all_mers += it.get_val();
+          ++distinct_mers;
           if(!ary->map(it.get_key(), it.get_val() * N + nb))
             die << "Output hash is full";
+        }
+      }
+      if(args.verbose_flag)
+        std::cerr << "coverage " << ((double)all_mers / (double)distinct_mers) << " "
+                  << all_mers << " " << distinct_mers << "\n";
+      if(args.coverage_given)
+        coverage_info << ((double)all_mers / (double)distinct_mers) << " "
+                      << all_mers << " " << distinct_mers << "\n";
     } else {
       die << "Invalid file type '" << err::substr(type, sizeof(type)) << "'.";
-    }    
+    }
   }
-  
+
+  coverage_info.close();
   if(args.verbose_flag)
     std::cerr << "Writing result to '" << args.output_arg << "'\n";
   raw_inv_hash_dumper_t dumper((uint_t)4, args.output_arg, 10000000, ary);
@@ -81,3 +109,4 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+

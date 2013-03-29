@@ -457,7 +457,12 @@ private:
                 out_dir_ptr out, elog &log, const char** error) {
     counter cpos = pos;
     //    int pocc = _af->get_val(mer.canonical()); // # of occurences of previous mer
-
+    uint32_t prev_count=_af->get_val(mer.canonical());
+    bool debug=false;
+if(debug)  fprintf(stderr,"Start correction at %c\n",(char)(*input));
+   for(int i=23;i>=0;i--)
+if(debug)  	fprintf(stderr,"%c",mer.base(i));
+if(debug)     fprintf(stderr,"\n");
     for( ; input < end; ++input) {
       char     base        = *input;
 
@@ -488,12 +493,17 @@ private:
 
       count = _af->get_best_alternatives(mer, counts, ucode, level);
 
+      // No coninuation whatsoever, trim.
       if(count == 0) {
         log.truncation(cpos);
         goto done;
       }
+
       if(count == 1) { // One continuation. Is it an error?
+        prev_count = counts[ucode]>(uint64_t)_ec->min_count() ? counts[ucode] : 2000000000;
+        //prev_count = counts[ucode];
         if(ucode != ori_code) {
+if(debug)          fprintf(stderr,"Unique sub from %ld to %ld count= %d\n",ori_code,ucode,prev_count);
           mer.replace(0, ucode);
           if(_ec->contaminant()->is_contaminant(mer.canonical())) {
             if(_ec->trim_contaminant()) {
@@ -505,78 +515,143 @@ private:
           }
           if(log.substitution(cpos, base, mer.base(0)))
             goto truncate;
-        }
+        }else{
+if(debug)  	fprintf(stderr,"Unique %ld count= %d\n",ori_code,prev_count);
+	}
         *out++ = mer.base(0);
         continue;
       }
+if(debug)       fprintf(stderr,"Multiple counts %ld %ld %ld %ld ori_code= %ld level= %d\n",counts[0],counts[1],counts[2],counts[3],ori_code,level);
+      // We get here if there is more than one alternative base to try
+      // at some level. Note that if the current base is low quality
+      // and all alternatives are higher quality, then the current
+      // base will have a count of zero. If the current base is non N
+      // and has a high count or previous count is low enough that
+      // continuity does not apply, output current base. But if the current
+      // base has count of zero, all alternatives are low quality and prev_count is low
+      // then trim  
+      if(ori_code < 4){ //if the current base is valid base (non N)
+        if(counts[ori_code] >= 4*(uint64_t)_ec->min_count()) {//high counts are unlikely to be errors
+          *out++ = mer.base(0);
+          continue;
+        }else if(level == 0  && counts[ori_code] <(uint64_t)_ec->min_count()){//definitely an error and allalternatives are low quality
+       		log.truncation(cpos);
+            	goto done;
+          	}
+      }else if(level == 0){//if all alternatives are low quality
+            log.truncation(cpos);
+            goto done;
+            }
 
-      // Check that there is at least one more base in the
-      // sequence. If not, leave it alone
-      if(input >= end) {
-        log.truncation(cpos);
-        goto done;
-      }
-
-      // Select the replacement base to try. Find the one with highest
-      // coverage and check that it is at least 3 times as big as
-      // current base count and that it can continue one more base. In
-      // that case, make the switch.
+if(debug)        fprintf(stderr,"Trying to correct\n");
+      // We get here if there are multiple possible substitutions, the 
+      // original count is low enough and the previous count is high (good) or
+      // the current base is an N 
+      // We find out all alternative bases
+      // that have a continuation at the same or better level.  Then
+      // if the current base is N, pick the one with the highest
+      // count that is the most similar to the prev_count, 
+      // otherwise pick the one with the most similar count.
+      // If no alternative continues, leave the base alone.
       uint64_t check_code = ori_code;
-      uint64_t ori_count  = ori_code < 4 ? counts[ori_code] : 0;
-      if(ori_count < (uint64_t)_ec->min_count())
-        ori_count = 0;
+      bool     success    = false;
+      uint32_t cont_counts[4];  //here we record the counts for the continuations
+      bool continue_with_correct_base[4];
+      uint32_t read_nbase_code = 5;
+      bool candidate_continuations[4];
+      uint32_t ncandidate_continuations = 0;
 
-      uint64_t max_count = std::numeric_limits<uint64_t>::max();
-      if(ori_count <= (uint64_t)_ec->anchor())
-        max_count  = 3 * ori_count;
+      //uint32_t preferred_nbase = 5;
+      //here we determine what the next base in the read is
+      if(input+1<end)
+	  read_nbase_code = kmer_t::codes[(int)*(input + 1)];
 
-      for(int i = 0; i < 4; i++) {
+      for(uint32_t i = 0; i < 4; i++) {
+        cont_counts[i] = 0;
+	continue_with_correct_base[i] = false;
         if(counts[i] < (uint64_t)_ec->min_count())
+	  continue;
+	check_code = i;
+	// Check that it continues at least one more base with that quality
+	dir_mer    nmer   = mer;
+	nmer.replace(0, check_code);
+	// Does not matter what we shift, check all alternative anyway.
+	nmer.shift((uint64_t)0);
+
+	uint64_t   ncounts[4];
+	int        ncount;
+	uint64_t   nucode = 0;
+	int        nlevel;
+	ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
+	if(ncount > 0 && nlevel >=level) {
+          if(read_nbase_code<4)
+	    if(ncounts[read_nbase_code]>0)
+	      continue_with_correct_base[i]=true;
+	  success        = true;
+	  cont_counts[i] = counts[i];
+	}
+      }
+
+      if(success) { // We found at least one alternative base that continues
+	//now we look for all alernatives that have a count closest to the previous count
+        //first we determine the count that is the closest to the current count
+        check_code = 4;
+        int  min_diff = std::numeric_limits<int>::max();
+	for(uint32_t  i = 0; i < 4; i++) {
+          candidate_continuations[i]=false;
+	  if(cont_counts[i]==0)
             continue;
-        if(counts[i] > max_count && counts[i]-ori_count<200) {
-          check_code = i;
-          max_count  = counts[i];
-        }
-      }
-      if(check_code == ori_code) {
-        // Don't need to check that check_code == 5 as an alternative
-        // would have been found by now.
-        *out++ = base;
-        continue;
-      }
+	  int diff = abs(cont_counts[i] - prev_count);
+          if(diff < min_diff)
+	    min_diff =diff;
+	}
 
-      // Check that it continues at least one more base with that quality
-      dir_mer    nmer   = mer;
-      //      in_dir_ptr ninput = input;
-      nmer.replace(0, check_code);
-      // char       nbase  = *ninput++;
-      // Does not matter what we shift, check all alternative anyway.
-      nmer.shift((uint64_t)0);
+        //we now know the count that is the closest, now we determine how many alternatives have this count
+        for(uint32_t  i = 0; i < 4; i++)
+	  if(abs(cont_counts[i] - prev_count)==min_diff){
+	    candidate_continuations[i]=true;
+	    ncandidate_continuations++;
+	    check_code=i;
+	  }
 
-      uint64_t   ncounts[4];
-      int        ncount;
-      uint64_t   nucode = 0;
-      int        nlevel;
-      ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
-      if(ncount == 0 || nlevel < level) { // It does not continue -> trim
-        log.truncation(cpos);
-        goto done;
+        //do we have more than one good candidate? if we do then check which one continues with the correct base
+	if(ncandidate_continuations>1 && read_nbase_code < 4)
+	  for(uint32_t  i = 0; i < 4; i++){
+	    if(candidate_continuations[i]==true){
+	      if(continue_with_correct_base[i]==false)
+		ncandidate_continuations--;
+	      else
+		check_code=i;
+	    }
+	  }
+
+        //fail if we still have more than one candidate
+	if(ncandidate_continuations!=1)
+	  check_code=5;
+
+if(debug)  	fprintf(stderr,"prev_count= %d cont_counts= %d %d %d %d check_code=%ld ori_code=%ld ori_count=%ld read_nbase_code=%u ncandidate_continuations=%d\n",prev_count,cont_counts[0],cont_counts[1],cont_counts[2],cont_counts[3],check_code,ori_code,counts[ori_code], read_nbase_code,ncandidate_continuations);
+	
+        if(check_code < 4){
+          mer.replace(0, check_code);
+	  if(_ec->contaminant()->is_contaminant(mer.canonical())) {
+	    if(_ec->trim_contaminant()) {
+	      log.truncation(cpos);
+	      goto done;
+	    }
+	    *error = error_contaminant;
+	    return 0;
+	  }
+	  if(log.substitution(cpos, base, mer.base(0)))
+	    goto truncate;
+	}
+      }else{
+if(debug)  	fprintf(stderr,"uanble to find continuation, no switch\n");
+	}	
+      if(ori_code>=4 && check_code>=4){// if invalid base and no good sub found
+	log.truncation(cpos);
+	goto done;
       }
-
-      mer.replace(0, check_code);
-      if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-        if(_ec->trim_contaminant()) {
-          log.truncation(cpos);
-          goto done;
-        }
-        *error = error_contaminant;
-        return 0;
-      }
-
       *out++ = mer.base(0);
-      if(check_code != ori_code)
-        if(log.substitution(cpos, base, mer.base(0)))
-          goto truncate;
     }
 
   done:
@@ -590,7 +665,7 @@ private:
   }
 
   char* homo_trim(const char* start, char* out_start, char* out_end,
-                  forward_log& fwd_log, backward_log& bwd_log, const char** error) {
+		  forward_log& fwd_log, backward_log& bwd_log, const char** error) {
     int   max_homo_score = std::numeric_limits<int>::min();
     char* max_pos        = 0;
     int   homo_score     = 0;
@@ -602,8 +677,8 @@ private:
       homo_score += ((pbase == cbase) << 1) - 1; // Add 1 if same as last, -1 if not
       pbase       = cbase;
       if(homo_score > max_homo_score) {
-        max_homo_score = homo_score;
-        max_pos        = ptr;
+	max_homo_score = homo_score;
+	max_pos        = ptr;
       }
     }
 
@@ -627,40 +702,40 @@ private:
       _buffer = (char *)realloc(_buffer, _buff_size);
 
       if(!_buffer)
-        eraise(std::runtime_error)
-          << "Buffer allocation failed, size " << _buffer << err::no;
+	eraise(std::runtime_error)
+	  << "Buffer allocation failed, size " << _buffer << err::no;
     }
   }
 
   bool find_starting_mer(kmer_t &mer, const char * &input, const char *end, char * &out,
-                         const char** error) {
+			 const char** error) {
     while(input < end) {
       for(int i = 0; input < end && i < _ec->mer_len(); ++i) {
-        char base = *input++;
-        *out++ = base;
-        if(!mer.shift_left(base))
-          i = -1;        // If an N, skip to next k-mer
+	char base = *input++;
+	*out++ = base;
+	if(!mer.shift_left(base))
+	  i = -1;        // If an N, skip to next k-mer
       }
       int found = 0;
       while(input < end) {
-        bool contaminated = _ec->contaminant()->is_contaminant(mer.canonical());
-        if(contaminated && !_ec->trim_contaminant()) {
-          *error = error_contaminant;
-          return false;
-        }
+	bool contaminated = _ec->contaminant()->is_contaminant(mer.canonical());
+	if(contaminated && !_ec->trim_contaminant()) {
+	  *error = error_contaminant;
+	  return false;
+	}
 
-        if(!contaminated) {
-          hval_t val = _af->get_val(mer.canonical());
+	if(!contaminated) {
+	  hval_t val = _af->get_val(mer.canonical());
 
-          found = (int)val >= _ec->anchor() ? found + 1 : 0;
-          if(found >= _ec->good())
-            return true;
-        }
+	  found = (int)val >= _ec->anchor() ? found + 1 : 0;
+	  if(found >= _ec->good())
+	    return true;
+	}
 
-        char base = *input++;
-        *out++ = base;
-        if(!mer.shift_left(base))
-          break;
+	char base = *input++;
+	*out++ = base;
+	if(!mer.shift_left(base))
+	  break;
       }
     }
 
@@ -694,8 +769,8 @@ int main(int argc, char *argv[])
       key_len = hashes.front()->get_key_len();
     else if(key_len != hashes.back()->get_key_len())
       die << "Different key length (" << hashes.back()->get_key_len()
-          << " != " << key_len
-          << ") for hash '" << *it << "'";
+	  << " != " << key_len
+	  << ") for hash '" << *it << "'";
   }
 
   // Open contaminant database
@@ -706,7 +781,7 @@ int main(int argc, char *argv[])
     inv_hash_storage_t ary = *raw_inv_hash_query_t(dbf).get_ary();
     if(ary.get_key_len() != key_len)
       die << "Contaminant hash must have same key length as other hashes ("
-          << ary.get_key_len() << " != " << key_len << ")";
+	  << ary.get_key_len() << " != " << key_len << ")";
     contaminant = new contaminant_database(ary);
   } else {
     contaminant = new contaminant_no_database();

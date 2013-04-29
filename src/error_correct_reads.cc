@@ -19,6 +19,7 @@
 #include <vector>
 #include <memory>
 #include <limits>
+#include <cmath>
 
 #ifndef typeof
 #define typeof __typeof__
@@ -35,6 +36,8 @@
 #include <divisor64.hpp>
 #include <src/error_correct_reads_cmdline.hpp>
 
+
+const double error_rate = 0.01;
 typedef uint64_t hkey_t;
 typedef uint64_t hval_t;
 //typedef jellyfish::invertible_hash::array<uint64_t,atomic::gcc,allocators::mmap> inv_hash_storage_t;
@@ -230,6 +233,7 @@ class error_correct_t : public thread_exec {
   int                    _anchor;
   std::string            _prefix;
   int                    _min_count;
+  int			 _cutoff;
   int                    _window;
   int                    _error;
   bool                   _gzip;
@@ -243,7 +247,7 @@ public:
   error_correct_t(jellyfish::parse_read* parser, hashes_t *hashes) :
     _parser(parser), _hashes(hashes),
     _mer_len((*_hashes->begin())->get_key_len() / 2),
-    _skip(0), _good(1), _min_count(1), _window(0), _error(0), _gzip(false),
+    _skip(0), _good(1), _min_count(1), _cutoff(4), _window(0), _error(0), _gzip(false),
     _combined(0), _contaminant(0), _trim_contaminant(false),
     _homo_trim(std::numeric_limits<int>::min()) { }
 
@@ -301,6 +305,7 @@ public:
   error_correct_t & prefix(const std::string s) { _prefix = s; return *this; }
   error_correct_t & mer_len(int l) { _mer_len = l; return *this; }
   error_correct_t & min_count(int m) { _min_count = m; return *this; }
+  error_correct_t & cutoff(int p) { _cutoff = p; return *this; }
   //  error_correct_t & advance(int a) { _advance = a; return *this; }
   error_correct_t & window(int w) { _window = w; return *this; }
   error_correct_t & error(int e) { _error = e; return *this; }
@@ -317,6 +322,7 @@ public:
   const std::string & prefix() const { return _prefix; }
   int mer_len() const { return _mer_len; }
   int min_count() const { return _min_count; }
+  int cutoff() const { return _cutoff; }
   //  int advance() const { return _advance; }
   int window() const { return _window ? _window : _mer_len; }
   int error() const { return _error ? _error : _mer_len / 2; }
@@ -459,10 +465,10 @@ private:
     //    int pocc = _af->get_val(mer.canonical()); // # of occurences of previous mer
     uint32_t prev_count=_af->get_val(mer.canonical());
     bool debug=false;
-if(debug)  fprintf(stderr,"Start correction at %c\n",(char)(*input));
-   for(int i=23;i>=0;i--)
-if(debug)  	fprintf(stderr,"%c",mer.base(i));
-if(debug)     fprintf(stderr,"\n");
+    if(debug)  fprintf(stderr,"Start correction at %c\n",(char)(*input));
+    for(int i=23;i>=0;i--)
+      if(debug)  	fprintf(stderr,"%c",mer.base(i));
+    if(debug)     fprintf(stderr,"\n");
     for( ; input < end; ++input) {
       char     base        = *input;
 
@@ -500,10 +506,9 @@ if(debug)     fprintf(stderr,"\n");
       }
 
       if(count == 1) { // One continuation. Is it an error?
-        prev_count = counts[ucode]>(uint64_t)_ec->min_count() ? counts[ucode] : 2000000000;
-        //prev_count = counts[ucode];
+        prev_count = counts[ucode];
         if(ucode != ori_code) {
-if(debug)          fprintf(stderr,"Unique sub from %ld to %ld count= %d\n",ori_code,ucode,prev_count);
+	  if(debug)          fprintf(stderr,"Unique sub from %ld to %ld count= %d\n",ori_code,ucode,prev_count);
           mer.replace(0, ucode);
           if(_ec->contaminant()->is_contaminant(mer.canonical())) {
             if(_ec->trim_contaminant()) {
@@ -516,12 +521,12 @@ if(debug)          fprintf(stderr,"Unique sub from %ld to %ld count= %d\n",ori_c
           if(log.substitution(cpos, base, mer.base(0)))
             goto truncate;
         }else{
-if(debug)  	fprintf(stderr,"Unique %ld count= %d\n",ori_code,prev_count);
+	  if(debug)  	fprintf(stderr,"Unique %ld count= %d\n",ori_code,prev_count);
 	}
         *out++ = mer.base(0);
         continue;
       }
-if(debug)       fprintf(stderr,"Multiple counts %ld %ld %ld %ld ori_code= %ld level= %d\n",counts[0],counts[1],counts[2],counts[3],ori_code,level);
+      if(debug)       fprintf(stderr,"Multiple counts %ld %ld %ld %ld ori_code= %ld level= %d\n",counts[0],counts[1],counts[2],counts[3],ori_code,level);
       // We get here if there is more than one alternative base to try
       // at some level. Note that if the current base is low quality
       // and all alternatives are higher quality, then the current
@@ -531,19 +536,30 @@ if(debug)       fprintf(stderr,"Multiple counts %ld %ld %ld %ld ori_code= %ld le
       // base has count of zero, all alternatives are low quality and prev_count is low
       // then trim  
       if(ori_code < 4){ //if the current base is valid base (non N)
-        if(counts[ori_code] >= 4*(uint64_t)_ec->min_count()) {//high counts are unlikely to be errors
-          *out++ = mer.base(0);
-          continue;
-        }else if(level == 0  && counts[ori_code] <(uint64_t)_ec->min_count()){//definitely an error and allalternatives are low quality
-       		log.truncation(cpos);
-            	goto done;
-          	}
+	if(counts[ori_code]>(uint64_t)_ec->min_count()){
+	  //double k=counts[ori_code]-1;
+	  //double qco3=error_rate*31.4952/3.;
+          //double prob=0.;
+          //for (uint32_t i=k;i<=k+100;i++){
+	 //	double err=error_rate/sqrt(2*3.1415927*i)*pow(qco3/i,i)*exp(-qco3+i);
+         //       prob+=err;
+	 //       if(err<1e-9) break;
+	//	}	
+	//  if(prob<1e-6){//poisson distribution calculation: given the previous count and the current count, what is the probability that the current count is an error, this drops the terms that are above the current count, to somplify the computation; if the probability is < 1e-6, leave the base alone 
+            if(counts[ori_code]>=(uint32_t)_ec->cutoff()){
+	    *out++ = mer.base(0);
+	    continue;
+	  }
+	}else if(level == 0  && counts[ori_code] == 0){//definitely an error and allalternatives are low quality
+	  log.truncation(cpos);
+	  goto done;
+	}
       }else if(level == 0){//if all alternatives are low quality
-            log.truncation(cpos);
-            goto done;
-            }
+	log.truncation(cpos);
+	goto done;
+      }
 
-if(debug)        fprintf(stderr,"Trying to correct\n");
+      if(debug)        fprintf(stderr,"Trying to correct\n");
       // We get here if there are multiple possible substitutions, the 
       // original count is low enough and the previous count is high (good) or
       // the current base is an N 
@@ -564,7 +580,7 @@ if(debug)        fprintf(stderr,"Trying to correct\n");
       //uint32_t preferred_nbase = 5;
       //here we determine what the next base in the read is
       if(input+1<end)
-	  read_nbase_code = kmer_t::codes[(int)*(input + 1)];
+	read_nbase_code = kmer_t::codes[(int)*(input + 1)];
 
       for(uint32_t i = 0; i < 4; i++) {
         cont_counts[i] = 0;
@@ -595,20 +611,23 @@ if(debug)        fprintf(stderr,"Trying to correct\n");
       if(success) { // We found at least one alternative base that continues
 	//now we look for all alernatives that have a count closest to the previous count
         //first we determine the count that is the closest to the current count
+        //but in the special case of prev_count == 1 we simply pick the largest count
+
         check_code = 4;
+        uint32_t _prev_count = prev_count<=(uint64_t)_ec->min_count() ? 2000000000 : prev_count;
         int  min_diff = std::numeric_limits<int>::max();
 	for(uint32_t  i = 0; i < 4; i++) {
           candidate_continuations[i]=false;
 	  if(cont_counts[i]==0)
             continue;
-	  int diff = abs(cont_counts[i] - prev_count);
+	  int diff = abs(cont_counts[i] - _prev_count);
           if(diff < min_diff)
 	    min_diff =diff;
 	}
 
         //we now know the count that is the closest, now we determine how many alternatives have this count
         for(uint32_t  i = 0; i < 4; i++)
-	  if(abs(cont_counts[i] - prev_count)==min_diff){
+	  if(abs(cont_counts[i] - _prev_count)==min_diff){
 	    candidate_continuations[i]=true;
 	    ncandidate_continuations++;
 	    check_code=i;
@@ -629,7 +648,7 @@ if(debug)        fprintf(stderr,"Trying to correct\n");
 	if(ncandidate_continuations!=1)
 	  check_code=5;
 
-if(debug)  	fprintf(stderr,"prev_count= %d cont_counts= %d %d %d %d check_code=%ld ori_code=%ld ori_count=%ld read_nbase_code=%u ncandidate_continuations=%d\n",prev_count,cont_counts[0],cont_counts[1],cont_counts[2],cont_counts[3],check_code,ori_code,counts[ori_code], read_nbase_code,ncandidate_continuations);
+	if(debug)  	fprintf(stderr,"prev_count= %d cont_counts= %d %d %d %d check_code=%ld ori_code=%ld ori_count=%ld read_nbase_code=%u ncandidate_continuations=%d\n",prev_count,cont_counts[0],cont_counts[1],cont_counts[2],cont_counts[3],check_code,ori_code,counts[ori_code], read_nbase_code,ncandidate_continuations);
 	
         if(check_code < 4){
           mer.replace(0, check_code);
@@ -645,8 +664,8 @@ if(debug)  	fprintf(stderr,"prev_count= %d cont_counts= %d %d %d %d check_code=%
 	    goto truncate;
 	}
       }else{
-if(debug)  	fprintf(stderr,"uanble to find continuation, no switch\n");
-	}	
+	if(debug)  	fprintf(stderr,"uanble to find continuation, no switch\n");
+      }	
       if(ori_code>=4 && check_code>=4){// if invalid base and no good sub found
 	log.truncation(cpos);
 	goto done;
@@ -794,6 +813,7 @@ int main(int argc, char *argv[])
     .anchor(args.anchor_count_arg)
     .prefix(args.output_given ? (std::string)args.output_arg : "")
     .min_count(args.min_count_arg)
+    .cutoff(args.cutoff_arg)
     .window(args.window_given ? args.window_arg : kmer_t::k())
     .error(args.error_given ? args.error_arg : kmer_t::k() / 2)
     .gzip(args.gzip_flag)

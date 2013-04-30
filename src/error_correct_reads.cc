@@ -585,7 +585,7 @@ private:
       for(uint32_t i = 0; i < 4; i++) {
         cont_counts[i] = 0;
 	continue_with_correct_base[i] = false;
-        if(counts[i] < (uint64_t)_ec->min_count())
+        if(counts[i] <= (uint64_t)_ec->min_count())
 	  continue;
 	check_code = i;
 	// Check that it continues at least one more base with that quality

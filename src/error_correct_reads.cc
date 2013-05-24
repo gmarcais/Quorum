@@ -21,11 +21,6 @@
 #include <limits>
 #include <cmath>
 
-#ifndef typeof
-#define typeof __typeof__
-#endif
-
-//#define DEBUG 1
 #include <jellyfish/dbg.hpp>
 #include <jellyfish/atomic_gcc.hpp>
 #include <jellyfish/mer_counting.hpp>
@@ -37,7 +32,6 @@
 #include <src/error_correct_reads_cmdline.hpp>
 
 
-const double error_rate = 0.01;
 typedef uint64_t hkey_t;
 typedef uint64_t hval_t;
 //typedef jellyfish::invertible_hash::array<uint64_t,atomic::gcc,allocators::mmap> inv_hash_storage_t;
@@ -534,23 +528,15 @@ private:
       // and has a high count or previous count is low enough that
       // continuity does not apply, output current base. But if the current
       // base has count of zero, all alternatives are low quality and prev_count is low
-      // then trim  
+      // then trim
       if(ori_code < 4){ //if the current base is valid base (non N)
-	if(counts[ori_code]>(uint64_t)_ec->min_count()){
-	  //double k=counts[ori_code]-1;
-	  //double qco3=error_rate*31.4952/3.;
-          //double prob=0.;
-          //for (uint32_t i=k;i<=k+100;i++){
-	 //	double err=error_rate/sqrt(2*3.1415927*i)*pow(qco3/i,i)*exp(-qco3+i);
-         //       prob+=err;
-	 //       if(err<1e-9) break;
-	//	}	
-	//  if(prob<1e-6){//poisson distribution calculation: given the previous count and the current count, what is the probability that the current count is an error, this drops the terms that are above the current count, to somplify the computation; if the probability is < 1e-6, leave the base alone 
-            if(counts[ori_code]>=(uint32_t)_ec->cutoff()){
+	if(counts[ori_code]>(uint64_t)_ec->min_count()) {
+          if(counts[ori_code]>=(uint32_t)_ec->cutoff()) {
 	    *out++ = mer.base(0);
 	    continue;
 	  }
-	}else if(level == 0  && counts[ori_code] == 0){//definitely an error and allalternatives are low quality
+	} else if(level == 0  && counts[ori_code] == 0) {
+          // definitely an error and all alternatives are low quality
 	  log.truncation(cpos);
 	  goto done;
 	}
@@ -560,13 +546,13 @@ private:
       }
 
       if(debug)        fprintf(stderr,"Trying to correct\n");
-      // We get here if there are multiple possible substitutions, the 
+      // We get here if there are multiple possible substitutions, the
       // original count is low enough and the previous count is high (good) or
-      // the current base is an N 
+      // the current base is an N
       // We find out all alternative bases
       // that have a continuation at the same or better level.  Then
       // if the current base is N, pick the one with the highest
-      // count that is the most similar to the prev_count, 
+      // count that is the most similar to the prev_count,
       // otherwise pick the one with the most similar count.
       // If no alternative continues, leave the base alone.
       uint64_t check_code = ori_code;
@@ -577,7 +563,6 @@ private:
       bool candidate_continuations[4];
       uint32_t ncandidate_continuations = 0;
 
-      //uint32_t preferred_nbase = 5;
       //here we determine what the next base in the read is
       if(input+1<end)
 	read_nbase_code = kmer_t::codes[(int)*(input + 1)];
@@ -608,13 +593,14 @@ private:
 	}
       }
 
-      if(success) { // We found at least one alternative base that continues
-	//now we look for all alernatives that have a count closest to the previous count
-        //first we determine the count that is the closest to the current count
-        //but in the special case of prev_count == 1 we simply pick the largest count
-
+      if(success) {
+        // We found at least one alternative base that continues now
+	// we look for all alernatives that have a count closest to
+	// the previous count first we determine the count that is the
+	// closest to the current count but in the special case of
+	// prev_count == 1 we simply pick the largest count
         check_code = 4;
-        uint32_t _prev_count = prev_count<=(uint64_t)_ec->min_count() ? 2000000000 : prev_count;
+        uint32_t _prev_count = prev_count<=(uint64_t)_ec->min_count() ? std::numeric_limits<uint32_t>::max() : prev_count;
         int  min_diff = std::numeric_limits<int>::max();
 	for(uint32_t  i = 0; i < 4; i++) {
           candidate_continuations[i]=false;
@@ -649,7 +635,7 @@ private:
 	  check_code=5;
 
 	if(debug)  	fprintf(stderr,"prev_count= %d cont_counts= %d %d %d %d check_code=%ld ori_code=%ld ori_count=%ld read_nbase_code=%u ncandidate_continuations=%d\n",prev_count,cont_counts[0],cont_counts[1],cont_counts[2],cont_counts[3],check_code,ori_code,counts[ori_code], read_nbase_code,ncandidate_continuations);
-	
+
         if(check_code < 4){
           mer.replace(0, check_code);
 	  if(_ec->contaminant()->is_contaminant(mer.canonical())) {
@@ -665,7 +651,7 @@ private:
 	}
       }else{
 	if(debug)  	fprintf(stderr,"uanble to find continuation, no switch\n");
-      }	
+      }
       if(ori_code>=4 && check_code>=4){// if invalid base and no good sub found
 	log.truncation(cpos);
 	goto done;

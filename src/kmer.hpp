@@ -102,11 +102,15 @@ private:
 
 std::ostream &operator<<(std::ostream &os, const kmer_t &mer);
 
+class forward_mer;
+class backward_mer;
+
 class forward_mer {
   kmer_t _m;
 public:
   forward_mer(kmer_t m) : _m(m) {}
   forward_mer(uint64_t m) : _m(m) {}
+  backward_mer rev_mer() const;
   bool shift(char c) { return _m.shift_left(c); }
   void shift(uint64_t x) { _m.shift_left(x); }
   bool rev_shift(char c) { return _m.shift_right(c); }
@@ -125,6 +129,7 @@ class backward_mer {
 public:
   backward_mer(kmer_t m) : _m(m) {}
   backward_mer(uint64_t m) : _m(m) {}
+  forward_mer rev_mer() const;
   bool shift(char c) { return _m.shift_right(c); }
   void shift(uint64_t x) { _m.shift_right(x); }
   bool rev_shift(char c) { return _m.shift_left(c); }
@@ -136,6 +141,13 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const backward_mer &mer);
 };
 std::ostream &operator<<(std::ostream &os, const backward_mer &mer);
+
+inline backward_mer forward_mer::rev_mer() const {
+  return backward_mer(_m);
+}
+inline forward_mer backward_mer::rev_mer() const {
+  return forward_mer(_m);
+}
 
     // static uint64_t mer_string_to_binary(const char *in, uint_t klen) {
     //   uint64_t res = 0;

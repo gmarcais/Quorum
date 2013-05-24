@@ -25,6 +25,9 @@ option("min-count", "m") {
 option("output", "o") {
   description "Output file"
   c_string; default "combined.jf"; typestr "prefix" }
+option("coverage", "c") {
+  description "Coverage file"
+  c_string; typestr "path" }
 option("verbose", "v") {
   description "Be verbose"
   flag; off }

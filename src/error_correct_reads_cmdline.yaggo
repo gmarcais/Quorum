@@ -19,6 +19,9 @@ option("both-strands", "C") {
 option("min-count", "m") {
   description "Minimum count for a k-mer to be considered \"good\""
   uint32; default "1" }
+option("cutoff","p") {
+  description "Poisson cutoff for correcting when we have multiple choices"
+  uint32; default "4" }  
 option("skip", "s") {
   description "Number of bases to skip for start k-mer"
   uint32; default "2" }
@@ -33,7 +36,7 @@ option("window", "w") {
   uint32 }
 option("error", "e") {
   description "Maximum number of error in a window"
-  uint32; default "5" }
+  uint32; default "3" }
 option("output", "o") {
   description "Output file prefix"
   string; default "error_corrected"; typestr "prefix" }

@@ -36,7 +36,9 @@ namespace jflib {
       for(size_t i = 0; i < _size; ++i)
         _buffer[i] = init.binary;
     }
-    virtual ~basic_circular_buffer() { }
+    virtual ~basic_circular_buffer() {
+      delete [] _buffer;
+    }
 
     /** Enqueue an element.
      * @return false if the FIFO is full.

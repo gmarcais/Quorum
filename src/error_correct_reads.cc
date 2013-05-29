@@ -343,11 +343,11 @@ public:
   typedef error_correct_t<error_correct_instance> ec_t ;
 
 private:
-  ec_t                     *_ec;
-  int                       _id;
-  size_t                    _buff_size;
-  char                     *_buffer;
-  alternative_finder*       _af;
+  ec_t                                *_ec;
+  int                                  _id;
+  size_t                               _buff_size;
+  char                                *_buffer;
+  std::unique_ptr<alternative_finder>  _af;
 
   static const char* error_contaminant;
   static const char* error_no_starting_mer;
@@ -356,10 +356,13 @@ private:
 public:
   error_correct_instance(ec_t *ec, int id) :
     _ec(ec), _id(id), _buff_size(0), _buffer(0) { }
+  ~error_correct_instance() {
+    free(_buffer);
+  }
 
   void start() {
     jellyfish::parse_read::thread parser = _ec->parser()->new_thread();
-    _af = _ec->new_af();
+    _af.reset(_ec->new_af());
 
     const jellyfish::read_parser::read_t *read;
 
@@ -779,7 +782,7 @@ int main(int argc, char *argv[])
   }
 
   // Open contaminant database
-  contaminant_check* contaminant = 0;
+  std::unique_ptr<contaminant_check> contaminant;
   if(args.contaminant_given) {
     mapped_file dbf(args.contaminant_arg);
     dbf.random().will_need().load();
@@ -787,9 +790,9 @@ int main(int argc, char *argv[])
     if(ary.get_key_len() != key_len)
       die << "Contaminant hash must have same key length as other hashes ("
 	  << ary.get_key_len() << " != " << key_len << ")";
-    contaminant = new contaminant_database(ary);
+    contaminant.reset(new contaminant_database(ary));
   } else {
-    contaminant = new contaminant_no_database();
+    contaminant.reset(new contaminant_no_database());
   }
   jellyfish::parse_read parser(args.file_arg.begin(), args.file_arg.end(), 100);
 
@@ -804,10 +807,16 @@ int main(int argc, char *argv[])
     .error(args.error_given ? args.error_arg : kmer_t::k() / 2)
     .gzip(args.gzip_flag)
     .combined(args.combined_arg)
-    .contaminant(contaminant)
+    .contaminant(contaminant.get())
     .trim_contaminant(args.trim_contaminant_flag)
     .homo_trim(args.homo_trim_given ? args.homo_trim_arg : std::numeric_limits<int>::min());
   correct.do_it(args.thread_arg);
+
+  // Free input hashes
+  for(auto it = hashes.begin(); it != hashes.end(); ++it) {
+    delete *it;
+    *it = 0;
+  }
 
   return 0;
 }

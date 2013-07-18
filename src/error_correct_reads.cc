@@ -461,11 +461,7 @@ private:
     counter cpos = pos;
     //    int pocc = _af->get_val(mer.canonical()); // # of occurences of previous mer
     uint32_t prev_count=_af->get_val(mer.canonical());
-    bool debug=false;
-    if(debug)  fprintf(stderr,"Start correction at %c\n",(char)(*input));
-    for(int i=23;i>=0;i--)
-      if(debug)  	fprintf(stderr,"%c",mer.base(i));
-    if(debug)     fprintf(stderr,"\n");
+
     for( ; input < end; ++input) {
       char     base        = *input;
 
@@ -505,7 +501,6 @@ private:
       if(count == 1) { // One continuation. Is it an error?
         prev_count = counts[ucode];
         if(ucode != ori_code) {
-	  if(debug)          fprintf(stderr,"Unique sub from %ld to %ld count= %d\n",ori_code,ucode,prev_count);
           mer.replace(0, ucode);
           if(_ec->contaminant()->is_contaminant(mer.canonical())) {
             if(_ec->trim_contaminant()) {
@@ -517,13 +512,10 @@ private:
           }
           if(log.substitution(cpos, base, mer.base(0)))
             goto truncate;
-        }else{
-	  if(debug)  	fprintf(stderr,"Unique %ld count= %d\n",ori_code,prev_count);
 	}
         *out++ = mer.base(0);
         continue;
       }
-      if(debug)       fprintf(stderr,"Multiple counts %ld %ld %ld %ld ori_code= %ld level= %d\n",counts[0],counts[1],counts[2],counts[3],ori_code,level);
       // We get here if there is more than one alternative base to try
       // at some level. Note that if the current base is low quality
       // and all alternatives are higher quality, then the current
@@ -548,7 +540,6 @@ private:
 	goto done;
       }
 
-      if(debug)        fprintf(stderr,"Trying to correct\n");
       // We get here if there are multiple possible substitutions, the
       // original count is low enough and the previous count is high (good) or
       // the current base is an N
@@ -558,20 +549,20 @@ private:
       // count that is the most similar to the prev_count,
       // otherwise pick the one with the most similar count.
       // If no alternative continues, leave the base alone.
-      uint64_t check_code = ori_code;
-      bool     success    = false;
+      uint64_t check_code               = ori_code;
+      bool     success                  = false;
       uint32_t cont_counts[4];  //here we record the counts for the continuations
-      bool continue_with_correct_base[4];
-      uint32_t read_nbase_code = 5;
-      bool candidate_continuations[4];
+      bool     continue_with_correct_base[4];
+      uint32_t read_nbase_code          = 5;
+      bool     candidate_continuations[4];
       uint32_t ncandidate_continuations = 0;
 
       //here we determine what the next base in the read is
-      if(input+1<end)
+      if(input + 1 < end)
 	read_nbase_code = kmer_t::codes[(int)*(input + 1)];
 
       for(uint32_t i = 0; i < 4; i++) {
-        cont_counts[i] = 0;
+        cont_counts[i]                = 0;
 	continue_with_correct_base[i] = false;
         if(counts[i] <= (uint64_t)_ec->min_count())
 	  continue;
@@ -587,12 +578,10 @@ private:
 	uint64_t   nucode = 0;
 	int        nlevel;
 	ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
-	if(ncount > 0 && nlevel >=level) {
-          if(read_nbase_code<4)
-	    if(ncounts[read_nbase_code]>0)
-	      continue_with_correct_base[i]=true;
-	  success        = true;
-	  cont_counts[i] = counts[i];
+	if(ncount > 0 && nlevel >= level) {
+          continue_with_correct_base[i] = read_nbase_code < 4 && ncounts[read_nbase_code] > 0;
+	  success                       = true;
+	  cont_counts[i]                = counts[i];
 	}
       }
 
@@ -602,42 +591,38 @@ private:
 	// the previous count first we determine the count that is the
 	// closest to the current count but in the special case of
 	// prev_count == 1 we simply pick the largest count
-        check_code = 4;
+        check_code           = 4;
         uint32_t _prev_count = prev_count<=(uint64_t)_ec->min_count() ? std::numeric_limits<uint32_t>::max() : prev_count;
-        int  min_diff = std::numeric_limits<int>::max();
+        int      min_diff    = std::numeric_limits<int>::max();
 	for(uint32_t  i = 0; i < 4; i++) {
-          candidate_continuations[i]=false;
-	  if(cont_counts[i]==0)
-            continue;
-	  int diff = abs(cont_counts[i] - _prev_count);
-          if(diff < min_diff)
-	    min_diff =diff;
+          candidate_continuations[i] = false;
+	  if(cont_counts[i] > 0)
+            min_diff = std::min(min_diff, abs(cont_counts[i] - _prev_count));
 	}
 
         //we now know the count that is the closest, now we determine how many alternatives have this count
-        for(uint32_t  i = 0; i < 4; i++)
-	  if(abs(cont_counts[i] - _prev_count)==min_diff){
-	    candidate_continuations[i]=true;
+        for(uint32_t  i = 0; i < 4; i++) {
+	  if(abs(cont_counts[i] - _prev_count) == min_diff){
+	    candidate_continuations[i] = true;
 	    ncandidate_continuations++;
 	    check_code=i;
 	  }
+        }
 
         //do we have more than one good candidate? if we do then check which one continues with the correct base
 	if(ncandidate_continuations>1 && read_nbase_code < 4)
 	  for(uint32_t  i = 0; i < 4; i++){
-	    if(candidate_continuations[i]==true){
-	      if(continue_with_correct_base[i]==false)
-		ncandidate_continuations--;
+	    if(candidate_continuations[i]){
+	      if(!continue_with_correct_base[i])
+		--ncandidate_continuations;
 	      else
-		check_code=i;
+		check_code = i;
 	    }
 	  }
 
         //fail if we still have more than one candidate
-	if(ncandidate_continuations!=1)
-	  check_code=5;
-
-	if(debug)  	fprintf(stderr,"prev_count= %d cont_counts= %d %d %d %d check_code=%ld ori_code=%ld ori_count=%ld read_nbase_code=%u ncandidate_continuations=%d\n",prev_count,cont_counts[0],cont_counts[1],cont_counts[2],cont_counts[3],check_code,ori_code,counts[ori_code], read_nbase_code,ncandidate_continuations);
+	if(ncandidate_continuations != 1)
+	  check_code = 5;
 
         if(check_code < 4){
           mer.replace(0, check_code);
@@ -652,10 +637,8 @@ private:
 	  if(log.substitution(cpos, base, mer.base(0)))
 	    goto truncate;
 	}
-      }else{
-	if(debug)  	fprintf(stderr,"uanble to find continuation, no switch\n");
       }
-      if(ori_code>=4 && check_code>=4){// if invalid base and no good sub found
+      if(ori_code >= 4 && check_code >= 4) {// if invalid base and no good sub found
 	log.truncation(cpos);
 	goto done;
       }

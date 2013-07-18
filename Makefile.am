@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS=-I m4
 
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir) $(JELLYFISH_CFLAGS)
-AM_CXXFLAGS = -Wall -Werror -g -O2 -std=c++0x
+AM_CXXFLAGS = -Wall -g -O2 -std=c++0x
 AM_LDFLAGS = $(STATIC_FLAGS)
 LDADD = $(JELLYFISH_LIBS)
 
@@ -43,15 +43,15 @@ quorum_combine_jf_dbs_SOURCES = src/combine_jf_dbs.cc
 # Adapter database generation #
 ###############################
 dist_data_DATA = data/adapter_0
-CLEANFILES = data/adapter_0
+DISTCLEANFILES = data/adapter_0
 SUFFIXES = _0 .fa
 
 .fa_0:
-	$(AM_V_GEN)mkdir -p $(@D); jellyfish count -m 24 -s 5k -C -t 10 -r -o $$(dirname $@)/$$(basename $@ _0) $<
+	$(AM_V_GEN)mkdir -p $(@D); $(JELLYFISH) count -m 24 -s 5k -C -t 10 -r -o $$(dirname $@)/$$(basename $@ _0) $<
 
 
 bin_SCRIPTS = quorum 
-CLEANFILES += $(bin_SCRIPTS)
+CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = src/quorum.in
 
 if RELATIVE_PATHS

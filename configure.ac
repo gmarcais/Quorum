@@ -10,6 +10,7 @@ AM_SILENT_RULES([yes])
 LT_INIT
 
 # Checks for programs.
+AC_LANG(C++)
 AC_PROG_CXX
 
 # Checks for libraries.
@@ -55,6 +56,9 @@ AM_CONDITIONAL([HAVE_RELATIVE_JF_PATH], [test x$with_relative_jf_path != x])
 AC_CHECK_TYPE([__int128],
               [AC_DEFINE([HAVE_INT128], [1], [Define if type __int128 is supported])])
 
+
+# Check the version of strerror_r
+AC_FUNC_STRERROR_R      
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

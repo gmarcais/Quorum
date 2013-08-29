@@ -50,7 +50,7 @@ SUFFIXES = _0 .fa
 	$(AM_V_GEN)mkdir -p $(@D); $(JELLYFISH) count -m 24 -s 5k -C -t 10 -r -o $$(dirname $@)/$$(basename $@ _0) $<
 
 
-bin_SCRIPTS = quorum 
+bin_SCRIPTS = quorum
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = src/quorum.in
 

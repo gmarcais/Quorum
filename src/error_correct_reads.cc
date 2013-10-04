@@ -525,8 +525,19 @@ private:
       // base has count of zero, all alternatives are low quality and prev_count is low
       // then trim
       if(ori_code < 4){ //if the current base is valid base (non N)
+	double n=0;
+        double k=counts[ori_code];
+	double p=1./300.;
+	for(int i=0;i<4;i++)
+		n+=(double)counts[i];
+        
+	//now we ask for a probability of getting counts[ori_code] errors with p=1/300 in sum_counts trials.  If this probability is < 10e-6, do not correct
 	if(counts[ori_code]>(uint64_t)_ec->min_count()) {
-          if(counts[ori_code]>=(uint32_t)_ec->cutoff()) {
+	double prob=pow(n*p/k,k)*exp(-n*p+k)/sqrt(2*3.1415927*k);
+//      fprintf(stderr,"n = %lf k = %lf prob = %lf\n",n,k,prob);
+	if(prob < 0.000001){
+//	if(counts[ori_code]>(uint64_t)_ec->min_count()) {
+//          if(counts[ori_code]>=(uint32_t)_ec->cutoff()) {
 	    *out++ = mer.base(0);
 	    continue;
 	  }

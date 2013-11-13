@@ -525,32 +525,31 @@ private:
       // base has count of zero, all alternatives are low quality and prev_count is low
       // then trim
       if(ori_code < 4){ //if the current base is valid base (non N)
-	if(counts[ori_code]>(uint64_t)_ec->min_count()) {
-		if(counts[ori_code]>(uint64_t)_ec->min_count()) {
-			if(counts[ori_code]>=(uint32_t)_ec->cutoff()) {
-				*out++ = mer.base(0);
-            			continue;
-          		}else{
-//now we ask for a probability of getting counts[ori_code] errors with p=1/300 in sum_counts trials.  If this probability is < 10e-6, do not correct
-		        	double n=0;
-		       		double k=counts[ori_code];
-        			double p=1./300.;
-        			for(int i=0;i<4;i++)
-                			n+=(double)counts[i];
+	if(counts[ori_code] > (uint64_t)_ec->min_count()) {
+          if(counts[ori_code]>=(uint32_t)_ec->cutoff()) {
+            *out++ = mer.base(0);
+            continue;
+          }
+          // Now we ask for a probability of getting
+          // counts[ori_code] errors with p=1/300 in sum_counts
+          // trials.  If this probability is < 10e-6, do not correct
+          double n = 0;
+          for(int i = 0; i < 4; ++i)
+            n += (double)counts[i];
 
-				double prob=pow(n*p/k,k)*exp(-n*p+k)/sqrt(2*3.1415927*k);
-				if(prob < 0.000001){
-                        		*out++ = mer.base(0);
-                       	 		continue;
-				}
-			}
-		}
+          const double k = counts[ori_code];
+          const double p = n / 300.;
+          const double prob = pow(p / k, k) * exp(-p + k) / sqrt(2 * 3.1415927 * k);
+          if(prob < 1e-6) {
+            *out++ = mer.base(0);
+            continue;
+          }
 	} else if(level == 0  && counts[ori_code] == 0) {
           // definitely an error and all alternatives are low quality
-	  log.truncation(cpos);
-	  goto done;
+          log.truncation(cpos);
+          goto done;
 	}
-      }else if(level == 0){//if all alternatives are low quality
+      } else if(level == 0) { //if all alternatives are low quality
 	log.truncation(cpos);
 	goto done;
       }
@@ -574,88 +573,88 @@ private:
 
       //here we determine what the next base in the read is
       if(input + 1 < end)
-	read_nbase_code = kmer_t::codes[(int)*(input + 1)];
+        read_nbase_code = kmer_t::codes[(int)*(input + 1)];
 
       for(uint32_t i = 0; i < 4; i++) {
         cont_counts[i]                = 0;
-	continue_with_correct_base[i] = false;
+        continue_with_correct_base[i] = false;
         if(counts[i] <= (uint64_t)_ec->min_count())
-	  continue;
-	check_code = i;
-	// Check that it continues at least one more base with that quality
-	dir_mer    nmer   = mer;
-	nmer.replace(0, check_code);
-	// Does not matter what we shift, check all alternative anyway.
-	nmer.shift((uint64_t)0);
+          continue;
+        check_code = i;
+        // Check that it continues at least one more base with that quality
+        dir_mer    nmer   = mer;
+        nmer.replace(0, check_code);
+        // Does not matter what we shift, check all alternative anyway.
+        nmer.shift((uint64_t)0);
 
-	uint64_t   ncounts[4];
-	int        ncount;
-	uint64_t   nucode = 0;
-	int        nlevel;
-	ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
-	if(ncount > 0 && nlevel >= level) {
+        uint64_t   ncounts[4];
+        int        ncount;
+        uint64_t   nucode = 0;
+        int        nlevel;
+        ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
+        if(ncount > 0 && nlevel >= level) {
           continue_with_correct_base[i] = read_nbase_code < 4 && ncounts[read_nbase_code] > 0;
-	  success                       = true;
-	  cont_counts[i]                = counts[i];
-	}
+          success                       = true;
+          cont_counts[i]                = counts[i];
+        }
       }
 
       if(success) {
         // We found at least one alternative base that continues now
-	// we look for all alernatives that have a count closest to
-	// the previous count first we determine the count that is the
-	// closest to the current count but in the special case of
-	// prev_count == 1 we simply pick the largest count
+        // we look for all alernatives that have a count closest to
+        // the previous count first we determine the count that is the
+        // closest to the current count but in the special case of
+        // prev_count == 1 we simply pick the largest count
         check_code           = 4;
         uint32_t _prev_count = prev_count<=(uint64_t)_ec->min_count() ? std::numeric_limits<uint32_t>::max() : prev_count;
         int      min_diff    = std::numeric_limits<int>::max();
-	for(uint32_t  i = 0; i < 4; i++) {
+        for(uint32_t  i = 0; i < 4; i++) {
           candidate_continuations[i] = false;
-	  if(cont_counts[i] > 0)
+          if(cont_counts[i] > 0)
             min_diff = std::min(min_diff, abs(cont_counts[i] - _prev_count));
-	}
+        }
 
         //we now know the count that is the closest, now we determine how many alternatives have this count
         for(uint32_t  i = 0; i < 4; i++) {
-	  if(abs(cont_counts[i] - _prev_count) == min_diff){
-	    candidate_continuations[i] = true;
-	    ncandidate_continuations++;
-	    check_code=i;
-	  }
+          if(abs(cont_counts[i] - _prev_count) == min_diff){
+            candidate_continuations[i] = true;
+            ncandidate_continuations++;
+            check_code=i;
+          }
         }
 
         //do we have more than one good candidate? if we do then check which one continues with the correct base
-	if(ncandidate_continuations>1 && read_nbase_code < 4)
-	  for(uint32_t  i = 0; i < 4; i++){
-	    if(candidate_continuations[i]){
-	      if(!continue_with_correct_base[i])
-		--ncandidate_continuations;
-	      else
-		check_code = i;
-	    }
-	  }
+        if(ncandidate_continuations>1 && read_nbase_code < 4)
+          for(uint32_t  i = 0; i < 4; i++){
+            if(candidate_continuations[i]){
+              if(!continue_with_correct_base[i])
+                --ncandidate_continuations;
+              else
+                check_code = i;
+            }
+          }
 
         //fail if we still have more than one candidate
-	if(ncandidate_continuations != 1)
-	  check_code = 5;
+        if(ncandidate_continuations != 1)
+          check_code = 5;
 
         if(check_code < 4){
           mer.replace(0, check_code);
-	  if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-	    if(_ec->trim_contaminant()) {
-	      log.truncation(cpos);
-	      goto done;
-	    }
-	    *error = error_contaminant;
-	    return 0;
-	  }
-	  if(log.substitution(cpos, base, mer.base(0)))
-	    goto truncate;
-	}
+          if(_ec->contaminant()->is_contaminant(mer.canonical())) {
+            if(_ec->trim_contaminant()) {
+              log.truncation(cpos);
+              goto done;
+            }
+            *error = error_contaminant;
+            return 0;
+          }
+          if(log.substitution(cpos, base, mer.base(0)))
+            goto truncate;
+        }
       }
       if(ori_code >= 4 && check_code >= 4) {// if invalid base and no good sub found
-	log.truncation(cpos);
-	goto done;
+        log.truncation(cpos);
+        goto done;
       }
       *out++ = mer.base(0);
     }

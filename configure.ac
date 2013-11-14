@@ -25,8 +25,8 @@ AC_ARG_VAR([YAGGO], [Yaggo switch parser generator])
 AS_IF([test "x$YAGGO" = "x"], [AC_PATH_PROG([YAGGO], [yaggo], [false])])
 
 # Get jellyfish compile flags && executable
-PKG_CHECK_MODULES([JELLYFISH], [jellyfish-1.1])
-JELLYFISH_VERSION=$(pkg-config --modversion jellyfish-1.1)
+PKG_CHECK_MODULES([JELLYFISH], [jellyfish-2.0])
+JELLYFISH_VERSION=$(pkg-config --modversion jellyfish-2.0)
 AC_SUBST([JELLYFISH_VERSION])
 AC_ARG_VAR([JELLYFISH], [Jellyfish executable absolute path (default to looking in PATH)])
 AS_IF([test "x$JELLYFISH" = "x"], [AC_PATH_PROG([JELLYFISH], [jellyfish], [false])])

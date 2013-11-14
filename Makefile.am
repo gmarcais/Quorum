@@ -19,11 +19,11 @@ noinst_HEADERS = $(YAGGO_SOURCES)
 
 JFLIB_I = include/jflib
 
-#bin_PROGRAMS = quorum_error_correct_reads quorum_create_database
-bin_PROGRAMS = quorum_create_database
+bin_PROGRAMS = quorum_error_correct_reads quorum_create_database
+#bin_PROGRAMS = quorum_create_database
 
-# quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc src/kmer.cc	\
-#                                      src/err_log.cc
+quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc	\
+                                     src/err_log.cc
 
 # quorum_error_correct_reads_SOURCES += src/kmer.hpp			\
 #                                       src/error_correct_reads.hpp	\

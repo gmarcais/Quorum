@@ -97,8 +97,8 @@ public:
   int remove_last_window() {
     if(_log.size() == 0)
       return 0;
-    int diff = _log.back().pos - _log[_lwin].pos; 
-    DBG << V(*_log.back().pos) << V(*_log[_lwin].pos) << V(diff);
+    int diff = _log.back().pos - _log[_lwin].pos;
+    //    DBG << V(*_log.back().pos) << V(*_log[_lwin].pos) << V(diff);
     _log.erase(_log.begin() + _lwin, _log.end());
     _lwin = 0;
     check_nb_error();

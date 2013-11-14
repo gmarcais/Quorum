@@ -1,8 +1,8 @@
 #ifndef _JFLIB_POOL_H_
 #define _JFLIB_POOL_H_
 
-#include <jflib/circular_buffer.hpp>
-#include <jflib/locks_pthread.hpp>
+#include <jellyfish/circular_buffer.hpp>
+#include <jellyfish/locks_pthread.hpp>
 #include <vector>
 #include <stdexcept>
 
@@ -20,12 +20,12 @@ namespace jflib {
    *
    * The elements of type T in the pool should not be accessed
    * unless one has the obtained the elt object and has not released
-   * (or destructed) it. 
+   * (or destructed) it.
    *
    * WARNING: The iterator on the elements does not check any of this
    * and is not thread-safe.
    */
-  template<typename T, typename CV = locks::cond>
+template<typename T, typename CV = jellyfish::locks::pthread::cond>
   class pool {
     class side;
 
@@ -41,7 +41,7 @@ namespace jflib {
         B2A.fifo_.enqueue(i);
     }
 
-    virtual ~pool() { 
+    virtual ~pool() {
       delete [] elts_;
     }
 
@@ -56,7 +56,7 @@ namespace jflib {
     bool is_closed_A_to_B() const { return A2B.fifo_.is_closed(); }
     bool is_closed_B_to_A() const { return B2A.fifo_.is_closed(); }
 
-    /** Iterators on the elements. Unlike other 
+    /** Iterators on the elements. Unlike other
      */
     T* begin() { return elts_; }
     T* end() { return elts_ + size_; }
@@ -80,7 +80,7 @@ namespace jflib {
         return *this;
       }
 
-      void release() { 
+      void release() {
         if(v_)
           s_->release(i_);
         v_ = 0;
@@ -112,7 +112,7 @@ namespace jflib {
       friend class pool;
       friend class elt;
       enum State { NONE, WAITING, CLOSED };
-      side(size_t size, T* elts) : 
+      side(size_t size, T* elts) :
         fifo_(2*size), state_(NONE), other_(0), elts_(elts) { }
 
       uint32_t get();

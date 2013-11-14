@@ -12,8 +12,6 @@ class kmer_t {
   jellyfish::mer_dna _fmer, _rmer;
 
 public:
-  kmer_t() : _fmer(), _rmer() {}
-
   bool shift_left(char c) {
     int x = jellyfish::mer_dna::code(c);
     if(x != -1) {

@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include <jellyfish/atomic_bits_array.hpp>
 #include <jellyfish/mer_dna.hpp>
 #include <jellyfish/file_header.hpp>
 #include <jellyfish/err.hpp>
@@ -27,25 +26,16 @@
 #include <jellyfish/stream_manager.hpp>
 #include <jellyfish/whole_sequence_parser.hpp>
 #include <jellyfish/large_hash_array.hpp>
+
+#include <src/mer_database.hpp>
 #include <src/create_database_cmdline.hpp>
 
 static create_database_cmdline args;
 
 using jellyfish::mer_dna;
-typedef jellyfish::large_hash::array<mer_dna> mer_array;
-typedef jellyfish::atomic_bits_array<uint64_t> val_array;
 typedef std::vector<const char*> file_vector;
 typedef jellyfish::stream_manager<file_vector::const_iterator> stream_manager;
 typedef jellyfish::whole_sequence_parser<stream_manager> read_parser;
-
-class database_header : public jellyfish::file_header {
-public:
-  database_header() : jellyfish::file_header() { }
-  database_header(std::istream& is) : jellyfish::file_header(is) { }
-
-  void bits(uint32_t b) { root_["bits"] = (Json::UInt)b; }
-  uint32_t bits() const { return root_["bits"] .asUInt(); }
-};
 
 class hash_with_quality {
   mer_array      keys_;
@@ -165,7 +155,10 @@ int main(int argc, char *argv[])
   }
 
   header.update_from_ary(ary.keys());
+  header.set_format();
   header.bits(args.bits_arg);
+  header.key_bytes(ary.keys().size_bytes());
+  header.value_bytes(ary.vals().size_bytes());
   header.write(output);
   ary.write(output);
   output.close();

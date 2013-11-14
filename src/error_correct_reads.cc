@@ -42,6 +42,8 @@ typedef jellyfish::whole_sequence_parser<stream_manager> read_parser;
 typedef uint64_t hkey_t;
 typedef uint64_t hval_t;
 
+
+
 // Base class which gives all possible continuation given a k-mer and
 // Jellyfish databases. One version uses many Jellyfish databases
 // while the other uses a combined database.
@@ -78,129 +80,6 @@ public:
     return 1;
   }
 };
-
-// class alternative_multiple_dbs : public alternative_finder {
-//   const hashes_t*          hashes_;
-//   int                      min_count_;
-
-// public:
-//   alternative_multiple_dbs(const hashes_t* hashes, int min_count) :
-//     hashes_(hashes), min_count_(min_count) { }
-
-//   virtual ~alternative_multiple_dbs() { }
-
-//   virtual hval_t get_val(uint64_t mer) {
-//     hashes_t::const_iterator chash = hashes_->begin();
-//     hval_t                   res   = 0;
-
-//     if(!(*chash)->get_val(mer, res, true))
-//       return 0;
-//     return res;
-//   }
-//   virtual int get_best_alternatives(forward_mer& m, uint64_t counts[], uint64_t &ucode, int& level) {
-//     return get_best_alternatives__(m, counts, ucode, level);
-//   }
-//   virtual int get_best_alternatives(backward_mer& m, uint64_t counts[], uint64_t &ucode, int& level) {
-//     return get_best_alternatives__(m, counts, ucode, level);
-//   }
-
-// private:
-//   template<typename dir_mer>
-//   int get_best_alternatives__(const dir_mer &mer, uint64_t counts[], uint64_t &ucode, int& level) {
-//     hashes_t::const_iterator chash = hashes_->begin();
-//     int                      count = 0;
-//     while(count == 0) {
-//       count = get_alternatives__(chash, mer, counts, ucode);
-//       if(count == 0 && ++chash == hashes_->end())
-//         return 0;
-//     }
-//     level = (hashes_->end() - chash) - 1 ;
-//     return count;
-//   }
-
-//   template <typename dir_mer>
-//   int get_alternatives__(hashes_t::const_iterator& chash, const dir_mer &mer, uint64_t counts[], uint64_t &ucode) {
-//     dir_mer  nmer(mer);
-//     int      count = 0;
-//     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
-//       nmer.replace(0, i);
-//       hval_t val = 0;
-//       if((*chash)->get_val(nmer.canonical(), val, true)) {
-//         counts[i] = val;
-//         if(val >= (uint64_t)min_count_) {
-//           count++;
-//           ucode = i;
-//         }
-//       } else {
-//         counts[i] = 0;
-//       }
-//     }
-//     return count;
-//   }
-// };
-
-// //  const int                nb_levels_;
-// class alternative_combined_dbs : public alternative_finder {
-//   hashes_t::const_iterator hash_;
-//   quorum::divisor64        nb_levels_;
-//   int                      min_count_;
-
-// public:
-//   alternative_combined_dbs(const hashes_t* hashes, int levels,  int min_count) :
-//     hash_(hashes->begin()), nb_levels_(levels), min_count_(min_count) { }
-
-//   virtual ~alternative_combined_dbs() { }
-//   virtual hval_t get_val(uint64_t mer) {
-//     hval_t res = 0;
-//     bool found = (*hash_)->get_val(mer, res, true, true);
-//     if(!found)
-//       return 0;
-//     uint64_t nlevel, val;
-//     nb_levels_.division(res, val, nlevel);
-//     if(nlevel != nb_levels_.d() - 1) //    if(res % nb_levels_ != (hval_t)(nb_levels_ - 1))
-//       return 0;
-//     return val; //   return res / nb_levels_;
-//   }
-//   virtual int get_best_alternatives(forward_mer& m, uint64_t counts[], uint64_t& ucode, int& level) {
-//     return get_best_alternatives__(m, counts, ucode, level);
-//   }
-//   virtual int get_best_alternatives(backward_mer& m, uint64_t counts[], uint64_t& ucode, int& level) {
-//     return get_best_alternatives__(m, counts, ucode, level);
-//   }
-
-// private:
-//   template<typename dir_mer>
-//   int get_best_alternatives__(dir_mer& mer, uint64_t counts[], uint64_t& ucode, int& level) {
-//     uint64_t      nlevel;
-//     uint64_t val;
-//     dir_mer  nmer(mer);
-//     int      count = 0;
-//     level = 0;
-
-//     for(uint64_t i = 0; i < (uint64_t)4; ++i) {
-//       nmer.replace(0, i);
-//       if(!(*hash_)->get_val(nmer.canonical(), val, true, true))
-//         val = 0;
-//       nb_levels_.division(val, val, nlevel);
-//       if(val == 0 || (int)nlevel < level) {
-//         counts[i] = 0;
-//       } else {
-//         if(val >= (uint64_t)min_count_) {
-//           if((int)nlevel > level) {
-//             for(uint64_t j = 0; j < (uint64_t)i; ++j)
-//               counts[j] = 0;
-//             count  = 0;
-//             level = nlevel;
-//           }
-//           counts[i] = val;
-//           ucode     = i;
-//           ++count;
-//         }
-//       }
-//     }
-//     return count;
-//   }
-// };
 
 // Contaminant database. If a Jellyfish database is given, return true
 // iff the k-mer is in the database. With no database, it always
@@ -377,6 +256,7 @@ public:
 
     jflib::omstream output(_ec->output());
     jflib::omstream details(_ec->log());
+    kmer_t      mer, tmer;
 
     uint64_t nb_reads = 0;
     bool     parity   = true;
@@ -394,7 +274,6 @@ public:
         insure_length_buffer(sequence.size());
 
         const char* error = "";
-        kmer_t      mer;
         const char *input = seq_s + _ec->skip();
         char       *out   = _buffer + _ec->skip();
         //Prime system. Find and write starting k-mer
@@ -406,9 +285,10 @@ public:
           continue;
         }
         // Extend forward and backward
+        tmer = mer;
         forward_log fwd_log(_ec->window(), _ec->error());
         char *end_out =
-          extend(forward_mer(mer), forward_ptr<const char>(input),
+          extend(forward_mer(tmer), forward_ptr<const char>(input),
                  forward_counter(input - seq_s),
                  forward_ptr<const char>(seq_e),
                  forward_ptr<char>(out), fwd_log,
@@ -423,9 +303,10 @@ public:
         assert(input > seq_s + mer_dna::k());
         assert(out > _buffer + mer_dna::k());
         assert(input - seq_s == out - _buffer);
+        tmer = mer;
         backward_log bwd_log(_ec->window(), _ec->error());
         char *start_out =
-          extend(backward_mer(mer),
+          extend(backward_mer(tmer),
                  backward_ptr<const char>(input - mer_dna::k() - 1),
                  backward_counter(input - mer_dna::k() - seq_s - 1),
                  backward_ptr<const char>(seq_s - 1),
@@ -477,7 +358,6 @@ private:
                 counter pos, in_dir_ptr end,
                 out_dir_ptr out, elog &log, const char** error) {
     counter cpos = pos;
-    //    int pocc = _af->get_val(mer.canonical()); // # of occurences of previous mer
     uint32_t prev_count=_af->get_val(mer.canonical());
 
     for( ; input < end; ++input) {

@@ -37,48 +37,6 @@ typedef std::vector<const char*> file_vector;
 typedef jellyfish::stream_manager<file_vector::const_iterator> stream_manager;
 typedef jellyfish::whole_sequence_parser<stream_manager> read_parser;
 
-class hash_with_quality {
-  mer_array      keys_;
-  val_array      vals_;
-  const uint64_t max_val_;
-
-public:
-  hash_with_quality(size_t size, uint16_t key_len, int bits, uint16_t reprobe_limit = 126) :
-    keys_(size, key_len, 0, reprobe_limit),
-    vals_(bits + 1, keys_.size()),
-    max_val_((uint64_t)-1 >> (sizeof(uint64_t) * 8 - bits))
-  { }
-
-  bool add(const mer_dna& key, unsigned int quality) {
-    bool is_new;
-    size_t id;
-    if(!keys_.set(key, &is_new, &id))
-      return false;
-
-    auto     entry = vals_[id];
-    uint64_t oval;
-    uint64_t nval = entry.get();;
-    do {
-      oval = nval;
-      if((oval & 1) > quality)
-        nval = 3;
-      else if((oval >> 1) == max_val_)
-        return true;
-      else
-        nval = oval + 2;
-    } while(!entry.set(nval));
-    return true;
-  }
-
-  void write(std::ostream& os) const {
-    vals_.write(os);
-    keys_.write(os);
-  }
-
-  mer_array& keys() { return keys_; }
-  val_array& vals() { return vals_; }
-};
-
 class quality_mer_counter : public jellyfish::thread_exec {
   hash_with_quality& ary_;
   read_parser        parser_;

@@ -77,4 +77,15 @@ quorum: src/quorum.in Makefile
 	$(do_subst) < $< > $@
 	chmod +x $@
 
+##############
+# Unit tests #
+##############
+TESTS = all_tests
+check_PROGRAMS = all_tests
+
+all_tests_SOURCES = unit_tests/test_speed_calc.cc
+all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(top_srcdir)/unit_tests/gtest/include -I$(top_srcdir)/unit_tests
+all_tests_LDADD = libgtest_main.la $(LDADD)
+
+include gtest.mk
 -include $(top_srcdir)/local.mk

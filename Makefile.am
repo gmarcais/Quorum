@@ -43,12 +43,12 @@ quorum_create_database_SOURCES = src/create_database.cc
 ###############################
 # Adapter database generation #
 ###############################
-dist_data_DATA = data/adapter_0
-DISTCLEANFILES = data/adapter_0
-SUFFIXES = _0 .fa
+dist_data_DATA = data/adapter.jf
+DISTCLEANFILES = data/adapter.jf
+SUFFIXES = .jf .fa
 
-.fa_0:
-	$(AM_V_GEN)mkdir -p $(@D); $(JELLYFISH) count -m 24 -s 5k -C -t 10 -r -o $$(dirname $@)/$$(basename $@ _0) $<
+.fa.jf:
+	$(AM_V_GEN)mkdir -p $(@D); $(JELLYFISH) count -m 24 -s 5k -C -t 10 -o $@ $<
 
 
 bin_SCRIPTS = quorum
@@ -80,12 +80,12 @@ quorum: src/quorum.in Makefile
 ##############
 # Unit tests #
 ##############
-TESTS = all_tests
-check_PROGRAMS = all_tests
+# TESTS = all_tests
+# check_PROGRAMS = all_tests
 
-all_tests_SOURCES = unit_tests/test_speed_calc.cc
-all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(top_srcdir)/unit_tests/gtest/include -I$(top_srcdir)/unit_tests
-all_tests_LDADD = libgtest_main.la $(LDADD)
+# all_tests_SOURCES = unit_tests/test_speed_calc.cc
+# all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(top_srcdir)/unit_tests/gtest/include -I$(top_srcdir)/unit_tests
+# all_tests_LDADD = libgtest_main.la $(LDADD)
 
-include gtest.mk
+# include gtest.mk
 -include $(top_srcdir)/local.mk

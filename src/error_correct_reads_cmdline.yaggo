@@ -1,21 +1,11 @@
 purpose "Error correct reads from a fastq file based on the k-mer frequencies."
 package "error_correct_reads"
 
-output "error_correct_reads_cmdline.hpp"
 name "args_t"
 
-option("db", "d") {
-  description "Jellyfish database"
-  c_string; required; multiple; typestr "jellyfish.db" }
-option("combined", "c") {
-  description "Number of Jellyfish databases combined"
-  uint32; typestr "Nb-DB"; default "0" }
 option("thread", "t") {
   description "Number of threads"
   uint32; default "1" }
-option("both-strands", "C") {
-  description "Canonical k-mers in database"
-  flag; on }
 option("min-count", "m") {
   description "Minimum count for a k-mer to be considered \"good\""
   uint32; default "1" }
@@ -52,6 +42,9 @@ option("homo-trim") {
 option("gzip") {
   description "Gzip output file"
   flag; off }
-arg("file") {
+option("db") {
+  description "Mer database"
+  c_string; typestr "path" }
+arg("sequence") {
   description "Input sequence"
   c_string; typestr "path"; multiple; at_least 1 }

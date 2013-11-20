@@ -98,39 +98,6 @@ public:
   val_array& vals() { return vals_; }
 };
 
-// A class that can compute the oid (original id, or position in the
-// hash array) for the substitution of the first base by the 4
-// nucleotide {A, C, G, T}.
-using jellyfish::RectangularBinaryMatrix;
-class oid_speed_calc {
-  const RectangularBinaryMatrix& matrix_;
-  const uint64_t                 size_mask_;
-  uint64_t                       changes_[4];
-
-public:
-  oid_speed_calc(const RectangularBinaryMatrix& matrix, uint64_t size_mask) :
-    matrix_(matrix),
-    size_mask_(size_mask)
-  {
-    mer_dna m;
-    m.polyA();
-    changes_[0] = 0;
-    for(int i = 1; i < 4; ++i) {
-      m.base(0) = i;
-      changes_[i] = matrix_.times(m);
-    }
-  }
-
-  void calc(const mer_dna& m, uint64_t oids[4]) {
-    const uint64_t base = (matrix_.times(m) & size_mask_) ^ changes_[m.base(0).code()];
-    oids[0] = base;
-    oids[1] = base ^ changes_[1];
-    oids[2] = base ^ changes_[2];
-    oids[3] = base ^ changes_[3];
-  }
-};
-
-
 class database_query {
   const database_header        header_;
   const jellyfish::mapped_file file_;
@@ -161,10 +128,37 @@ public:
   { }
 
   // Get value of m in the high quality database
-  uint64_t get_val(const mer_dna& m) { return 1; }
+  uint64_t get_val(const mer_dna& m) {
+    size_t id;
+    if(!keys_.get_key_id(m, &id))
+      return 0;
+    uint64_t v = vals_[id];
+    return v & (uint64_t)0x1 ? v >> 1 : 0;
+  }
 
   // Get all alternatives at the best level
-  int get_best_alternatives(const mer_dna& m, uint64_t counts[], int& ucode, int& level) {
+  template<typename mer_type>
+  int get_best_alternatives(mer_type m, uint64_t counts[4], int& ucode, int& level) {
+    size_t  id;
+    mer_dna tmp_mer;
+    int     count = 0;
+    memset(counts, '\0', sizeof(counts));
+    level = 0;
+
+    for(int i = 0; i < 4; ++i) {
+      m.replace(0, i);
+      if(!keys_.get_key_id(m.canonical(), &id, tmp_mer))
+        continue;
+      const uint64_t v = vals_[id];
+      const int nlevel = v & (uint64_t)0x1;
+      if(nlevel > level)
+        for(int j = 0; j < i; ++j)
+          counts[j] = 0;
+      counts[i] = v >> 1;
+      ucode     = i;
+      level     = nlevel;
+      ++count;
+    }
     return 0;
   }
 };

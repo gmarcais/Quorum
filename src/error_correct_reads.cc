@@ -25,11 +25,11 @@
 #include <jellyfish/stream_manager.hpp>
 #include <jellyfish/whole_sequence_parser.hpp>
 #include <jellyfish/mer_dna.hpp>
-// #include <jellyfish/divisor64.hpp>
 
 #include <jflib/multiplexed_io.hpp>
 #include <gzip_stream.hpp>
 
+#include <src/mer_database.hpp>
 #include <src/error_correct_reads.hpp>
 #include <src/error_correct_reads_cmdline.hpp>
 
@@ -42,44 +42,6 @@ typedef jellyfish::whole_sequence_parser<stream_manager> read_parser;
 typedef uint64_t hkey_t;
 typedef uint64_t hval_t;
 
-
-
-// Base class which gives all possible continuation given a k-mer and
-// Jellyfish databases. One version uses many Jellyfish databases
-// while the other uses a combined database.
-//
-// The best alternatives version gets all the possible continuation at
-// the highest possible level. The best level is recorded. The
-// get_alternatives version gets all the possible continuation at the
-// currently recorded level.
-class alternative_finder {
-public:
-  virtual ~alternative_finder() { }
-
-  // Get count at highest level for a k-mer. If the k-mer is not
-  // found, 0 is returned
-  virtual hval_t get_val(const mer_dna& m) = 0;
-  virtual int get_best_alternatives(const forward_mer& m, uint64_t counts[], int &ucode, int& level) = 0;
-  virtual int get_best_alternatives(const backward_mer& m, uint64_t counts[], int &ucode, int& level) = 0;
-};
-
-class alternative_dummy : public alternative_finder {
-public:
-  virtual ~alternative_dummy() { }
-  virtual hval_t get_val(const mer_dna& m) { return 1; }
-  virtual int get_best_alternatives(const forward_mer& m, uint64_t counts[], int &ucode, int& level) {
-    counts[0] = counts[1] = counts[2] = counts[3] = 1;
-    ucode = 0;
-    level = 1;
-    return 1;
-  }
-  virtual int get_best_alternatives(const backward_mer& m, uint64_t counts[], int &ucode, int& level) {
-    counts[0] = counts[1] = counts[2] = counts[3] = 1;
-    ucode = 0;
-    level = 1;
-    return 1;
-  }
-};
 
 // Contaminant database. If a Jellyfish database is given, return true
 // iff the k-mer is in the database. With no database, it always
@@ -114,7 +76,6 @@ public:
 template<class instance_t>
 class error_correct_t : public jellyfish::thread_exec {
   read_parser            _parser;
-  alternative_finder*    _af;
   int                    _mer_len;
   int                    _skip;
   int                    _good;
@@ -125,7 +86,7 @@ class error_correct_t : public jellyfish::thread_exec {
   int                    _window;
   int                    _error;
   bool                   _gzip;
-  int                    _combined;
+  database_query*        _mer_database;
   contaminant_check*     _contaminant;
   bool                   _trim_contaminant;
   int                    _homo_trim;
@@ -136,7 +97,7 @@ public:
     _parser(4 * nb_threads, 100, 1, streams),
     _mer_len(mer_dna::k()),
     _skip(0), _good(1), _min_count(1), _cutoff(4), _window(0), _error(0), _gzip(false),
-    _combined(0), _contaminant(0), _trim_contaminant(false),
+    _mer_database(0), _contaminant(0), _trim_contaminant(false),
     _homo_trim(std::numeric_limits<int>::min()) { }
 
 private:
@@ -183,25 +144,25 @@ public:
   }
 
   virtual void start(int id) {
-    instance_t(this, id).start();
+    instance_t(*this, id).start();
   }
 
-  error_correct_t & skip(int s) { _skip = s; return *this; }
-  error_correct_t & good(int g) { _good = g; return *this; }
-  error_correct_t & anchor(int a) { _anchor = a; return *this; }
-  error_correct_t & prefix(const char *s) { _prefix = s; return *this; }
-  error_correct_t & prefix(const std::string s) { _prefix = s; return *this; }
-  error_correct_t & mer_len(int l) { _mer_len = l; return *this; }
-  error_correct_t & min_count(int m) { _min_count = m; return *this; }
-  error_correct_t & cutoff(int p) { _cutoff = p; return *this; }
-  //  error_correct_t & advance(int a) { _advance = a; return *this; }
-  error_correct_t & window(int w) { _window = w; return *this; }
-  error_correct_t & error(int e) { _error = e; return *this; }
-  error_correct_t & gzip(bool g) { _gzip = g; return *this; }
-  error_correct_t & combined(int c) { _combined = c; return *this; }
-  error_correct_t & contaminant(contaminant_check* c) { _contaminant = c; return *this; }
-  error_correct_t & trim_contaminant(bool t) { _trim_contaminant = t; return *this; }
-  error_correct_t & homo_trim(int t) { _homo_trim = t; return *this; }
+  error_correct_t& skip(int s) { _skip = s; return *this; }
+  error_correct_t& good(int g) { _good = g; return *this; }
+  error_correct_t& anchor(int a) { _anchor = a; return *this; }
+  error_correct_t& prefix(const char *s) { _prefix = s; return *this; }
+  error_correct_t& prefix(const std::string s) { _prefix = s; return *this; }
+  error_correct_t& mer_len(int l) { _mer_len = l; return *this; }
+  error_correct_t& min_count(int m) { _min_count = m; return *this; }
+  error_correct_t& cutoff(int p) { _cutoff = p; return *this; }
+  //  error_corret_t & advance(int a) { _advance = a; return *this; }
+  error_correct_t& window(int w) { _window = w; return *this; }
+  error_correct_t& error(int e) { _error = e; return *this; }
+  error_correct_t& gzip(bool g) { _gzip = g; return *this; }
+  error_correct_t& mer_database(database_query* q) { _mer_database = q; return *this; }
+  error_correct_t& contaminant(contaminant_check* c) { _contaminant = c; return *this; }
+  error_correct_t& trim_contaminant(bool t) { _trim_contaminant = t; return *this; }
+  error_correct_t& homo_trim(int t) { _homo_trim = t; return *this; }
 
   read_parser& parser() { return _parser; }
   int skip() const { return _skip; }
@@ -215,18 +176,14 @@ public:
   int window() const { return _window ? _window : _mer_len; }
   int error() const { return _error ? _error : _mer_len / 2; }
   bool gzip() const { return _gzip; }
-  int combined() const { return _combined; }
+  database_query* mer_database() const { return _mer_database; }
   contaminant_check* contaminant() const { return _contaminant; }
   bool trim_contaminant() const { return _trim_contaminant; }
   bool do_homo_trim() const { return _homo_trim != std::numeric_limits<int>::min(); }
   int homo_trim() const { return _homo_trim; }
 
-  jflib::o_multiplexer &output() { return *_output; }
-  jflib::o_multiplexer &log() { return *_log; }
-
-  alternative_finder* new_af() {
-    return new alternative_dummy();
-  }
+  jflib::o_multiplexer& output() { return *_output; }
+  jflib::o_multiplexer& log() { return *_log; }
 };
 
 class error_correct_instance {
@@ -234,34 +191,31 @@ public:
   typedef error_correct_t<error_correct_instance> ec_t ;
 
 private:
-  ec_t                                *_ec;
-  int                                  _id;
-  size_t                               _buff_size;
-  char                                *_buffer;
-  std::unique_ptr<alternative_finder>  _af;
+  ec_t&  _ec;
+  int    _id;
+  size_t _buff_size;
+  char*  _buffer;
 
   static const char* error_contaminant;
   static const char* error_no_starting_mer;
   static const char* error_homopolymer;
 
 public:
-  error_correct_instance(ec_t *ec, int id) :
+  error_correct_instance(ec_t& ec, int id) :
     _ec(ec), _id(id), _buff_size(0), _buffer(0) { }
   ~error_correct_instance() {
     free(_buffer);
   }
 
   void start() {
-    _af.reset(_ec->new_af());
-
-    jflib::omstream output(_ec->output());
-    jflib::omstream details(_ec->log());
-    kmer_t      mer, tmer;
+    jflib::omstream output(_ec.output());
+    jflib::omstream details(_ec.log());
+    kmer_t          mer, tmer;
 
     uint64_t nb_reads = 0;
     bool     parity   = true;
     while(true) {
-      read_parser::job job(_ec->parser());
+      read_parser::job job(_ec.parser());
       if(job.is_empty()) break;
       for(size_t i = 0; i < job->nb_filled; ++i) {
         const std::string& header = job->data[i].header;
@@ -274,8 +228,8 @@ public:
         insure_length_buffer(sequence.size());
 
         const char* error = "";
-        const char *input = seq_s + _ec->skip();
-        char       *out   = _buffer + _ec->skip();
+        const char *input = seq_s + _ec.skip();
+        char       *out   = _buffer + _ec.skip();
         //Prime system. Find and write starting k-mer
         if(!find_starting_mer(mer, input, seq_e, out, &error)) {
           details << "Skipped " << header
@@ -286,7 +240,7 @@ public:
         }
         // Extend forward and backward
         tmer = mer;
-        forward_log fwd_log(_ec->window(), _ec->error());
+        forward_log fwd_log(_ec.window(), _ec.error());
         char *end_out =
           extend(forward_mer(tmer), forward_ptr<const char>(input),
                  forward_counter(input - seq_s),
@@ -304,7 +258,7 @@ public:
         assert(out > _buffer + mer_dna::k());
         assert(input - seq_s == out - _buffer);
         tmer = mer;
-        backward_log bwd_log(_ec->window(), _ec->error());
+        backward_log bwd_log(_ec.window(), _ec.error());
         char *start_out =
           extend(backward_mer(tmer),
                  backward_ptr<const char>(input - mer_dna::k() - 1),
@@ -323,7 +277,7 @@ public:
         assert(start_out >= _buffer);
         assert(_buffer + _buff_size >= end_out);
 
-        if(_ec->do_homo_trim()) {
+        if(_ec.do_homo_trim()) {
           end_out = homo_trim(_buffer, start_out, end_out, fwd_log, bwd_log, &error);
           if(!end_out) {
             details << "Skipped " << header
@@ -357,8 +311,8 @@ private:
   char * extend(dir_mer mer, in_dir_ptr input,
                 counter pos, in_dir_ptr end,
                 out_dir_ptr out, elog &log, const char** error) {
-    counter cpos = pos;
-    uint32_t prev_count=_af->get_val(mer.canonical());
+    counter  cpos       = pos;
+    uint32_t prev_count = _ec.mer_database()->get_val(mer.canonical());
 
     for( ; input < end; ++input) {
       char     base        = *input;
@@ -373,8 +327,8 @@ private:
         ori_code = -1; // Invalid base
         mer.shift(0);
       } else {
-        if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-          if(_ec->trim_contaminant()) {
+        if(_ec.contaminant()->is_contaminant(mer.canonical())) {
+          if(_ec.trim_contaminant()) {
             log.truncation(cpos);
             goto done;
           }
@@ -388,7 +342,7 @@ private:
       int      count;
       int      level;
 
-      count = _af->get_best_alternatives(mer, counts, ucode, level);
+      count = _ec.mer_database()->get_best_alternatives(mer, counts, ucode, level);
 
       // No coninuation whatsoever, trim.
       if(count == 0) {
@@ -400,8 +354,8 @@ private:
         prev_count = counts[ucode];
         if(ucode != ori_code) {
           mer.replace(0, ucode);
-          if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-            if(_ec->trim_contaminant()) {
+          if(_ec.contaminant()->is_contaminant(mer.canonical())) {
+            if(_ec.trim_contaminant()) {
               log.truncation(cpos);
               goto done;
             }
@@ -423,8 +377,8 @@ private:
       // base has count of zero, all alternatives are low quality and prev_count is low
       // then trim
       if(ori_code >= 0){ //if the current base is valid base (non N)
-	if(counts[ori_code] > (uint64_t)_ec->min_count()) {
-          if(counts[ori_code]>=(uint32_t)_ec->cutoff()) {
+	if(counts[ori_code] > (uint64_t)_ec.min_count()) {
+          if(counts[ori_code]>=(uint32_t)_ec.cutoff()) {
             *out++ = mer.base(0);
             continue;
           }
@@ -476,7 +430,7 @@ private:
       for(int i = 0; i < 4; ++i) {
         cont_counts[i]                = 0;
         continue_with_correct_base[i] = false;
-        if(counts[i] <= (uint64_t)_ec->min_count())
+        if(counts[i] <= (uint64_t)_ec.min_count())
           continue;
         check_code = i;
         // Check that it continues at least one more base with that quality
@@ -489,7 +443,7 @@ private:
         int        ncount;
         int        nucode = 0;
         int        nlevel;
-        ncount = _af->get_best_alternatives(nmer, ncounts, nucode, nlevel);
+        ncount = _ec.mer_database()->get_best_alternatives(nmer, ncounts, nucode, nlevel);
         if(ncount > 0 && nlevel >= level) {
           continue_with_correct_base[i] = read_nbase_code >= 0 && ncounts[read_nbase_code] > 0;
           success                       = true;
@@ -504,7 +458,7 @@ private:
         // closest to the current count but in the special case of
         // prev_count == 1 we simply pick the largest count
         check_code           = -1;
-        uint32_t _prev_count = prev_count<=(uint64_t)_ec->min_count() ? std::numeric_limits<uint32_t>::max() : prev_count;
+        uint32_t _prev_count = prev_count<=(uint64_t)_ec.min_count() ? std::numeric_limits<uint32_t>::max() : prev_count;
         int      min_diff    = std::numeric_limits<int>::max();
         for(int  i = 0; i < 4; ++i) {
           candidate_continuations[i] = false;
@@ -538,8 +492,8 @@ private:
 
         if(check_code >= 0){
           mer.replace(0, check_code);
-          if(_ec->contaminant()->is_contaminant(mer.canonical())) {
-            if(_ec->trim_contaminant()) {
+          if(_ec.contaminant()->is_contaminant(mer.canonical())) {
+            if(_ec.trim_contaminant()) {
               log.truncation(cpos);
               goto done;
             }
@@ -585,7 +539,7 @@ private:
       }
     }
 
-    if(max_homo_score < _ec->homo_trim())
+    if(max_homo_score < _ec.homo_trim())
       return out_end; // Not a high score -> return without truncation
     assert(max_pos >= out_start);
     assert(max_pos >= start);
@@ -602,7 +556,7 @@ private:
   void insure_length_buffer(size_t len) {
     if(len > _buff_size) {
       _buff_size = len > 2 * _buff_size ? len + 100 : 2 * _buff_size;
-      _buffer = (char *)realloc(_buffer, _buff_size);
+      _buffer    = (char *)realloc(_buffer, _buff_size);
 
       if(!_buffer)
 	eraise(std::runtime_error)
@@ -613,7 +567,7 @@ private:
   bool find_starting_mer(kmer_t &mer, const char * &input, const char *end, char * &out,
 			 const char** error) {
     while(input < end) {
-      for(int i = 0; input < end && i < _ec->mer_len(); ++i) {
+      for(int i = 0; input < end && i < _ec.mer_len(); ++i) {
 	char base = *input++;
 	*out++ = base;
 	if(!mer.shift_left(base))
@@ -621,17 +575,17 @@ private:
       }
       int found = 0;
       while(input < end) {
-	bool contaminated = _ec->contaminant()->is_contaminant(mer.canonical());
-	if(contaminated && !_ec->trim_contaminant()) {
+	bool contaminated = _ec.contaminant()->is_contaminant(mer.canonical());
+	if(contaminated && !_ec.trim_contaminant()) {
 	  *error = error_contaminant;
 	  return false;
 	}
 
 	if(!contaminated) {
-	  hval_t val = _af->get_val(mer.canonical());
+	  hval_t val = _ec.mer_database()->get_val(mer.canonical());
 
-	  found = (int)val >= _ec->anchor() ? found + 1 : 0;
-	  if(found >= _ec->good())
+	  found = (int)val >= _ec.anchor() ? found + 1 : 0;
+	  if(found >= _ec.good())
 	    return true;
 	}
 
@@ -656,8 +610,7 @@ int main(int argc, char *argv[])
 {
   args_t args(argc, argv);
 
-  if(args.combined_given && args.db_arg.size() > 1)
-    die << "Only one Jellyfish database when using combined mode";
+  database_query mer_database(args.db_arg);
 
   // Open contaminant database. Skipped for now. No contaminant.
   std::unique_ptr<contaminant_check> contaminant;
@@ -673,7 +626,7 @@ int main(int argc, char *argv[])
   // } else {
   //   contaminant.reset(new contaminant_no_database());
   // }
-  stream_manager streams(args.file_arg.cbegin(), args.file_arg.cend(), 1);
+  stream_manager streams(args.sequence_arg.cbegin(), args.sequence_arg.cend(), 1);
 
   error_correct_instance::ec_t correct(args.thread_arg, streams);
   correct.skip(args.skip_arg).good(args.good_arg)
@@ -684,7 +637,7 @@ int main(int argc, char *argv[])
     .window(args.window_given ? args.window_arg : mer_dna::k())
     .error(args.error_given ? args.error_arg : mer_dna::k() / 2)
     .gzip(args.gzip_flag)
-    .combined(args.combined_arg)
+    .mer_database(&mer_database)
     .contaminant(contaminant.get())
     .trim_contaminant(args.trim_contaminant_flag)
     .homo_trim(args.homo_trim_given ? args.homo_trim_arg : std::numeric_limits<int>::min());

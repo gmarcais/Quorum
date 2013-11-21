@@ -55,11 +55,11 @@ TEST(MerDatabase, WriteRead) {
   std::string lq1  = generate_sequence(sequence_len);
   std::string lq2  = generate_sequence(sequence_len);
 
-  mer_dna::k(20);
+  mer_dna::k(33);
 
   size_t key_start, val_start, total_len;
   {
-    hash_with_quality database(10 * sequence_len, mer_dna::k() * 2, bits);
+    hash_with_quality database(20 * sequence_len, mer_dna::k() * 2, bits);
     insert_sequence(database, hq2, 1);
     insert_sequence(database, hq2, 1);
     insert_sequence(database, hq1, 1);

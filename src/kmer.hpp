@@ -23,7 +23,7 @@ public:
 
   void shift_left(int x) {
     _fmer.shift_left(x);
-    _rmer.shift_left(x);
+    _rmer.shift_right(mer_dna::complement(x));
   }
 
   bool shift_right(char c) {
@@ -37,8 +37,7 @@ public:
 
   void shift_right(int x) {
     _fmer.shift_right(x);
-    _rmer.shift_right(x);
-
+    _rmer.shift_left(mer_dna::complement(x));
   }
 
   const jellyfish::mer_dna& canonical() const { return _fmer < _rmer ? _fmer : _rmer; }
@@ -46,8 +45,8 @@ public:
   const jellyfish::mer_dna& rmer() const { return _rmer; }
 
   void replace(int i, int x) {
-    _fmer.base(i)                           = x;
-    _rmer.base(jellyfish::mer_dna::k() - 1) = jellyfish::mer_dna::complement(x);
+    _fmer.base(i)                               = x;
+    _rmer.base(jellyfish::mer_dna::k() - i - 1) = jellyfish::mer_dna::complement(x);
   }
 
   char base(int i) const { return jellyfish::mer_dna::rev_code(code(i)); }
@@ -82,6 +81,7 @@ public:
   int code(int i) const { return _m.code(i); }
   void replace(int i, int x) { _m.replace(i, x); }
   const jellyfish::mer_dna& rmer() const { return _m.rmer(); }
+  const kmer_t& kmer() const { return _m; }
   friend std::ostream &operator<<(std::ostream &os, const forward_mer &mer);
 };
 inline std::ostream &operator<<(std::ostream &os, const forward_mer &mer) {
@@ -101,6 +101,7 @@ public:
   char base(int i) const { return _m.base(jellyfish::mer_dna::k() - i - 1); }
   int code(int i) const { return _m.code(jellyfish::mer_dna::k() - i - 1); }
   void replace(int i, uint64_t c) { _m.replace(jellyfish::mer_dna::k() - i - 1, c); }
+  const kmer_t& kmer() const { return _m; }
   friend std::ostream &operator<<(std::ostream &os, const backward_mer &mer);
 };
 inline std::ostream &operator<<(std::ostream &os, const backward_mer &mer) {

@@ -18,6 +18,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include <jellyfish/mer_dna.hpp>
 #include <jellyfish/file_header.hpp>
@@ -51,6 +52,7 @@ public:
 
   virtual void start(int thid) {
     mer_dna m, rm;
+    size_t counted_high = 0, counted_low = 0;
 
     while(true) {
       read_parser::job job(parser_);
@@ -64,21 +66,24 @@ public:
         auto         qual     = quals.begin();
         unsigned int low_len  = 0; // Length of low quality stretch
         unsigned int high_len = 0; // Length of high quality stretch
-        for( ; base != seq.begin(); ++base, ++base) {
+        for( ; base != seq.end(); ++base, ++qual) {
           int code = mer_dna::code(*base);
           if(mer_dna::not_dna(code)) {
             high_len = low_len = 0;
             continue;
           }
           m.shift_left(code);
-          m.shift_right(mer_dna::rev_code(code));
+          rm.shift_right(mer_dna::complement(code));
           ++low_len;
           if(*qual > qual_thresh_)
             ++high_len;
           else
             high_len = 0;
           if(low_len >= mer_dna::k()) {
-            ary_.add(m < rm ? m : rm, high_len >= mer_dna::k());
+            if(!ary_.add(m < rm ? m : rm, high_len >= mer_dna::k()))
+              eraise(std::runtime_error) << "Hash is full";
+            counted_high += high_len >= mer_dna::k();
+            ++counted_low;
           }
         }
       }

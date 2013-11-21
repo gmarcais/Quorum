@@ -17,16 +17,16 @@ option("skip", "s") {
   uint32; default "2" }
 option("good", "g") {
   description "Number of good k-mer in a row for anchor"
-  uint32; default "2" }
+  uint32; default 2 }
 option("anchor-count", "a") {
   description "Minimum count for an anchor k-mer"
-  uint32; default "3" }
+  uint32; default 3 }
 option("window", "w") {
-  description "Size of window (default=mer length)"
-  uint32 }
+  description "Size of window"
+  uint32; default 10 }
 option("error", "e") {
   description "Maximum number of error in a window"
-  uint32; default "3" }
+  uint32; default 3 }
 option("output", "o") {
   description "Output file prefix"
   string; default "error_corrected"; typestr "prefix" }

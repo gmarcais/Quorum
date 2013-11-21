@@ -76,7 +76,6 @@ public:
 template<class instance_t>
 class error_correct_t : public jellyfish::thread_exec {
   read_parser            _parser;
-  int                    _mer_len;
   int                    _skip;
   int                    _good;
   int                    _anchor;
@@ -86,7 +85,7 @@ class error_correct_t : public jellyfish::thread_exec {
   int                    _window;
   int                    _error;
   bool                   _gzip;
-  database_query*        _mer_database;
+  const database_query*  _mer_database;
   contaminant_check*     _contaminant;
   bool                   _trim_contaminant;
   int                    _homo_trim;
@@ -95,7 +94,6 @@ class error_correct_t : public jellyfish::thread_exec {
 public:
   error_correct_t(int nb_threads, stream_manager& streams) :
     _parser(4 * nb_threads, 100, 1, streams),
-    _mer_len(mer_dna::k()),
     _skip(0), _good(1), _min_count(1), _cutoff(4), _window(0), _error(0), _gzip(false),
     _mer_database(0), _contaminant(0), _trim_contaminant(false),
     _homo_trim(std::numeric_limits<int>::min()) { }
@@ -152,7 +150,6 @@ public:
   error_correct_t& anchor(int a) { _anchor = a; return *this; }
   error_correct_t& prefix(const char *s) { _prefix = s; return *this; }
   error_correct_t& prefix(const std::string s) { _prefix = s; return *this; }
-  error_correct_t& mer_len(int l) { _mer_len = l; return *this; }
   error_correct_t& min_count(int m) { _min_count = m; return *this; }
   error_correct_t& cutoff(int p) { _cutoff = p; return *this; }
   //  error_corret_t & advance(int a) { _advance = a; return *this; }
@@ -169,14 +166,13 @@ public:
   int good() const { return _good; }
   int anchor() const { return _anchor; }
   const std::string & prefix() const { return _prefix; }
-  int mer_len() const { return _mer_len; }
   int min_count() const { return _min_count; }
   int cutoff() const { return _cutoff; }
   //  int advance() const { return _advance; }
-  int window() const { return _window ? _window : _mer_len; }
-  int error() const { return _error ? _error : _mer_len / 2; }
+  int window() const { return _window ? _window : mer_dna::k(); }
+  int error() const { return _error ? _error : mer_dna::k() / 2; }
   bool gzip() const { return _gzip; }
-  database_query* mer_database() const { return _mer_database; }
+  const database_query* mer_database() const { return _mer_database; }
   contaminant_check* contaminant() const { return _contaminant; }
   bool trim_contaminant() const { return _trim_contaminant; }
   bool do_homo_trim() const { return _homo_trim != std::numeric_limits<int>::min(); }
@@ -342,7 +338,9 @@ private:
       int      count;
       int      level;
 
+      //      std::cout << "before mer:" << mer << "\n";
       count = _ec.mer_database()->get_best_alternatives(mer, counts, ucode, level);
+      //      std::cout << "after  mer:" << mer << "\n";
 
       // No coninuation whatsoever, trim.
       if(count == 0) {
@@ -365,6 +363,7 @@ private:
           if(log.substitution(cpos, base, mer.base(0)))
             goto truncate;
 	}
+        //        std::cout << "unique base:" << mer.base(0) << " mer:" << mer << "\n";
         *out++ = mer.base(0);
         continue;
       }
@@ -434,7 +433,8 @@ private:
           continue;
         check_code = i;
         // Check that it continues at least one more base with that quality
-        dir_mer    nmer   = mer;
+        kmer_t  _nmer = mer.kmer();
+        dir_mer nmer  = _nmer;
         nmer.replace(0, check_code);
         // Does not matter what we shift, check all alternative anyway.
         nmer.shift(0);
@@ -567,7 +567,7 @@ private:
   bool find_starting_mer(kmer_t &mer, const char * &input, const char *end, char * &out,
 			 const char** error) {
     while(input < end) {
-      for(int i = 0; input < end && i < _ec.mer_len(); ++i) {
+      for(int i = 0; input < end && i < (int)mer_dna::k(); ++i) {
 	char base = *input++;
 	*out++ = base;
 	if(!mer.shift_left(base))
@@ -611,6 +611,7 @@ int main(int argc, char *argv[])
   args_t args(argc, argv);
 
   database_query mer_database(args.db_arg);
+  mer_dna::k(mer_database.header().key_len() / 2);
 
   // Open contaminant database. Skipped for now. No contaminant.
   std::unique_ptr<contaminant_check> contaminant;
@@ -634,8 +635,8 @@ int main(int argc, char *argv[])
     .prefix(args.output_given ? (std::string)args.output_arg : "")
     .min_count(args.min_count_arg)
     .cutoff(args.cutoff_arg)
-    .window(args.window_given ? args.window_arg : mer_dna::k())
-    .error(args.error_given ? args.error_arg : mer_dna::k() / 2)
+    .window(args.window_arg)
+    .error(args.error_arg)
     .gzip(args.gzip_flag)
     .mer_database(&mer_database)
     .contaminant(contaminant.get())

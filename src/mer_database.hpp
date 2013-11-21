@@ -148,38 +148,37 @@ public:
   }
 
   // Get value of m in the high quality database
-  uint64_t get_val(const mer_dna& m) {
-    size_t id;
-    if(!keys_.get_key_id(m, &id))
-      return 0;
-    uint64_t v = vals_[id];
-    return v & (uint64_t)0x1 ? v >> 1 : 0;
+  uint64_t get_val(const mer_dna& m) const {
+    auto v = operator[](m);
+    return v.second ? v.first : 0;
   }
 
   // Get all alternatives at the best level
   template<typename mer_type>
-  int get_best_alternatives(mer_type m, uint64_t counts[4], int& ucode, int& level) {
-    size_t  id;
+  int get_best_alternatives(mer_type& m, uint64_t counts[4], int& ucode, int& level) const {
     mer_dna tmp_mer;
     int     count = 0;
-    memset(counts, '\0', sizeof(counts));
+    memset(counts, '\0', sizeof(uint64_t) * 4);
     level = 0;
+    int ori_code = m.code(0);
 
     for(int i = 0; i < 4; ++i) {
       m.replace(0, i);
-      if(!keys_.get_key_id(m.canonical(), &id, tmp_mer))
-        continue;
-      const uint64_t v = vals_[id];
-      const int nlevel = v & (uint64_t)0x1;
-      if(nlevel > level)
-        for(int j = 0; j < i; ++j)
-          counts[j] = 0;
-      counts[i] = v >> 1;
-      ucode     = i;
-      level     = nlevel;
-      ++count;
+      auto v = operator[](m.canonical());
+      if(v.first > 0) {
+        if(v.second > level && count > 0) {
+          for(int j = 0; j < i; ++j)
+            counts[j] = 0;
+          count = 0;
+        }
+        counts[i] = v.first;
+        ucode     = i;
+        level     = v.second;
+        ++count;
+      }
     }
-    return 0;
+    m.replace(0, ori_code); // Reset m to original value
+    return count;
   }
 };
 

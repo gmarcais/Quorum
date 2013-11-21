@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
   mer_dna::k(args.mer_arg);
   if(!args.min_qual_value_given && !args.min_qual_char_given)
     args.error("Either a min-qual-value or min-qual-char must be provided.");
-  if(args.min_qual_char_arg.size() != 1)
+  if(args.min_qual_char_given && args.min_qual_char_arg.size() != 1)
     args.error("The min-qual-char should be one ASCII character.");
   char qual_thresh = args.min_qual_char_given ? args.min_qual_char_arg[0] : (char)args.min_qual_value_arg;
   if(args.bits_arg < 1 || args.bits_arg > 63)
@@ -112,13 +112,7 @@ int main(int argc, char *argv[])
     counter.exec_join(args.threads_arg);
   }
 
-  header.update_from_ary(ary.keys());
-  header.set_format();
-  header.bits(args.bits_arg);
-  header.key_bytes(ary.keys().size_bytes());
-  header.value_bytes(ary.vals().size_bytes());
-  header.write(output);
-  ary.write(output);
+  ary.write(output, &header);
   output.close();
 
   return 0;

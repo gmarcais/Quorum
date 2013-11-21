@@ -33,7 +33,6 @@ typedef jellyfish::large_hash::array_raw<mer_dna> mer_array_raw;
 typedef jellyfish::atomic_bits_array<uint64_t> val_array;
 typedef jellyfish::atomic_bits_array_raw<uint64_t> val_array_raw;
 
-
 class database_header : public jellyfish::file_header {
 public:
   database_header() : jellyfish::file_header() { }
@@ -79,9 +78,9 @@ public:
     uint64_t nval = entry.get();;
     do {
       oval = nval;
-      if((oval & 1) > quality)
+      if((oval & 1) < quality)
         nval = 3;
-      else if((oval >> 1) == max_val_)
+      else if((oval >> 1) == max_val_ || (oval & 1) > quality)
         return true;
       else
         nval = oval + 2;
@@ -89,7 +88,15 @@ public:
     return true;
   }
 
-  void write(std::ostream& os) const {
+  void write(std::ostream& os, database_header* header = 0) const {
+    if(header) {
+      header->set_format();
+      header->update_from_ary(keys_);
+      header->bits(vals_.bits() - 1);
+      header->key_bytes(keys_.size_bytes());
+      header->value_bytes(vals_.size_bytes());
+      header->write(os);
+    }
     keys_.write(os);
     vals_.write(os);
   }
@@ -122,10 +129,23 @@ public:
   file_(filename),
   keys_(file_.base() + header_.offset(), header_.key_bytes(),
         header_.size(), header_.key_len(), header_.val_len(),
-        header_.max_reprobe()),
+        header_.max_reprobe(), header_.matrix()),
   vals_(file_.base() + header_.offset() + header_.key_bytes(), header_.value_bytes(),
-        header_.bits(), header_.size())
+        header_.bits() + 1, header_.size())
   { }
+
+  const database_header& header() const { return header_; }
+
+  std::pair<uint64_t, int> operator[](const mer_dna& m) const {
+    std::pair<uint64_t, int> res = { 0, 0 };
+    size_t                   id  = 0;
+    if(keys_.get_key_id(m, &id)) {
+      uint64_t v = vals_[id];
+      res.first  = v >> 1;
+      res.second = v & 0x1;
+    }
+    return res;
+  }
 
   // Get value of m in the high quality database
   uint64_t get_val(const mer_dna& m) {

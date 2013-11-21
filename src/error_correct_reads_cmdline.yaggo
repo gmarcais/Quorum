@@ -42,7 +42,7 @@ option("homo-trim") {
 option("gzip") {
   description "Gzip output file"
   flag; off }
-option("db") {
+arg("db") {
   description "Mer database"
   c_string; typestr "path" }
 arg("sequence") {

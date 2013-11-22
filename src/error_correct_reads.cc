@@ -25,6 +25,7 @@
 #include <jellyfish/stream_manager.hpp>
 #include <jellyfish/whole_sequence_parser.hpp>
 #include <jellyfish/mer_dna.hpp>
+#include <jellyfish/jellyfish.hpp>
 
 #include <jflib/multiplexed_io.hpp>
 #include <gzip_stream.hpp>
@@ -51,6 +52,7 @@ public:
   virtual ~contaminant_check() { }
 
   virtual bool is_contaminant(const mer_dna& m) = 0;
+  virtual bool is_contaminant(const mer_dna& m, mer_dna& tmp) = 0;
   virtual void debug(const char*msg) = 0;
 };
 
@@ -58,20 +60,27 @@ class contaminant_no_database : public contaminant_check {
 public:
   virtual ~contaminant_no_database() { }
   virtual bool is_contaminant(const mer_dna& m) { return false; }
+  virtual bool is_contaminant(const mer_dna& m, mer_dna& tmp) { return false; }
   virtual void debug(const char* msg) { std::cerr << msg << " no database" << std::endl; }
 };
 
-// class contaminant_database : public contaminant_check {
-//   inv_hash_storage_t ary_;
-// public:
-//   contaminant_database(inv_hash_storage_t ary) : ary_(ary) { }
-//   virtual ~contaminant_database() { }
-//   virtual void debug(const char* msg) { std::cerr << msg << " block_len " << ary_.get_block_len() << std::endl; }
-//   virtual bool is_contaminant(uint64_t m) {
-//     hval_t val = 0;
-//     return ary_.get_val(m, val, false);
-//   }
-// };
+class contaminant_database : public contaminant_check {
+  mer_array ary_;
+public:
+  contaminant_database(binary_reader& reader, size_t size) : ary_(size, mer_dna::k() * 2, 0, 126) {
+    while(reader.next()) {
+      if(!ary_.set(reader.key()))
+        eraise(std::runtime_error) << "Size of hash for contaminant too small";
+    }
+  }
+  virtual ~contaminant_database() { }
+  virtual void debug(const char* msg) { std::cerr << msg << std::endl; }
+  virtual bool is_contaminant(const mer_dna& m) { return ary_.has_key(m); }
+  virtual bool is_contaminant(const mer_dna& m, mer_dna& tmp) {
+    size_t id;
+    return ary_.get_key_id(m, &id, tmp);
+  }
+};
 
 template<class instance_t>
 class error_correct_t : public jellyfish::thread_exec {
@@ -187,10 +196,12 @@ public:
   typedef error_correct_t<error_correct_instance> ec_t ;
 
 private:
-  ec_t&  _ec;
-  int    _id;
-  size_t _buff_size;
-  char*  _buffer;
+  ec_t&   _ec;
+  int     _id;
+  size_t  _buff_size;
+  char*   _buffer;
+  kmer_t  _tmp_mer;
+  mer_dna _tmp_mer_dna;
 
   static const char* error_contaminant;
   static const char* error_no_starting_mer;
@@ -323,7 +334,7 @@ private:
         ori_code = -1; // Invalid base
         mer.shift(0);
       } else {
-        if(_ec.contaminant()->is_contaminant(mer.canonical())) {
+        if(_ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna)) {
           if(_ec.trim_contaminant()) {
             log.truncation(cpos);
             goto done;
@@ -352,7 +363,7 @@ private:
         prev_count = counts[ucode];
         if(ucode != ori_code) {
           mer.replace(0, ucode);
-          if(_ec.contaminant()->is_contaminant(mer.canonical())) {
+          if(_ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna)) {
             if(_ec.trim_contaminant()) {
               log.truncation(cpos);
               goto done;
@@ -433,8 +444,8 @@ private:
           continue;
         check_code = i;
         // Check that it continues at least one more base with that quality
-        kmer_t  _nmer = mer.kmer();
-        dir_mer nmer  = _nmer;
+        _tmp_mer     = mer.kmer();
+        dir_mer nmer = _tmp_mer;
         nmer.replace(0, check_code);
         // Does not matter what we shift, check all alternative anyway.
         nmer.shift(0);
@@ -492,7 +503,7 @@ private:
 
         if(check_code >= 0){
           mer.replace(0, check_code);
-          if(_ec.contaminant()->is_contaminant(mer.canonical())) {
+          if(_ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna)) {
             if(_ec.trim_contaminant()) {
               log.truncation(cpos);
               goto done;
@@ -554,14 +565,14 @@ private:
   }
 
   void insure_length_buffer(size_t len) {
-    if(len > _buff_size) {
-      _buff_size = len > 2 * _buff_size ? len + 100 : 2 * _buff_size;
-      _buffer    = (char *)realloc(_buffer, _buff_size);
+    if(len <= _buff_size)
+      return;
 
-      if(!_buffer)
-	eraise(std::runtime_error)
-	  << "Buffer allocation failed, size " << _buffer << jellyfish::err::no;
-    }
+    _buff_size = len > 2 * _buff_size ? len + 100 : 2 * _buff_size;
+    _buffer    = (char *)realloc(_buffer, _buff_size);
+    if(!_buffer)
+      eraise(std::runtime_error)
+        << "Buffer allocation failed, size " << _buffer << jellyfish::err::no;
   }
 
   bool find_starting_mer(kmer_t &mer, const char * &input, const char *end, char * &out,
@@ -575,7 +586,7 @@ private:
       }
       int found = 0;
       while(input < end) {
-	bool contaminated = _ec.contaminant()->is_contaminant(mer.canonical());
+	bool contaminated = _ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna);
 	if(contaminated && !_ec.trim_contaminant()) {
 	  *error = error_contaminant;
 	  return false;
@@ -616,17 +627,20 @@ int main(int argc, char *argv[])
   // Open contaminant database. Skipped for now. No contaminant.
   std::unique_ptr<contaminant_check> contaminant;
   contaminant.reset(new contaminant_no_database());
-  // if(args.contaminant_given) {
-  //   mapped_file dbf(args.contaminant_arg);
-  //   dbf.random().will_need().load();
-  //   inv_hash_storage_t ary = *raw_inv_hash_query_t(dbf).get_ary();
-  //   if(ary.get_key_len() != key_len)
-  //     die << "Contaminant hash must have same key length as other hashes ("
-  //         << ary.get_key_len() << " != " << key_len << ")";
-  //   contaminant.reset(new contaminant_database(ary));
-  // } else {
-  //   contaminant.reset(new contaminant_no_database());
-  // }
+  if(args.contaminant_given) {
+    std::ifstream contaminant_file(args.contaminant_arg);
+    if(!contaminant_file.good())
+      die << "Failed to open contaminant file '" << args.contaminant_arg << "'";
+    jellyfish::file_header header(contaminant_file);
+    if(header.format() != binary_dumper::format)
+      die << "Contaminant format expected '" << binary_dumper::format << "'";
+    if(mer_dna::k() * 2 != header.key_len())
+      die << "Contaminant mer length (" << (header.key_len() / 2)
+          << ") different than correction mer length (" << mer_dna::k() << ")";
+    binary_reader reader(contaminant_file, &header);
+    contaminant.reset(new contaminant_database(reader, header.size()));
+  }
+
   stream_manager streams(args.sequence_arg.cbegin(), args.sequence_arg.cend(), 1);
 
   error_correct_instance::ec_t correct(args.thread_arg, streams);

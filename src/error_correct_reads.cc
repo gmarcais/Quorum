@@ -33,6 +33,7 @@
 #include <src/mer_database.hpp>
 #include <src/error_correct_reads.hpp>
 #include <src/error_correct_reads_cmdline.hpp>
+#include <src/verbose_log.hpp>
 
 using jellyfish::mer_dna;
 typedef std::vector<const char*> file_vector;
@@ -43,6 +44,18 @@ typedef jellyfish::whole_sequence_parser<stream_manager> read_parser;
 typedef uint64_t hkey_t;
 typedef uint64_t hval_t;
 
+static args_t args;
+
+// Poisson term. Computes a term of the Poisson distribution: e^{-\lambda} \lambda^i / i!.
+double poisson_term(double lambda, unsigned int i) {
+  static const double facts[11] = { 1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800 };
+  static const double tau       = 6.283185307179583;
+
+  if(i < 11)
+    return exp(-lambda) * pow(lambda, i) / facts[i];
+  else
+    return exp(-lambda + i) * pow(lambda / i, i) / sqrt(tau * i);
+}
 
 // Contaminant database. If a Jellyfish database is given, return true
 // iff the k-mer is in the database. With no database, it always
@@ -98,6 +111,8 @@ class error_correct_t : public jellyfish::thread_exec {
   contaminant_check*     _contaminant;
   bool                   _trim_contaminant;
   int                    _homo_trim;
+  double                 _collision_prob; // collision probability = a priori error rate / 3
+  double                 _poisson_threshold;
   jflib::o_multiplexer * _output;
   jflib::o_multiplexer * _log;
 public:
@@ -169,6 +184,8 @@ public:
   error_correct_t& contaminant(contaminant_check* c) { _contaminant = c; return *this; }
   error_correct_t& trim_contaminant(bool t) { _trim_contaminant = t; return *this; }
   error_correct_t& homo_trim(int t) { _homo_trim = t; return *this; }
+  error_correct_t& collision_prob(double cp) { _collision_prob = cp; return *this; }
+  error_correct_t& poisson_threshold(double t) { _poisson_threshold = t; return *this; }
 
   read_parser& parser() { return _parser; }
   int skip() const { return _skip; }
@@ -186,6 +203,8 @@ public:
   bool trim_contaminant() const { return _trim_contaminant; }
   bool do_homo_trim() const { return _homo_trim != std::numeric_limits<int>::min(); }
   int homo_trim() const { return _homo_trim; }
+  double collision_prob() const { return _collision_prob; }
+  double poisson_threshold() const { return _poisson_threshold; }
 
   jflib::o_multiplexer& output() { return *_output; }
   jflib::o_multiplexer& log() { return *_log; }
@@ -349,9 +368,7 @@ private:
       int      count;
       int      level;
 
-      //      std::cout << "before mer:" << mer << "\n";
       count = _ec.mer_database()->get_best_alternatives(mer, counts, ucode, level);
-      //      std::cout << "after  mer:" << mer << "\n";
 
       // No coninuation whatsoever, trim.
       if(count == 0) {
@@ -374,7 +391,6 @@ private:
           if(log.substitution(cpos, base, mer.base(0)))
             goto truncate;
 	}
-        //        std::cout << "unique base:" << mer.base(0) << " mer:" << mer << "\n";
         *out++ = mer.base(0);
         continue;
       }
@@ -388,25 +404,20 @@ private:
       // then trim
       if(ori_code >= 0){ //if the current base is valid base (non N)
 	if(counts[ori_code] > (uint64_t)_ec.min_count()) {
-          if(counts[ori_code]>=(uint32_t)_ec.cutoff()) {
+          if(counts[ori_code] >= (uint32_t)_ec.cutoff()) {
             *out++ = mer.base(0);
             continue;
           }
           // Now we ask for a probability of getting
           // counts[ori_code] errors with p=1/300 in sum_counts
           // trials.  If this probability is < 10e-6, do not correct
-          double n = 0;
-          for(int i = 0; i < 4; ++i)
-            n += (double)counts[i];
-
-          const double k = counts[ori_code];
-          const double p = n / 300.;
-          const double prob = pow(p / k, k) * exp(-p + k) / sqrt(2 * 3.1415927 * k);
-          if(prob < 1e-6) {
+          double p = (double)(counts[0] + counts[1] + counts[2] + counts[3]) * _ec.collision_prob();
+          const double prob = poisson_term(p, counts[ori_code]);
+          if(prob < _ec.poisson_threshold()) {
             *out++ = mer.base(0);
             continue;
           }
-	} else if(level == 0  && counts[ori_code] == 0) {
+	} else if(level == 0 && counts[ori_code] == 0) {
           // definitely an error and all alternatives are low quality
           log.truncation(cpos);
           goto done;
@@ -616,11 +627,33 @@ const char* error_correct_instance::error_contaminant     = "Contaminated read";
 const char* error_correct_instance::error_no_starting_mer = "No high quality mer";
 const char* error_correct_instance::error_homopolymer     = "Entire read is an homopolymer";
 
+unsigned int compute_poisson_cutoff__(const val_array_raw& counts, double collision_prob, double poisson_threshold) {
+  auto     it_end   = counts.end();
+  uint64_t distinct = 0;
+  uint64_t total    = 0;
+  for(auto it = counts.begin(); it != it_end; ++it) {
+    distinct += 1;
+    total    += *it;
+  }
+  double coverage = (double)distinct / (double)total;
+  for(unsigned int x = 2; x < 1000; ++x)
+    if(poisson_term(coverage * collision_prob, x) < poisson_threshold)
+      return x;
+  return 0;
+}
+
+unsigned int compute_poisson_cutoff(const val_array_raw& counts, double collision_prob, double poisson_threshold) {
+  vlog << "Computing Poisson cutoff";
+  unsigned int res = compute_poisson_cutoff__(counts, collision_prob, poisson_threshold);
+  vlog << "Using cutoff of " << res;
+  return res;
+}
 
 int main(int argc, char *argv[])
 {
-  args_t args(argc, argv);
+  args.parse(argc, argv);
 
+  verbose_log::verbose = args.verbose_flag;
   database_query mer_database(args.db_arg);
   mer_dna::k(mer_database.header().key_len() / 2);
 
@@ -628,6 +661,7 @@ int main(int argc, char *argv[])
   std::unique_ptr<contaminant_check> contaminant;
   contaminant.reset(new contaminant_no_database());
   if(args.contaminant_given) {
+    vlog << "Loading contaminant sequences";
     std::ifstream contaminant_file(args.contaminant_arg);
     if(!contaminant_file.good())
       die << "Failed to open contaminant file '" << args.contaminant_arg << "'";
@@ -643,20 +677,28 @@ int main(int argc, char *argv[])
 
   stream_manager streams(args.sequence_arg.cbegin(), args.sequence_arg.cend(), 1);
 
+  const unsigned int cutoff =   args.cutoff_given ?
+    args.cutoff_arg :
+    compute_poisson_cutoff(mer_database.vals(), args.apriori_error_rate_arg / 3, args.poisson_threshold_arg);
+
   error_correct_instance::ec_t correct(args.thread_arg, streams);
   correct.skip(args.skip_arg).good(args.good_arg)
     .anchor(args.anchor_count_arg)
     .prefix(args.output_given ? (std::string)args.output_arg : "")
     .min_count(args.min_count_arg)
-    .cutoff(args.cutoff_arg)
+    .cutoff(cutoff)
     .window(args.window_arg)
     .error(args.error_arg)
     .gzip(args.gzip_flag)
     .mer_database(&mer_database)
     .contaminant(contaminant.get())
     .trim_contaminant(args.trim_contaminant_flag)
-    .homo_trim(args.homo_trim_given ? args.homo_trim_arg : std::numeric_limits<int>::min());
+    .homo_trim(args.homo_trim_given ? args.homo_trim_arg : std::numeric_limits<int>::min())
+    .collision_prob(args.apriori_error_rate_arg / 3)
+    .poisson_threshold(args.poisson_threshold_arg);
+  vlog << "Correcting reads";
   correct.do_it(args.thread_arg);
+  vlog << "Done";
 
   return 0;
  }

@@ -9,9 +9,6 @@ option("thread", "t") {
 option("min-count", "m") {
   description "Minimum count for a k-mer to be considered \"good\""
   uint32; default "1" }
-option("cutoff","p") {
-  description "Poisson cutoff for correcting when we have multiple choices"
-  uint32; default "4" }  
 option("skip", "s") {
   description "Number of bases to skip for start k-mer"
   uint32; default "2" }
@@ -41,6 +38,18 @@ option("homo-trim") {
   int32 }
 option("gzip") {
   description "Gzip output file"
+  flag; off }
+option("apriori-error-rate") {
+  description "Probability of a base being an error"
+  double; default 0.01 }
+option("poisson-threshold") {
+  description "Error probability threshold in Poisson test"
+  double; default 1e-6 }
+option("cutoff","p") {
+  description "Poisson cutoff when there are multiple choices"
+  uint32 }
+option("verbose", "v") {
+  description "Be verbose"
   flag; off }
 arg("db") {
   description "Mer database"

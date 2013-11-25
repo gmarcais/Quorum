@@ -135,6 +135,8 @@ public:
   { }
 
   const database_header& header() const { return header_; }
+  const mer_array_raw& keys() const { return keys_; }
+  const val_array_raw& vals() const { return vals_; }
 
   std::pair<uint64_t, int> operator[](const mer_dna& m) const {
     std::pair<uint64_t, int> res = { 0, 0 };

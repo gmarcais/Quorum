@@ -48,6 +48,9 @@ option("poisson-threshold") {
 option("cutoff","p") {
   description "Poisson cutoff when there are multiple choices"
   uint32 }
+option("comp") {
+  description "Bug for bug compatibility with old version"
+  flag; off; hidden }
 option("verbose", "v") {
   description "Be verbose"
   flag; off }

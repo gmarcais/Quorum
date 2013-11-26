@@ -679,7 +679,8 @@ int main(int argc, char *argv[])
 
   const unsigned int cutoff =   args.cutoff_given ?
     args.cutoff_arg :
-    compute_poisson_cutoff(mer_database.vals(), args.apriori_error_rate_arg / 3, args.poisson_threshold_arg);
+    compute_poisson_cutoff(mer_database.vals(), args.apriori_error_rate_arg / 3,
+                           args.poisson_threshold_arg / (args.comp_flag ?  args.apriori_error_rate_arg : 1.0));
 
   error_correct_instance::ec_t correct(args.thread_arg, streams);
   correct.skip(args.skip_arg).good(args.good_arg)

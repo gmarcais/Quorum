@@ -328,6 +328,42 @@ public:
   }
 
 private:
+  enum log_code { OK, TRUNCATE, ERROR };
+
+  template<typename dir_mer, typename elog, typename counter>
+  log_code check_contaminant(dir_mer& mer, elog& log, const counter& cpos, const char**error) {
+    if(_ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna)) {
+      if(_ec.trim_contaminant()) {
+        log.truncation(cpos);
+        return TRUNCATE;
+      }
+      *error = error_contaminant;
+      return ERROR;
+    }
+    return OK;
+  }
+
+  // Log a substitution.
+  template<typename dir_mer, typename out_dir_ptr, typename elog, typename counter>
+  log_code log_substitution(dir_mer& mer, out_dir_ptr& out, elog& log, const counter& cpos, int from, int to,
+                            const char**error) {
+    if(from == to)
+      return OK;
+
+    mer.replace(0, to);
+    switch(log_code c = check_contaminant(mer, log, cpos, error)) {
+    case OK: break;
+    default: return c;
+    }
+
+    if(log.substitution(cpos, from >= 0 ? mer_dna::rev_code(from) : 'N', to >= 0 ? mer_dna::rev_code(to) : 'N')) {
+      int diff = log.remove_last_window();
+      out = out - diff;
+      log.truncation(cpos - diff);
+      return TRUNCATE;
+    }
+    return OK;
+  }
 
   // Extend and correct read. Copy from input to out. mer should be
   // represent a "good" starting k-mer at the input position.
@@ -341,34 +377,27 @@ private:
     uint32_t prev_count = _ec.mer_database()->get_val(mer.canonical());
 
     for( ; input < end; ++input) {
-      char     base        = *input;
+      const char base = *input;
 
       if(base == '\n')
         continue;
       cpos = pos;
       ++pos;
 
-      int ori_code;
-      if(!mer.shift(base)) {
-        ori_code = -1; // Invalid base
-        mer.shift(0);
-      } else {
-        if(_ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna)) {
-          if(_ec.trim_contaminant()) {
-            log.truncation(cpos);
-            goto done;
-          }
-          *error = error_contaminant;
-          return 0;
+      const int ori_code = mer_dna::code(base);
+      mer.shift(ori_code >= 0 ? ori_code : 0);
+      if(ori_code >= 0) {
+        switch(check_contaminant(mer, log, cpos, error)) {
+        case OK: break;
+        case TRUNCATE: goto done;
+        case ERROR: return 0;
         }
-        ori_code = mer.code(0);
       }
       uint64_t counts[4];
       int      ucode = 0;
-      int      count;
       int      level;
 
-      count = _ec.mer_database()->get_best_alternatives(mer, counts, ucode, level);
+      const int count = _ec.mer_database()->get_best_alternatives(mer, counts, ucode, level);
 
       // No coninuation whatsoever, trim.
       if(count == 0) {
@@ -378,19 +407,11 @@ private:
 
       if(count == 1) { // One continuation. Is it an error?
         prev_count = counts[ucode];
-        if(ucode != ori_code) {
-          mer.replace(0, ucode);
-          if(_ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna)) {
-            if(_ec.trim_contaminant()) {
-              log.truncation(cpos);
-              goto done;
-            }
-            *error = error_contaminant;
-            return 0;
-          }
-          if(log.substitution(cpos, base, mer.base(0)))
-            goto truncate;
-	}
+        switch(log_substitution(mer, out, log, cpos, ori_code, ucode, error)) {
+        case OK: break;
+        case TRUNCATE: goto done;
+        case ERROR: return 0;
+        }
         *out++ = mer.base(0);
         continue;
       }
@@ -462,10 +483,9 @@ private:
         nmer.shift(0);
 
         uint64_t   ncounts[4];
-        int        ncount;
         int        nucode = 0;
         int        nlevel;
-        ncount = _ec.mer_database()->get_best_alternatives(nmer, ncounts, nucode, nlevel);
+        const int ncount = _ec.mer_database()->get_best_alternatives(nmer, ncounts, nucode, nlevel);
         if(ncount > 0 && nlevel >= level) {
           continue_with_correct_base[i] = read_nbase_code >= 0 && ncounts[read_nbase_code] > 0;
           success                       = true;
@@ -512,18 +532,12 @@ private:
         if(ncandidate_continuations != 1)
           check_code = -1;
 
-        if(check_code >= 0){
-          mer.replace(0, check_code);
-          if(_ec.contaminant()->is_contaminant(mer.canonical(), _tmp_mer_dna)) {
-            if(_ec.trim_contaminant()) {
-              log.truncation(cpos);
-              goto done;
-            }
-            *error = error_contaminant;
-            return 0;
+        if(check_code >= 0) {
+          switch(log_substitution(mer, out, log, cpos, ori_code, check_code, error)) {
+          case OK: break;
+          case TRUNCATE: goto done;
+          case ERROR: return 0;
           }
-          if(log.substitution(cpos, base, mer.base(0)))
-            goto truncate;
         }
       }
       if(ori_code < 0 && check_code < 0) {// if invalid base and no good sub found
@@ -535,12 +549,6 @@ private:
 
   done:
     return out.ptr();
-
-  truncate:
-    int diff = log.remove_last_window();
-    out = out - diff;
-    log.truncation(cpos - diff);
-    goto done;
   }
 
   char* homo_trim(const char* start, char* out_start, char* out_end,

@@ -15,7 +15,7 @@ my $PACKAGE_VERSION = "@PACKAGE_VERSION@";
 
 # Command line switches
 my $jf_size;    # Mandatory option
-my $prefix       = "quorum_";
+my $prefix       = "quorum_corrected";
 my $klen         = 24;
 my $min_q_char;
 my $min_quality  = 5;
@@ -98,10 +98,11 @@ if($JF_LIB_PATH) {
 # Detect number of CPUs
 if(!defined($nb_threads)) {
   if(-f "/proc/cpuinfo") {
-    $nb_threads = `grep -c '^processor:' /proc/cpuinfo`;
+    $nb_threads = `grep -c '^processor' /proc/cpuinfo`;
   } else {
     $nb_threads = `sysctl -n hw.cpu`;
   }
+  chomp($nb_threads) if defined($nb_threads);
 }
 defined($nb_threads) or
     die "Can't detect the number of CPUs. Set number of threads with -t option";
@@ -140,7 +141,7 @@ if(!defined($min_q_char)) {
 
 my $db_file = $prefix . "_mer_database.jf";
 run($CDB, "-s", $jf_size, "-m", $klen, "-t", $nb_threads,
-    "-q", $min_q_char + $min_quality, "-o", $db_file,
+    "-q", $min_q_char + $min_quality, "-b", 7, "-o", $db_file,
     @ARGV) == 0 or
     die "Creating the mer database failed.";
 

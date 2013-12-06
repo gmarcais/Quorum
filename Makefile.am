@@ -81,7 +81,7 @@ quorum: src/quorum.in Makefile
 # Unit tests #
 ##############
 TESTS = all_tests
-check_PROGRAMS = all_tests query_mer_database
+check_PROGRAMS = all_tests query_mer_database histo_mer_database
 
 all_tests_SOURCES = unit_tests/test_mer_database.cc
 all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(top_srcdir)/unit_tests/gtest/include -I$(top_srcdir)/unit_tests
@@ -89,6 +89,7 @@ all_tests_LDADD = libgtest_main.la $(LDADD)
 noinst_HEADERS += unit_tests/test_misc.hpp
 
 query_mer_database_SOURCES = src/query_mer_database.cc
+histo_mer_database_SOURCES = src/histo_mer_database.cc
 
 include gtest.mk
 -include $(top_srcdir)/local.mk

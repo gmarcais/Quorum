@@ -571,9 +571,9 @@ private:
 
     if(max_homo_score < _ec.homo_trim())
       return out_end; // Not a high score -> return without truncation
-    assert(max_pos >= out_start);
-    assert(max_pos >= start);
-    if(max_pos == out_start) {
+    // assert(max_pos >= out_start);
+    // assert(max_pos >= start);
+    if(max_pos < out_start) {
       *error = error_homopolymer;
       return 0;
     }
@@ -640,20 +640,24 @@ unsigned int compute_poisson_cutoff__(const val_array_raw& counts, double collis
   uint64_t distinct = 0;
   uint64_t total    = 0;
   for(auto it = counts.begin(); it != it_end; ++it) {
-    distinct += 1;
-    total    += *it;
+    if((*it & 0x1) && (*it >= 2)) {
+      distinct += 1;
+      total    += *it >> 1;
+    }
   }
-  double coverage = (double)distinct / (double)total;
+  const double coverage = (double)total / (double)distinct;
+  vlog << "distinct mers:" << distinct << " total mers:" << total << " estimated coverage:" << coverage;
+  const double lambda = coverage * collision_prob;
+  vlog << "lambda:" << lambda << " collision_prob:" << collision_prob << " poisson_threshold:" << poisson_threshold;
   for(unsigned int x = 2; x < 1000; ++x)
-    if(poisson_term(coverage * collision_prob, x) < poisson_threshold)
-      return x;
+    if(poisson_term(lambda, x) < poisson_threshold)
+      return x + 1;
   return 0;
 }
 
 unsigned int compute_poisson_cutoff(const val_array_raw& counts, double collision_prob, double poisson_threshold) {
   vlog << "Computing Poisson cutoff";
   unsigned int res = compute_poisson_cutoff__(counts, collision_prob, poisson_threshold);
-  vlog << "Using cutoff of " << res;
   return res;
 }
 
@@ -688,7 +692,10 @@ int main(int argc, char *argv[])
   const unsigned int cutoff =   args.cutoff_given ?
     args.cutoff_arg :
     compute_poisson_cutoff(mer_database.vals(), args.apriori_error_rate_arg / 3,
-                           args.poisson_threshold_arg / (args.comp_flag ?  args.apriori_error_rate_arg : 1.0));
+                           args.poisson_threshold_arg / args.apriori_error_rate_arg);
+  vlog << "Using cutoff of " << cutoff;
+  if(cutoff == 0 && !args.cutoff_given)
+    die << "Cutoff computation failed. Pass it explicitly with -p switch.";
 
   error_correct_instance::ec_t correct(args.thread_arg, streams);
   correct.skip(args.skip_arg).good(args.good_arg)

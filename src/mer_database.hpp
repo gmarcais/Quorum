@@ -168,15 +168,17 @@ public:
       m.replace(0, i);
       auto v = operator[](m.canonical());
       if(v.first > 0) {
-        if(v.second > level && count > 0) {
-          for(int j = 0; j < i; ++j)
-            counts[j] = 0;
-          count = 0;
+        if(v.second >= level) {
+          if(v.second > level && count > 0) {
+            for(int j = 0; j < i; ++j)
+              counts[j] = 0;
+            count = 0;
+          }
+          counts[i] = v.first;
+          ucode     = i;
+          level     = v.second;
+          ++count;
         }
-        counts[i] = v.first;
-        ucode     = i;
-        level     = v.second;
-        ++count;
       }
     }
     m.replace(0, ori_code); // Reset m to original value

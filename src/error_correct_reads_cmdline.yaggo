@@ -48,6 +48,9 @@ option("poisson-threshold") {
 option("cutoff","p") {
   description "Poisson cutoff when there are multiple choices"
   uint32 }
+option("d", "no-discard") {
+  description "Do not discard reads, output a single N"
+  off }
 option("verbose", "v") {
   description "Be verbose"
   flag; off }

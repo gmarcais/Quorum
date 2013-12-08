@@ -113,6 +113,8 @@ class error_correct_t : public jellyfish::thread_exec {
   int                    _homo_trim;
   double                 _collision_prob; // collision probability = a priori error rate / 3
   double                 _poisson_threshold;
+  bool                   _no_discard;
+
   jflib::o_multiplexer * _output;
   jflib::o_multiplexer * _log;
 public:
@@ -120,7 +122,7 @@ public:
     _parser(4 * nb_threads, 100, 1, streams),
     _skip(0), _good(1), _min_count(1), _cutoff(4), _window(0), _error(0), _gzip(false),
     _mer_database(0), _contaminant(0), _trim_contaminant(false),
-    _homo_trim(std::numeric_limits<int>::min()) { }
+    _homo_trim(std::numeric_limits<int>::min()), _no_discard(false) { }
 
 private:
   // Open the data (error corrected reads) and log files. Default to
@@ -186,6 +188,7 @@ public:
   error_correct_t& homo_trim(int t) { _homo_trim = t; return *this; }
   error_correct_t& collision_prob(double cp) { _collision_prob = cp; return *this; }
   error_correct_t& poisson_threshold(double t) { _poisson_threshold = t; return *this; }
+  error_correct_t& no_discard(bool d) { _no_discard = d; return *this; }
 
   read_parser& parser() { return _parser; }
   int skip() const { return _skip; }
@@ -205,6 +208,7 @@ public:
   int homo_trim() const { return _homo_trim; }
   double collision_prob() const { return _collision_prob; }
   double poisson_threshold() const { return _poisson_threshold; }
+  bool no_discard() const { return _no_discard; }
 
   jflib::o_multiplexer& output() { return *_output; }
   jflib::o_multiplexer& log() { return *_log; }
@@ -239,17 +243,17 @@ public:
     kmer_t          mer, tmer;
 
     uint64_t nb_reads = 0;
-    bool     parity   = true;
     while(true) {
       read_parser::job job(_ec.parser());
       if(job.is_empty()) break;
       for(size_t i = 0; i < job->nb_filled; ++i) {
+        if(i % 2 == 0)
+          output << jflib::endr;
         const std::string& header = job->data[i].header;
         const std::string& sequence = job->data[i].seq;
         const char* const seq_s = sequence.c_str();
         const char* const seq_e = seq_s + sequence.size();
 
-        parity = !parity;
         nb_reads++;
         insure_length_buffer(sequence.size());
 
@@ -258,10 +262,10 @@ public:
         char       *out   = _buffer + _ec.skip();
         //Prime system. Find and write starting k-mer
         if(!find_starting_mer(mer, input, seq_e, out, &error)) {
-          details << "Skipped " << header
-                  << ": " << error << "\n";
+          details << "Skipped " << header << ": " << error << "\n";
           details << jflib::endr;
-          output << jflib::endr;
+          if(_ec.no_discard())
+            output << ">" << header << "\nN\n";
           continue;
         }
         // Extend forward and backward
@@ -274,10 +278,10 @@ public:
                  forward_ptr<char>(out), fwd_log,
                  &error);
         if(!end_out) {
-          details << "Skipped " << header
-                  << ": " << error << "\n";
+          details << "Skipped " << header << ": " << error << "\n";
           details << jflib::endr;
-          output << jflib::endr;
+          if(_ec.no_discard())
+            output << ">" << header << "\nN\n";
           continue;
         }
         assert(input > seq_s + mer_dna::k());
@@ -293,10 +297,10 @@ public:
                  backward_ptr<char>(out - mer_dna::k() - 1), bwd_log,
                  &error);
         if(!start_out) {
-          details << "Skipped " << header
-                  << ": " << error << "\n";
+          details << "Skipped " << header << ": " << error << "\n";
           details << jflib::endr;
-          output << jflib::endr;
+          if(_ec.no_discard())
+            output << ">" << header << "\nN\n";
           continue;
         }
         start_out++;
@@ -306,10 +310,10 @@ public:
         if(_ec.do_homo_trim()) {
           end_out = homo_trim(_buffer, start_out, end_out, fwd_log, bwd_log, &error);
           if(!end_out) {
-            details << "Skipped " << header
-                    << ": " << error << "\n";
+            details << "Skipped " << header << ": " << error << "\n";
             details << jflib::endr;
-            output << jflib::endr;
+            if(_ec.no_discard())
+              output << ">" << header << "\nN\n";
             continue;
           }
         }
@@ -319,8 +323,6 @@ public:
         output << ">" << header
                << " " << fwd_log << " " << bwd_log << "\n"
                << substr(start_out, end_out) << "\n";
-        if(parity)
-          output << jflib::endr;
       } // for(size_t i...  Loop over reads in job
     } // while(true)... loop over all jobs
     details.close();
@@ -711,7 +713,8 @@ int main(int argc, char *argv[])
     .trim_contaminant(args.trim_contaminant_flag)
     .homo_trim(args.homo_trim_given ? args.homo_trim_arg : std::numeric_limits<int>::min())
     .collision_prob(args.apriori_error_rate_arg / 3)
-    .poisson_threshold(args.poisson_threshold_arg);
+    .poisson_threshold(args.poisson_threshold_arg)
+    .no_discard(args.no_discard_flag);
   vlog << "Correcting reads";
   correct.do_it(args.thread_arg);
   vlog << "Done";

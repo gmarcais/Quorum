@@ -4,9 +4,6 @@
 #include <config.h>
 #include <jellyfish/err.hpp>
 #include <jellyfish/mapped_file.hpp>
-#include <jellyfish/invertible_hash_array.hpp>
-#include <jellyfish/allocators_mmap.hpp>
-#include <jellyfish/parse_read.hpp>
 #include <jellyfish/thread_exec.hpp>
 #include <iostream>
 #include <fstream>
@@ -150,6 +147,14 @@ public:
   int operator*() const { return _c; }
   friend std::ostream &operator<<(std::ostream &os, const backward_counter &c);
 };
+
+inline std::ostream &operator<<(std::ostream &os, const forward_counter &c) {
+  return os << c._c;
+}
+inline std::ostream &operator<<(std::ostream &os, const backward_counter &c) {
+  return os << c._c;
+}
+
 
 class forward_log : public err_log<forward_counter> {
 public:

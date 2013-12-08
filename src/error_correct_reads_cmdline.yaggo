@@ -1,42 +1,29 @@
 purpose "Error correct reads from a fastq file based on the k-mer frequencies."
 package "error_correct_reads"
 
-output "error_correct_reads_cmdline.hpp"
 name "args_t"
 
-option("db", "d") {
-  description "Jellyfish database"
-  c_string; required; multiple; typestr "jellyfish.db" }
-option("combined", "c") {
-  description "Number of Jellyfish databases combined"
-  uint32; typestr "Nb-DB"; default "0" }
 option("thread", "t") {
   description "Number of threads"
   uint32; default "1" }
-option("both-strands", "C") {
-  description "Canonical k-mers in database"
-  flag; on }
 option("min-count", "m") {
   description "Minimum count for a k-mer to be considered \"good\""
   uint32; default "1" }
-option("cutoff","p") {
-  description "Poisson cutoff for correcting when we have multiple choices"
-  uint32; default "4" }  
 option("skip", "s") {
   description "Number of bases to skip for start k-mer"
   uint32; default "2" }
 option("good", "g") {
   description "Number of good k-mer in a row for anchor"
-  uint32; default "2" }
+  uint32; default 2 }
 option("anchor-count", "a") {
   description "Minimum count for an anchor k-mer"
-  uint32; default "3" }
+  uint32; default 3 }
 option("window", "w") {
-  description "Size of window (default=mer length)"
-  uint32 }
+  description "Size of window"
+  uint32; default 10 }
 option("error", "e") {
   description "Maximum number of error in a window"
-  uint32; default "3" }
+  uint32; default 3 }
 option("output", "o") {
   description "Output file prefix"
   string; default "error_corrected"; typestr "prefix" }
@@ -52,6 +39,24 @@ option("homo-trim") {
 option("gzip") {
   description "Gzip output file"
   flag; off }
-arg("file") {
+option("apriori-error-rate") {
+  description "Probability of a base being an error"
+  double; default 0.01 }
+option("poisson-threshold") {
+  description "Error probability threshold in Poisson test"
+  double; default 1e-6 }
+option("cutoff","p") {
+  description "Poisson cutoff when there are multiple choices"
+  uint32 }
+option("d", "no-discard") {
+  description "Do not discard reads, output a single N"
+  off }
+option("verbose", "v") {
+  description "Be verbose"
+  flag; off }
+arg("db") {
+  description "Mer database"
+  c_string; typestr "path" }
+arg("sequence") {
   description "Input sequence"
   c_string; typestr "path"; multiple; at_least 1 }

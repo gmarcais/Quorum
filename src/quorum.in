@@ -143,7 +143,7 @@ my $db_file = $prefix . "_mer_database.jf";
 run($CDB, "-s", $jf_size, "-m", $klen, "-t", $nb_threads,
     "-q", $min_q_char + $min_quality, "-b", 7, "-o", $db_file,
     @ARGV) == 0 or
-    die "Creating the mer database failed.";
+    die "Creating the mer database failed. Most likely the size passed to the -s switch is too small.";
 
 my @ec_cmd = ($EC, "-t", $nb_threads, "-o", $prefix);
 for my $s (@switches) {

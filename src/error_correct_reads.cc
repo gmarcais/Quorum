@@ -104,6 +104,7 @@ class error_correct_t : public jellyfish::thread_exec {
   std::string            _prefix;
   int                    _min_count;
   int			 _cutoff;
+  char                   _qual_cutoff;
   int                    _window;
   int                    _error;
   bool                   _gzip;
@@ -178,6 +179,7 @@ public:
   error_correct_t& prefix(const std::string s) { _prefix = s; return *this; }
   error_correct_t& min_count(int m) { _min_count = m; return *this; }
   error_correct_t& cutoff(int p) { _cutoff = p; return *this; }
+  error_correct_t& qual_cutoff(char c) { _qual_cutoff = c; return *this; }
   //  error_corret_t & advance(int a) { _advance = a; return *this; }
   error_correct_t& window(int w) { _window = w; return *this; }
   error_correct_t& error(int e) { _error = e; return *this; }
@@ -197,6 +199,7 @@ public:
   const std::string & prefix() const { return _prefix; }
   int min_count() const { return _min_count; }
   int cutoff() const { return _cutoff; }
+  char qual_cutoff() const { return _qual_cutoff; }
   //  int advance() const { return _advance; }
   int window() const { return _window ? _window : mer_dna::k(); }
   int error() const { return _error ? _error : mer_dna::k() / 2; }
@@ -249,10 +252,11 @@ public:
       for(size_t i = 0; i < job->nb_filled; ++i) {
         if(i % 2 == 0)
           output << jflib::endr;
-        const std::string& header = job->data[i].header;
+        const std::string& header   = job->data[i].header;
         const std::string& sequence = job->data[i].seq;
-        const char* const seq_s = sequence.c_str();
-        const char* const seq_e = seq_s + sequence.size();
+        const char* const  seq_s    = sequence.c_str();
+        const char* const  seq_e    = seq_s + sequence.size();
+        const char* const  qual_s   = job->data[i].qual.c_str();
 
         nb_reads++;
         insure_length_buffer(sequence.size());
@@ -270,10 +274,13 @@ public:
         }
         // Extend forward and backward
         tmer = mer;
+        const ssize_t start_off = input - seq_s;
         forward_log fwd_log(_ec.window(), _ec.error());
         char *end_out =
-          extend(forward_mer(tmer), forward_ptr<const char>(input),
-                 forward_counter(input - seq_s),
+          extend(forward_mer(tmer),
+                 forward_ptr<const char>(input),
+                 forward_ptr<const char>(qual_s + start_off),
+                 forward_counter(start_off),
                  forward_ptr<const char>(seq_e),
                  forward_ptr<char>(out), fwd_log,
                  &error);
@@ -292,7 +299,8 @@ public:
         char *start_out =
           extend(backward_mer(tmer),
                  backward_ptr<const char>(input - mer_dna::k() - 1),
-                 backward_counter(input - mer_dna::k() - seq_s - 1),
+                 backward_ptr<const char>(qual_s + start_off - mer_dna::k() - 1),
+                 backward_counter(start_off - mer_dna::k() - 1),
                  backward_ptr<const char>(seq_s - 1),
                  backward_ptr<char>(out - mer_dna::k() - 1), bwd_log,
                  &error);
@@ -372,13 +380,13 @@ private:
   // out point to the next character to be written.
   template<typename dir_mer, typename in_dir_ptr, typename out_dir_ptr,
            typename counter, typename elog>
-  char * extend(dir_mer mer, in_dir_ptr input,
+  char * extend(dir_mer mer, in_dir_ptr input, in_dir_ptr qual,
                 counter pos, in_dir_ptr end,
                 out_dir_ptr out, elog &log, const char** error) {
     counter  cpos       = pos;
     uint32_t prev_count = _ec.mer_database()->get_val(mer.canonical());
 
-    for( ; input < end; ++input) {
+    for( ; input < end; ++input, ++qual) {
       const char base = *input;
 
       if(base == '\n')
@@ -427,7 +435,7 @@ private:
       // then trim
       if(ori_code >= 0){ //if the current base is valid base (non N)
 	if(counts[ori_code] > (uint64_t)_ec.min_count()) {
-          if(counts[ori_code] >= (uint32_t)_ec.cutoff()) {
+          if(counts[ori_code] >= (uint32_t)_ec.cutoff() || *qual >= _ec.qual_cutoff()) {
             *out++ = mer.base(0);
             continue;
           }
@@ -667,6 +675,14 @@ int main(int argc, char *argv[])
 {
   args.parse(argc, argv);
 
+  if(args.qual_cutoff_char_given && args.qual_cutoff_char_arg.size() != 1)
+    args.error("The qual-cutoff-char must be one ASCII character.");
+  if(args.qual_cutoff_value_given && args.qual_cutoff_value_arg > (uint32_t)std::numeric_limits<char>::max())
+    args.error("The qual-cutoff-value must be in the range 0-127.");
+  const char qual_cutoff = args.qual_cutoff_char_given ? args.qual_cutoff_char_arg[0] :
+    (args.qual_cutoff_value_given ? (char)args.qual_cutoff_value_arg : std::numeric_limits<char>::max());
+  std::cerr << (int)qual_cutoff << "\n";
+
   verbose_log::verbose = args.verbose_flag;
   database_query mer_database(args.db_arg);
   mer_dna::k(mer_database.header().key_len() / 2);
@@ -705,6 +721,7 @@ int main(int argc, char *argv[])
     .prefix(args.output_given ? (std::string)args.output_arg : "")
     .min_count(args.min_count_arg)
     .cutoff(cutoff)
+    .qual_cutoff(qual_cutoff)
     .window(args.window_arg)
     .error(args.error_arg)
     .gzip(args.gzip_flag)

@@ -48,6 +48,12 @@ option("poisson-threshold") {
 option("cutoff","p") {
   description "Poisson cutoff when there are multiple choices"
   uint32 }
+option("qual-cutoff-value", "q") {
+  description "Any base above with quality equal or greater is untouched when there are multiple choices"
+  uint32 }
+option("qual-cutoff-char", "Q") {
+  description "Any base above with quality equal or greater is untouched when there are multiple choices"
+  string; conflict "qual-cutoff-value" }
 option("d", "no-discard") {
   description "Do not discard reads, output a single N"
   off }

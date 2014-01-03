@@ -23,7 +23,8 @@ bin_PROGRAMS = quorum_error_correct_reads quorum_create_database
 #bin_PROGRAMS = quorum_create_database
 
 quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc	\
-                                     src/err_log.cc
+                                     src/err_log.cc src/error_correct_reads.hpp \
+                                     src/verbose_log.hpp $(JFLIB_I)/multiplexed_io.hpp src/mer_database.hpp $(JFLIB_I)/atomic_field.hpp $(JFLIB_I)/compare_and_swap.hpp $(JFLIB_I)/locks_pthread.hpp $(JFLIB_I)/pool.hpp include/misc.hpp include/gzip_stream.hpp src/kmer.hpp src/err_log.hpp
 
 # quorum_error_correct_reads_SOURCES += src/kmer.hpp			\
 #                                       src/error_correct_reads.hpp	\

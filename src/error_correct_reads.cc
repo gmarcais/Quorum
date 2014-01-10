@@ -676,12 +676,11 @@ int main(int argc, char *argv[])
   args.parse(argc, argv);
 
   if(args.qual_cutoff_char_given && args.qual_cutoff_char_arg.size() != 1)
-    args.error("The qual-cutoff-char must be one ASCII character.");
+    args_t::error("The qual-cutoff-char must be one ASCII character.");
   if(args.qual_cutoff_value_given && args.qual_cutoff_value_arg > (uint32_t)std::numeric_limits<char>::max())
-    args.error("The qual-cutoff-value must be in the range 0-127.");
+    args_t::error("The qual-cutoff-value must be in the range 0-127.");
   const char qual_cutoff = args.qual_cutoff_char_given ? args.qual_cutoff_char_arg[0] :
     (args.qual_cutoff_value_given ? (char)args.qual_cutoff_value_arg : std::numeric_limits<char>::max());
-  std::cerr << (int)qual_cutoff << "\n";
 
   verbose_log::verbose = args.verbose_flag;
   database_query mer_database(args.db_arg);

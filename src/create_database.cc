@@ -32,6 +32,7 @@
 #include <src/create_database_cmdline.hpp>
 
 static create_database_cmdline args;
+typedef create_database_cmdline::error error;
 
 using jellyfish::mer_dna;
 typedef std::vector<const char*> file_vector;
@@ -100,15 +101,15 @@ int main(int argc, char *argv[])
   args.parse(argc, argv);
   mer_dna::k(args.mer_arg);
   if(!args.min_qual_value_given && !args.min_qual_char_given)
-    args.error("Either a min-qual-value or min-qual-char must be provided.");
+    error("Either a min-qual-value or min-qual-char must be provided.");
   if(args.min_qual_char_given && args.min_qual_char_arg.size() != 1)
-    args.error("The min-qual-char should be one ASCII character.");
+    error("The min-qual-char should be one ASCII character.");
   char qual_thresh = args.min_qual_char_given ? args.min_qual_char_arg[0] : (char)args.min_qual_value_arg;
   if(args.bits_arg < 1 || args.bits_arg > 63)
-    args.error("The number of bits should be between 1 and 63");
+    error("The number of bits should be between 1 and 63");
   std::ofstream output(args.output_arg);
   if(!output.good())
-    die << "Failed to open output file '" << args.output_arg << "'.";
+    error() << "Failed to open output file '" << args.output_arg << "'.";
 
   hash_with_quality ary(args.size_arg, 2 * mer_dna::k(), args.bits_arg, args.reprobe_arg);
   {

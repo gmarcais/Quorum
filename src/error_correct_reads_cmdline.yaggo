@@ -11,7 +11,7 @@ option("min-count", "m") {
   uint32; default "1" }
 option("skip", "s") {
   description "Number of bases to skip for start k-mer"
-  uint32; default "2" }
+  uint32; default "1" }
 option("good", "g") {
   description "Number of good k-mer in a row for anchor"
   uint32; default 2 }

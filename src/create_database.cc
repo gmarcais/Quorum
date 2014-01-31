@@ -76,7 +76,7 @@ public:
           m.shift_left(code);
           rm.shift_right(mer_dna::complement(code));
           ++low_len;
-          if(*qual > qual_thresh_)
+          if(*qual >= qual_thresh_)
             ++high_len;
           else
             high_len = 0;

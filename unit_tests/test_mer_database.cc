@@ -37,7 +37,6 @@ void test_sequence(const database_query& hash, const std::string& seq, const uin
 
 TEST(MerDatabase, WriteRead) {
   file_unlink database_file("mer_database");
-  database_file.do_unlink = false;
 
   // Insert in the database the following data sets:
   // hq2: high quality, inserted twice

@@ -39,6 +39,9 @@ option("homo-trim") {
 option("gzip") {
   description "Gzip output file"
   flag; off }
+option("M", "map") {
+  description "Memory map the input mer database"
+  off }
 option("apriori-error-rate") {
   description "Probability of a base being an error"
   double; default 0.01 }

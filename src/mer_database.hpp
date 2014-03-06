@@ -144,11 +144,30 @@ private:
   char* base_;
 };
 
+class map_or_read_file {
+  std::unique_ptr<const jellyfish::mapped_file> mapped;
+  std::unique_ptr<const suck_in_file>           sucked;
+
+public:
+  map_or_read_file(const char* filename, bool map) {
+    if(map)
+      mapped.reset(new jellyfish::mapped_file(filename));
+    else
+      sucked.reset(new suck_in_file(filename));
+  }
+
+  char* base() {
+    if(mapped)
+      return mapped->base();
+    else
+      return sucked->base();
+  }
+};
+
 
 class database_query {
   const database_header        header_;
-  //  const jellyfish::mapped_file file_;
-  const suck_in_file           file_;
+  map_or_read_file             file_;
   const mer_array_raw          keys_;
   const val_array_raw          vals_;
 
@@ -165,9 +184,9 @@ class database_query {
   }
 
 public:
-  database_query(const char* filename) :
+  database_query(const char* filename, bool map = false) :
   header_(parse_header(filename)),
-  file_(filename),
+  file_(filename, map),
   keys_(file_.base() + header_.offset(), header_.key_bytes(),
         header_.size(), header_.key_len(), header_.val_len(),
         header_.max_reprobe(), header_.matrix()),

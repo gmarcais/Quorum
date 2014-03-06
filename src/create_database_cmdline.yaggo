@@ -21,9 +21,6 @@ option("Q", "min-qual-char") {
 option("t", "threads") {
   description "Number of threads"
   uint32; default 1 }
-option("M", "map") {
-  description "Memory map the input mer database"
-  off }
 option("o", "output") {
   description "Output file"
   c_string; typestr "path"; default "combined_database" }

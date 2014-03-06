@@ -683,10 +683,11 @@ int main(int argc, char *argv[])
     (args.qual_cutoff_value_given ? (char)args.qual_cutoff_value_arg : std::numeric_limits<char>::max());
 
   verbose_log::verbose = args.verbose_flag;
-  database_query mer_database(args.db_arg, args.mmap_flag);
+  vlog << "Loading mer database";
+  database_query mer_database(args.db_arg, args.no_mmap_flag);
   mer_dna::k(mer_database.header().key_len() / 2);
 
-  // Open contaminant database. Skipped for now. No contaminant.
+  // Open contaminant database.
   std::unique_ptr<contaminant_check> contaminant;
   contaminant.reset(new contaminant_no_database());
   if(args.contaminant_given) {

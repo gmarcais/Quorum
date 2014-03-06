@@ -39,8 +39,8 @@ option("homo-trim") {
 option("gzip") {
   description "Gzip output file"
   flag; off }
-option("M", "mmap") {
-  description "Memory map the input mer database"
+option("M", "no-mmap") {
+  description "Do not memory map the input mer database"
   off }
 option("apriori-error-rate") {
   description "Probability of a base being an error"

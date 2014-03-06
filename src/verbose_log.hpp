@@ -49,6 +49,10 @@ public:
     if(verbose)
       std::cerr << super::str() << std::endl;
   }
+
+  std::ostream& operator<<(const char* str) {
+    return *static_cast<std::ostream*>(this) << str;
+  }
 };
 template <typename T>
 bool basic_verbose_log<T>::verbose = false;

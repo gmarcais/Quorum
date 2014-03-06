@@ -28,6 +28,8 @@
 #include <jellyfish/rectangular_binary_matrix.hpp>
 #include <jellyfish/err.hpp>
 
+#include <src/verbose_log.hpp>
+
 using jellyfish::mer_dna;
 typedef jellyfish::large_hash::array<mer_dna> mer_array;
 typedef jellyfish::large_hash::array_raw<mer_dna> mer_array_raw;
@@ -150,9 +152,10 @@ class map_or_read_file {
 
 public:
   map_or_read_file(const char* filename, bool map) {
-    if(map)
+    if(map) {
       mapped.reset(new jellyfish::mapped_file(filename));
-    else
+      vlog << "Mer database bogus checksum: " << (int)mapped->load();
+    } else
       sucked.reset(new suck_in_file(filename));
   }
 

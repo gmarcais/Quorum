@@ -151,12 +151,13 @@ class map_or_read_file {
   std::unique_ptr<const suck_in_file>           sucked;
 
 public:
-  map_or_read_file(const char* filename, bool map) {
-    if(map) {
+  map_or_read_file(const char* filename, bool no_map) {
+    if(no_map) {
+      sucked.reset(new suck_in_file(filename));
+    } else {
       mapped.reset(new jellyfish::mapped_file(filename));
       vlog << "Mer database bogus checksum: " << (int)mapped->load();
-    } else
-      sucked.reset(new suck_in_file(filename));
+    }
   }
 
   char* base() {

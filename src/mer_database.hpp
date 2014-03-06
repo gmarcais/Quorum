@@ -26,6 +26,7 @@
 #include <jellyfish/mapped_file.hpp>
 #include <jellyfish/mer_dna.hpp>
 #include <jellyfish/rectangular_binary_matrix.hpp>
+#include <jellyfish/err.hpp>
 
 using jellyfish::mer_dna;
 typedef jellyfish::large_hash::array<mer_dna> mer_array;
@@ -105,9 +106,68 @@ public:
   val_array& vals() { return vals_; }
 };
 
+class suck_in_file {
+public:
+  suck_in_file(const char* path) : base_(0) { read_in(path); }
+  suck_in_file(int fd) : base_(0) { read_in(fd); }
+  ~suck_in_file() { }
+
+  char* base() const { return base_; }
+  define_error_class(ErrorReading);
+
+protected:
+  void read_in(int fd, const char* path = "<unknown>") {
+    delete[] base_;
+    struct stat buf;
+    if(fstat(fd, &buf) < 0)
+      eraise(ErrorReading) << "Can't stat file '" << path << "'" << jellyfish::err::no;
+    base_ = new (std::nothrow) char[buf.st_size];
+    if(!base_)
+      eraise(ErrorReading) << "Not enough memory to read in file '" << path << "'";
+    ssize_t sucked = 0;
+    while(sucked < buf.st_size) {
+      ssize_t s = read(fd, base_ + sucked, buf.st_size - sucked);
+      if(s == -1)
+        eraise(ErrorReading) << "Failed to read in file '" << path << "'";
+      sucked += s;
+    }
+  }
+  void read_in(const char* path) {
+    int fd = open(path, O_RDONLY);
+    if(fd < 0)
+      eraise(ErrorReading) << "Can't open file '" << path << "'" << jellyfish::err::no;
+    read_in(fd, path);
+    close(fd);
+  }
+
+private:
+  char* base_;
+};
+
+class map_or_read_file {
+  std::unique_ptr<const jellyfish::mapped_file> mapped;
+  std::unique_ptr<const suck_in_file>           sucked;
+
+public:
+  map_or_read_file(const char* filename, bool map) {
+    if(map)
+      mapped.reset(new jellyfish::mapped_file(filename));
+    else
+      sucked.reset(new suck_in_file(filename));
+  }
+
+  char* base() {
+    if(mapped)
+      return mapped->base();
+    else
+      return sucked->base();
+  }
+};
+
+
 class database_query {
   const database_header        header_;
-  const jellyfish::mapped_file file_;
+  map_or_read_file             file_;
   const mer_array_raw          keys_;
   const val_array_raw          vals_;
 
@@ -124,9 +184,9 @@ class database_query {
   }
 
 public:
-  database_query(const char* filename) :
+  database_query(const char* filename, bool map = false) :
   header_(parse_header(filename)),
-  file_(filename),
+  file_(filename, map),
   keys_(file_.base() + header_.offset(), header_.key_bytes(),
         header_.size(), header_.key_len(), header_.val_len(),
         header_.max_reprobe(), header_.matrix()),

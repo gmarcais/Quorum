@@ -30,6 +30,8 @@
 
 #include <src/verbose_log.hpp>
 
+namespace err = jellyfish::err;
+
 using jellyfish::mer_dna;
 typedef jellyfish::large_hash::array<mer_dna> mer_array;
 typedef jellyfish::large_hash::array_raw<mer_dna> mer_array_raw;
@@ -122,22 +124,22 @@ protected:
     delete[] base_;
     struct stat buf;
     if(fstat(fd, &buf) < 0)
-      eraise(ErrorReading) << "Can't stat file '" << path << "'" << jellyfish::err::no;
+      throw ErrorReading(err::msg() << "Can't stat file '" << path << "'" << err::no);
     base_ = new (std::nothrow) char[buf.st_size];
     if(!base_)
-      eraise(ErrorReading) << "Not enough memory to read in file '" << path << "'";
+      throw ErrorReading(err::msg() << "Not enough memory to read in file '" << path << "'" << err::no);
     ssize_t sucked = 0;
     while(sucked < buf.st_size) {
       ssize_t s = read(fd, base_ + sucked, buf.st_size - sucked);
       if(s == -1)
-        eraise(ErrorReading) << "Failed to read in file '" << path << "'";
+        throw ErrorReading(err::msg() << "Failed to read in file '" << path << "'");
       sucked += s;
     }
   }
   void read_in(const char* path) {
     int fd = open(path, O_RDONLY);
     if(fd < 0)
-      eraise(ErrorReading) << "Can't open file '" << path << "'" << jellyfish::err::no;
+      throw ErrorReading(err::msg() << "Can't open file '" << path << "'" << err::no);
     read_in(fd, path);
     close(fd);
   }
@@ -178,12 +180,12 @@ class database_query {
   static database_header parse_header(const char* filename) {
     std::ifstream file(filename);
     if(!file.good())
-      eraise(std::runtime_error) << "Can't open '" << filename << "' for reading";
+      throw std::runtime_error(err::msg() << "Can't open '" << filename << "' for reading");
     database_header res;
     if(!res.read(file))
-      eraise(std::runtime_error) << "Can't parse header of file '" << filename << "'";
+      throw std::runtime_error(err::msg() << "Can't parse header of file '" << filename << "'");
     if(!res.check_format())
-      eraise(std::runtime_error) << "Wrong type '" << res.format() << "' for file '" << filename << "'";
+      std::runtime_error(err::msg() << "Wrong type '" << res.format() << "' for file '" << filename << "'");
     return res;
   }
 

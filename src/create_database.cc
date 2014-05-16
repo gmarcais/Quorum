@@ -31,6 +31,8 @@
 #include <src/mer_database.hpp>
 #include <src/create_database_cmdline.hpp>
 
+namespace err = jellyfish::err;
+
 static create_database_cmdline args;
 typedef create_database_cmdline::error error;
 
@@ -82,7 +84,7 @@ public:
             high_len = 0;
           if(low_len >= mer_dna::k()) {
             if(!ary_.add(m < rm ? m : rm, high_len >= mer_dna::k()))
-              eraise(std::runtime_error) << "Hash is full";
+              throw std::runtime_error(err::msg() << "Hash is full");
             counted_high += high_len >= mer_dna::k();
             ++counted_low;
           }

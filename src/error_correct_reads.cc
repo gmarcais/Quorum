@@ -35,6 +35,8 @@
 #include <src/error_correct_reads_cmdline.hpp>
 #include <src/verbose_log.hpp>
 
+namespace err = jellyfish::err;
+
 using jellyfish::mer_dna;
 typedef std::vector<const char*> file_vector;
 typedef jellyfish::stream_manager<file_vector::const_iterator> stream_manager;
@@ -83,7 +85,7 @@ public:
   contaminant_database(binary_reader& reader, size_t size) : ary_(size, mer_dna::k() * 2, 0, 126) {
     while(reader.next()) {
       if(!ary_.set(reader.key()))
-        eraise(std::runtime_error) << "Size of hash for contaminant too small";
+        throw std::runtime_error("Size of hash for contaminant too small");
     }
   }
   virtual ~contaminant_database() { }
@@ -146,8 +148,7 @@ private:
     } else
       res = new std::ofstream(file.c_str());
     if(!res->good())
-      eraise(std::runtime_error)
-        << "Failed to open file '" << file << "'" << jellyfish::err::no;
+      throw std::runtime_error(err::msg() << "Failed to open file '" << file << "'" << err::no);
     res->exceptions(std::ios::eofbit|std::ios::failbit|std::ios::badbit);
     return res;
   }
@@ -600,8 +601,7 @@ private:
     _buff_size = len > 2 * _buff_size ? len + 100 : 2 * _buff_size;
     _buffer    = (char *)realloc(_buffer, _buff_size);
     if(!_buffer)
-      eraise(std::runtime_error)
-        << "Buffer allocation failed, size " << _buffer << jellyfish::err::no;
+      throw std::runtime_error(err::msg() << "Buffer allocation failed, size " << _buffer << err::no);
   }
 
   bool find_starting_mer(kmer_t &mer, const char * &input, const char *end, char * &out,
@@ -694,13 +694,13 @@ int main(int argc, char *argv[])
     vlog << "Loading contaminant sequences";
     std::ifstream contaminant_file(args.contaminant_arg);
     if(!contaminant_file.good())
-      die << "Failed to open contaminant file '" << args.contaminant_arg << "'";
+      err::die(err::msg() << "Failed to open contaminant file '" << args.contaminant_arg << "'");
     jellyfish::file_header header(contaminant_file);
     if(header.format() != binary_dumper::format)
-      die << "Contaminant format expected '" << binary_dumper::format << "'";
+      err::die(err::msg() << "Contaminant format expected '" << binary_dumper::format << "'");
     if(mer_dna::k() * 2 != header.key_len())
-      die << "Contaminant mer length (" << (header.key_len() / 2)
-          << ") different than correction mer length (" << mer_dna::k() << ")";
+      err::die(err::msg() << "Contaminant mer length (" << (header.key_len() / 2)
+          << ") different than correction mer length (" << mer_dna::k() << ")");
     binary_reader reader(contaminant_file, &header);
     contaminant.reset(new contaminant_database(reader, header.size()));
   }
@@ -713,7 +713,7 @@ int main(int argc, char *argv[])
                            args.poisson_threshold_arg / args.apriori_error_rate_arg);
   vlog << "Using cutoff of " << cutoff;
   if(cutoff == 0 && !args.cutoff_given)
-    die << "Cutoff computation failed. Pass it explicitly with -p switch.";
+    err::die("Cutoff computation failed. Pass it explicitly with -p switch.");
 
   error_correct_instance::ec_t correct(args.thread_arg, streams);
   correct.skip(args.skip_arg).good(args.good_arg)

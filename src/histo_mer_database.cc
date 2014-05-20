@@ -3,10 +3,12 @@
 #include <jellyfish/err.hpp>
 #include <src/mer_database.hpp>
 
+namespace err = jellyfish::err;
+
 int main(int argc, char* argv[])
 {
   if(argc != 2)
-    die << "Usage: " << argv[0] << " db";
+    err::die(err::msg() << "Usage: " << argv[0] << " db");
 
   static const size_t hlen = 1001;
   uint64_t histos[hlen][2];

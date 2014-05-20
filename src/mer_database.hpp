@@ -19,6 +19,7 @@
 #define __QUORUM_MER_DATABASE_HPP__
 
 #include <fstream>
+#include <atomic>
 
 #include <jellyfish/file_header.hpp>
 #include <jellyfish/large_hash_array.hpp>
@@ -27,6 +28,7 @@
 #include <jellyfish/mer_dna.hpp>
 #include <jellyfish/rectangular_binary_matrix.hpp>
 #include <jellyfish/err.hpp>
+#include <jellyfish/locks_pthread.hpp>
 
 #include <src/verbose_log.hpp>
 
@@ -61,24 +63,42 @@ public:
 };
 
 class hash_with_quality {
-  mer_array      keys_;
-  val_array      vals_;
-  const uint64_t max_val_;
+  mer_array*                         keys_;
+  mer_array*                         new_keys_;
+  val_array*                         vals_;
+  val_array*                         new_vals_;
+  const uint64_t                     max_val_;
+  jellyfish::locks::pthread::barrier size_barrier_;
+  std::atomic<uint16_t>              done_threads_;
+  std::atomic<uint16_t>              size_thid_;
+  const uint16_t                     nb_threads_;
 
 public:
-  hash_with_quality(size_t size, uint16_t key_len, int bits, uint16_t reprobe_limit = 126) :
-    keys_(size, key_len, 0, reprobe_limit),
-    vals_(bits + 1, keys_.size()),
-    max_val_((uint64_t)-1 >> (sizeof(uint64_t) * 8 - bits))
+  hash_with_quality(size_t size, uint16_t key_len, int bits, uint16_t nb_threads, uint16_t reprobe_limit = 126) :
+    keys_(new mer_array(size, key_len, 0, reprobe_limit)),
+    new_keys_(0),
+    vals_(new val_array(bits + 1, keys_->size())),
+    new_vals_(0),
+    max_val_((uint64_t)-1 >> (sizeof(uint64_t) * 8 - bits)),
+    size_barrier_(nb_threads),
+    done_threads_(0), size_thid_(0),
+    nb_threads_(nb_threads)
   { }
+
+  ~hash_with_quality() {
+    delete keys_;
+    delete vals_;
+  }
 
   bool add(const mer_dna& key, unsigned int quality) {
     bool is_new;
     size_t id;
-    if(!keys_.set(key, &is_new, &id))
-      return false;
+    while(__builtin_expect(!keys_->set(key, &is_new, &id), 0)) {
+      if(!handle_full_ary())
+        return false;
+    }
 
-    auto     entry = vals_[id];
+    auto     entry = (*vals_)[id];
     uint64_t oval;
     uint64_t nval = entry.get();;
     do {
@@ -89,25 +109,84 @@ public:
         return true;
       else
         nval = oval + 2;
-    } while(!entry.set(nval));
+    } while(__builtin_expect(!entry.set(nval), 0));
     return true;
   }
 
   void write(std::ostream& os, database_header* header = 0) const {
     if(header) {
       header->set_format();
-      header->update_from_ary(keys_);
-      header->bits(vals_.bits() - 1);
-      header->key_bytes(keys_.size_bytes());
-      header->value_bytes(vals_.size_bytes());
+      header->update_from_ary(*keys_);
+      header->bits(vals_->bits() - 1);
+      header->key_bytes(keys_->size_bytes());
+      header->value_bytes(vals_->size_bytes());
       header->write(os);
     }
-    keys_.write(os);
-    vals_.write(os);
+    keys_->write(os);
+    vals_->write(os);
   }
 
-  mer_array& keys() { return keys_; }
-  val_array& vals() { return vals_; }
+  void done() {
+    ++done_threads_;
+    while(!handle_full_ary());
+  }
+
+  mer_array& keys() { return *keys_; }
+  val_array& vals() { return *vals_; }
+
+private:
+  bool handle_full_ary() {
+    bool serial_thread = size_barrier_.wait();
+    if(done_threads_.load() >= nb_threads_) // All done?
+      return true;
+
+    if(serial_thread) {
+      new_keys_ = 0;
+      new_vals_ = 0;
+      try {
+        new_keys_ = new mer_array(keys_->size() * 2, keys_->key_len(), keys_->val_len(),
+                                  keys_->max_reprobe(), keys_->reprobes());
+        new_vals_ = new val_array(vals_->bits(), new_keys_->size());
+      } catch(...) {
+        delete new_keys_;
+        delete new_vals_;
+        new_keys_ = 0;
+        new_vals_ = 0;
+      }
+      size_thid_.store(0);
+    }
+    size_barrier_.wait();
+
+    if(!new_keys_ || !new_vals_) {
+      size_barrier_.wait();
+      return false;
+    }
+
+    uint16_t thid = size_thid_++;
+    auto it = keys_->eager_slice(thid, nb_threads_);
+
+    bool   is_new;
+    size_t id;
+    while(it.next()) {
+      new_keys_->set(it.key(), &is_new, &id);
+      auto entry = (*new_vals_)[id];
+      uint64_t v = entry.get();
+      assert(v == 0);
+      uint64_t ov = (*vals_)[it.id()].get();
+      entry.set(ov);
+    }
+
+    size_barrier_.wait();
+    if(serial_thread) {
+      delete keys_;
+      delete vals_;
+      keys_ = new_keys_;
+      vals_ = new_vals_;
+    }
+    size_barrier_.wait();
+
+    return true;
+  }
 };
 
 class suck_in_file {

@@ -1,4 +1,5 @@
 #include <fstream>
+#include <stdexcept>
 
 #include <gtest/gtest.h>
 
@@ -20,7 +21,8 @@ void insert_sequence(hash_with_quality& hash, const std::string& seq, const unsi
   mer_dna m;
   for(size_t i = 0; i <= seq.size() - mer_dna::k(); ++i) {
     m = seq.substr(i, mer_dna::k());
-    hash.add(m, quality);
+    if(!hash.add(m, quality))
+      throw std::runtime_error("Hash is full");
   }
 }
 
@@ -35,7 +37,9 @@ void test_sequence(const database_query& hash, const std::string& seq, const uin
   }
 }
 
-TEST(MerDatabase, WriteRead) {
+class MerDatabase : public ::testing::TestWithParam<int> { };
+
+TEST_P(MerDatabase, WriteRead) {
   file_unlink database_file("mer_database");
 
   // Insert in the database the following data sets:
@@ -58,7 +62,7 @@ TEST(MerDatabase, WriteRead) {
 
   size_t key_start, val_start, total_len;
   {
-    hash_with_quality database(20 * sequence_len, mer_dna::k() * 2, bits);
+    hash_with_quality database(GetParam() * sequence_len, mer_dna::k() * 2, bits, 1);
     insert_sequence(database, hq2, 1);
     insert_sequence(database, hq2, 1);
     insert_sequence(database, hq1, 1);
@@ -91,4 +95,6 @@ TEST(MerDatabase, WriteRead) {
   test_sequence(database, lq1, 1, 0);
   test_sequence(database, lq2, 2, 0);
 }
+
+INSTANTIATE_TEST_CASE_P(MerDatabaseTest, MerDatabase, ::testing::Values(1, 10, 20, 40));
 }

@@ -2,10 +2,12 @@
 
 #include <src/mer_database.hpp>
 
+namespace err = jellyfish::err;
+
 int main(int argc, char *argv[])
 {
   if(argc < 3)
-    die << "Usage: " << argv[0] << " db mer ...";
+    err::die(err::msg() << "Usage: " << argv[0] << " db mer ...");
 
   database_query mer_database(argv[1]);
   mer_dna::k(mer_database.header().key_len() / 2);

@@ -72,6 +72,7 @@ class hash_with_quality {
   std::atomic<uint16_t>              done_threads_;
   std::atomic<uint16_t>              size_thid_;
   const uint16_t                     nb_threads_;
+  enum status { OK, DONE, FULL };
 
 public:
   hash_with_quality(size_t size, uint16_t key_len, int bits, uint16_t nb_threads, uint16_t reprobe_limit = 126) :
@@ -94,21 +95,19 @@ public:
     bool is_new;
     size_t id;
     while(__builtin_expect(!keys_->set(key, &is_new, &id), 0)) {
-      if(!handle_full_ary())
+      if(handle_full_ary() == FULL)
         return false;
     }
 
     auto     entry = (*vals_)[id];
-    uint64_t oval;
     uint64_t nval = entry.get();;
     do {
-      oval = nval;
-      if((oval & 1) < quality)
+      if((nval & 1) < quality)
         nval = 3;
-      else if((oval >> 1) == max_val_ || (oval & 1) > quality)
+      else if((nval >> 1) == max_val_ || (nval & 1) > quality)
         return true;
       else
-        nval = oval + 2;
+        nval += 2;
     } while(__builtin_expect(!entry.set(nval), 0));
     return true;
   }
@@ -128,17 +127,17 @@ public:
 
   void done() {
     ++done_threads_;
-    while(!handle_full_ary());
+    while(handle_full_ary() == OK);
   }
 
   mer_array& keys() { return *keys_; }
   val_array& vals() { return *vals_; }
 
 private:
-  bool handle_full_ary() {
+  status handle_full_ary() {
     bool serial_thread = size_barrier_.wait();
     if(done_threads_.load() >= nb_threads_) // All done?
-      return true;
+      return DONE;
 
     if(serial_thread) {
       new_keys_ = 0;
@@ -156,10 +155,11 @@ private:
       size_thid_.store(0);
     }
     size_barrier_.wait();
-
-    if(!new_keys_ || !new_vals_) {
+    mer_array* new_keys = *(mer_array* volatile *)&new_keys_;
+    val_array* new_vals = *(val_array* volatile *)&new_vals_;
+    if(!new_keys || !new_vals) {
       size_barrier_.wait();
-      return false;
+      return FULL;
     }
 
     uint16_t thid = size_thid_++;
@@ -168,24 +168,22 @@ private:
     bool   is_new;
     size_t id;
     while(it.next()) {
-      new_keys_->set(it.key(), &is_new, &id);
-      auto entry = (*new_vals_)[id];
-      uint64_t v = entry.get();
-      assert(v == 0);
+      new_keys->set(it.key(), &is_new, &id);
+      auto entry = (*new_vals)[id];
+      entry.get();
       uint64_t ov = (*vals_)[it.id()].get();
       entry.set(ov);
     }
-
     size_barrier_.wait();
     if(serial_thread) {
       delete keys_;
       delete vals_;
-      keys_ = new_keys_;
-      vals_ = new_vals_;
+      keys_ = new_keys;
+      vals_ = new_vals;
     }
     size_barrier_.wait();
 
-    return true;
+    return OK;
   }
 };
 

@@ -91,6 +91,7 @@ public:
         }
       }
     }
+    ary_.done();
   }
 };
 
@@ -113,7 +114,8 @@ int main(int argc, char *argv[])
   if(!output.good())
     error() << "Failed to open output file '" << args.output_arg << "'.";
 
-  hash_with_quality ary(args.size_arg, 2 * mer_dna::k(), args.bits_arg, args.reprobe_arg);
+  hash_with_quality ary(args.size_arg, 2 * mer_dna::k(), args.bits_arg,
+                        args.threads_arg, args.reprobe_arg);
   {
     stream_manager streams(args.reads_arg.cbegin(), args.reads_arg.cend(), 1);
     quality_mer_counter counter(args.threads_arg, ary, streams, qual_thresh);

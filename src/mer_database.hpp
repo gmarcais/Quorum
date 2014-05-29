@@ -327,6 +327,38 @@ public:
     m.replace(0, ori_code); // Reset m to original value
     return count;
   }
+
+  class const_iterator :
+    public std::iterator<std::forward_iterator_tag, typename std::pair<const mer_dna*, std::pair<uint64_t, int> > > {
+    mer_array_raw::const_iterator it_;
+    const val_array_raw&          vals_;
+    value_type                    content_;
+  public:
+    const_iterator(const mer_array_raw::const_iterator it, const val_array_raw& vals) :
+      it_(it), vals_(vals)
+    { }
+
+    bool operator==(const const_iterator& rhs) const { return it_ == rhs.it_; }
+    bool operator!=(const const_iterator& rhs) const { return it_ != rhs.it_; }
+    const_iterator& operator++() { ++it_; return *this; }
+    const_iterator operator++(int) {
+      const_iterator res(*this);
+      ++*this;
+      return res;
+    }
+
+    const value_type& operator*() {
+      content_.first = &it_.key();
+      uint64_t v = vals_[it_.id()];
+      content_.second.first = v >> 1;
+      content_.second.first = v & 0x1;
+      return content_;
+    }
+    const value_type* operator->() { return &this->operator*(); }
+  };
+
+  const_iterator begin() const { return const_iterator(keys_.begin(), vals_); }
+  const_iterator end() const { return const_iterator(keys_.end(), vals_); }
 };
 
 #endif /* __QUORUM_MER_DATABASE_HPP__ */

@@ -348,10 +348,10 @@ public:
     }
 
     const value_type& operator*() {
-      content_.first = &it_.key();
-      uint64_t v = vals_[it_.id()];
-      content_.second.first = v >> 1;
-      content_.second.first = v & 0x1;
+      content_.first         = &it_.key();
+      uint64_t v             = vals_[it_.id()];
+      content_.second.first  = v >> 1;
+      content_.second.second = v & 0x1;
       return content_;
     }
     const value_type* operator->() { return &this->operator*(); }

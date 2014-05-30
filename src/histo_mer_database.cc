@@ -14,9 +14,10 @@ int main(int argc, char* argv[])
   uint64_t histos[hlen][2];
   memset(histos, '\0', sizeof(histos));
   const database_query mer_database(argv[1]);
-  for(auto it = mer_database.vals().begin(); it != mer_database.vals().end(); ++it) {
-    const uint64_t val = std::min(*it >> 1, hlen - 1);
-    ++histos[val][*it & 0x1];
+  for(auto& it : mer_database) {
+    auto& vals = it.second;
+    const uint64_t val = std::min(vals.first, hlen - 1);
+    ++histos[val][vals.second];
   }
 
   for(size_t i = 0; i < hlen; ++i) {

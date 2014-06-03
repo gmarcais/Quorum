@@ -123,13 +123,13 @@ TEST_P(MerDatabase, WriteRead) {
   {
     // basic histogram. Check that we have the right number of mers with given count and quality
     int i = 0;
-    for(auto it : database) {
+    for(auto it = database.begin(); it != database.end(); ++it) {
       SCOPED_TRACE(::testing::Message() << "i:" << i++);
-      ASSERT_TRUE(it.first != 0);
-      auto counts = mer_map.find(*it.first);
+      ASSERT_TRUE(it->first != 0);
+      auto counts = mer_map.find(*it->first);
       ASSERT_NE(mer_map.end(), counts);
-      EXPECT_EQ(counts->first, *it.first);
-      EXPECT_EQ(counts->second, it.second);
+      EXPECT_EQ(counts->first, *it->first);
+      EXPECT_EQ(counts->second, it->second);
     }
   }
 }

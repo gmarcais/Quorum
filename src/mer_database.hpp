@@ -19,7 +19,6 @@
 #define __QUORUM_MER_DATABASE_HPP__
 
 #include <fstream>
-#include <atomic>
 
 #include <jellyfish/file_header.hpp>
 #include <jellyfish/large_hash_array.hpp>
@@ -29,6 +28,7 @@
 #include <jellyfish/rectangular_binary_matrix.hpp>
 #include <jellyfish/err.hpp>
 #include <jellyfish/locks_pthread.hpp>
+#include <jellyfish/atomic_field.hpp>
 
 #include <src/verbose_log.hpp>
 
@@ -69,8 +69,8 @@ class hash_with_quality {
   val_array*                         new_vals_;
   const uint64_t                     max_val_;
   jellyfish::locks::pthread::barrier size_barrier_;
-  std::atomic<uint16_t>              done_threads_;
-  std::atomic<uint16_t>              size_thid_;
+  jflib::atomic_field<uint16_t>       done_threads_;
+  jflib::atomic_field<uint16_t>        size_thid_;
   const uint16_t                     nb_threads_;
   enum status { OK, DONE, FULL };
 
@@ -126,7 +126,7 @@ public:
   }
 
   void done() {
-    ++done_threads_;
+    done_threads_ += 1;
     while(handle_full_ary() == OK);
   }
 
@@ -136,7 +136,7 @@ public:
 private:
   status handle_full_ary() {
     bool serial_thread = size_barrier_.wait();
-    if(done_threads_.load() >= nb_threads_) // All done?
+    if(done_threads_ >= nb_threads_) // All done?
       return DONE;
 
     if(serial_thread) {
@@ -152,7 +152,7 @@ private:
         new_keys_ = 0;
         new_vals_ = 0;
       }
-      size_thid_.store(0);
+      size_thid_ = 0;
     }
     size_barrier_.wait();
     mer_array* new_keys = *(mer_array* volatile *)&new_keys_;
@@ -162,7 +162,7 @@ private:
       return FULL;
     }
 
-    uint16_t thid = size_thid_++;
+    uint16_t thid = (size_thid_ += 1) - 1;
     auto it = keys_->eager_slice(thid, nb_threads_);
 
     bool   is_new;
@@ -329,7 +329,7 @@ public:
   }
 
   class const_iterator :
-    public std::iterator<std::forward_iterator_tag, typename std::pair<const mer_dna*, std::pair<uint64_t, int> > > {
+    public std::iterator<std::forward_iterator_tag, std::pair<const mer_dna*, std::pair<uint64_t, int> > > {
     mer_array_raw::const_iterator it_;
     const val_array_raw&          vals_;
     value_type                    content_;

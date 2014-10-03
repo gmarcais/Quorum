@@ -1,0 +1,32 @@
+purpose "Create database of k-mers for quorum error corrector"
+description <<EOS
+To come.
+EOS
+
+option("s", "size") {
+  description "Initial hash size"
+  uint64; suffix; required }
+option("m", "mer") {
+  description "Mer length"
+  uint32; required }
+option("b", "bits") {
+  description "Bits for value field"
+  uint32; required }
+option("q", "min-qual-value") {
+  description "Min quality as an int"
+  uint32 }
+option("Q", "min-qual-char") {
+  description "Min quality as a ASCII character"
+  string; conflict "min-qual-value" }
+option("t", "threads") {
+  description "Number of threads"
+  uint32; default 1 }
+option("o", "output") {
+  description "Output file"
+  c_string; typestr "path"; default "combined_database" }
+option("p", "reprobe") {
+  description "Maximum number of reprobes"
+  int32; default 126 }
+arg("reads") {
+  description "Read files"
+  c_string; multiple; typestr "path"; at_least 1}

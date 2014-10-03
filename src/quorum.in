@@ -14,7 +14,7 @@ my $EC              = "@bindir@/quorum_error_correct_reads";
 my $PACKAGE_VERSION = "@PACKAGE_VERSION@";
 
 # Command line switches
-my $jf_size;    # Mandatory option
+my $jf_size      = "200M";
 my $prefix       = "quorum_corrected";
 my $klen         = 24;
 my $min_q_char;
@@ -30,8 +30,8 @@ $0 [options] .fastq [.fastq]+
 Run the quorum error corrector on the given fastq file.
 
 Options:
- -s, --size              Mer database size (required)
- -t, --threads           Number of threads
+ -s, --size              Mer database size (default $jf_size)
+ -t, --threads           Number of threads (default number of cpus)
  -p, --prefix            Output prefix (default $prefix)
  -k, --kmer-len          Kmer length (default $klen)
  -q, --min-q-char        Minimum quality char. Usually 33 or 64 (autodetect)
@@ -77,8 +77,8 @@ if($version) {
   print($PACKAGE_VERSION, "\n");
   exit(0);
 }
-if(!defined($jf_size)) {
-  print STDERR "Must pass the -s switch. See $0 --help.\n";
+if($jf_size !~ /^\d+[kMGT]?$/) {
+  print STDERR "Invalid size '$jf_size'. It must be a number, maybe followed by a suffix (like k, M, G for thousand, million and billion).\n";
   exit(1);
 }
 if(!@ARGV) {

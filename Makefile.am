@@ -1,9 +1,9 @@
 ACLOCAL_AMFLAGS=-I m4
 
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir) $(JELLYFISH_CFLAGS)
+AM_CPPFLAGS = -I$(srcdir)/include -I$(srcdir) $(JELLYFISH2_0_CFLAGS)
 AM_CXXFLAGS = -Wall -g -O2 -std=c++0x
 AM_LDFLAGS = $(STATIC_FLAGS)
-LDADD = $(JELLYFISH_LIBS)
+LDADD = $(JELLYFISH2_0_LIBS)
 
 # Yaggo automatic rules with silencing
 V_YAGGO = $(V_YAGGO_$(V))
@@ -78,7 +78,7 @@ TESTS = all_tests
 check_PROGRAMS = all_tests query_mer_database histo_mer_database
 
 all_tests_SOURCES = unit_tests/test_mer_database.cc
-all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(top_srcdir)/unit_tests/gtest/include -I$(top_srcdir)/unit_tests
+all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(srcdir)/unit_tests/gtest/include -I$(srcdir)/unit_tests
 all_tests_LDADD = libgtest_main.la $(LDADD)
 noinst_HEADERS += unit_tests/test_misc.hpp
 
@@ -86,4 +86,4 @@ query_mer_database_SOURCES = src/query_mer_database.cc
 histo_mer_database_SOURCES = src/histo_mer_database.cc
 
 include gtest.mk
--include $(top_srcdir)/local.mk
+-include $(srcdir)/local.mk

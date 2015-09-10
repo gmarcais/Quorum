@@ -21,7 +21,8 @@ my $min_q_char;
 my $min_quality  = 5;
 my $nb_threads;
 my %opts;
-my @switches = qw(min-count skip good anchor-count window error contaminant trim-contaminant homo-trim);
+my @switches = qw(min-count skip good anchor-count window error contaminant homo-trim);
+my @flags = qw(trim-contaminant no-discard);
 my ($help, $debug, $version);
 
 my $usage = <<EOS;
@@ -43,9 +44,10 @@ Options:
      --anchor            Numer of good kmer in a row for anchor
      --anchor-count      Minimum count for an anchor kmer
      --contaminant       Contaminant sequences
-     --contaminant-trim  Trim sequences with contaminant mers
+     --trim-contaminant  Trim sequences with contaminant mers
+ -d, --no-discard        Do not discard reads, output a single N (false)
      --homo-trim         Trim homo-polymer on 3\' end
- -d, --debug             Display debugging information
+     --debug             Display debugging information
      --version           Display version
  -h, --help              This message
 EOS
@@ -64,9 +66,11 @@ GetOptions("s|size=s"         => \$jf_size,
            "anchor=i"         => \$opts{"good"},
            "anchor-count=i"   => \$opts{"anchor-count"},
            "contaminant=s"    => \$opts{"contaminant"},
+           "trim-contaminant" => \$opts{"trim-contaminant"},
            "contaminant-trim" => \$opts{"trim-contaminant"},
+           "d|no-discard"     => \$opts{"no-discard"},
            "homo-trim=i"      => \$opts{"homo-trim"},
-           "d|debug"          => \$debug,
+           "debug"            => \$debug,
            "version"          => \$version,
            "h|help"           => \$help) or die $usage;
 if($help) {
@@ -148,6 +152,9 @@ run($CDB, "-s", $jf_size, "-m", $klen, "-t", $nb_threads,
 my @ec_cmd = ($EC, "-t", $nb_threads, "-o", $prefix);
 for my $s (@switches) {
   push(@ec_cmd, "--" . $s, $opts{$s}) if defined($opts{$s});
+}
+for my $f (@flags) {
+  push(@ec_cmd, "--" . $f) if defined($opts{$f});
 }
 run(@ec_cmd, $db_file, @ARGV) == 0 or
     die "Error correction failed";

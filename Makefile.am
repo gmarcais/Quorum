@@ -14,13 +14,14 @@ V_YAGGO_0 = @echo "  YAGGO " $@;
 	$(V_YAGGO)$(YAGGO) --license $(srcdir)/header-license -o $@ $<
 YAGGO_SOURCES = src/error_correct_reads_cmdline.hpp	\
                 src/create_database_cmdline.hpp		\
-                src/merge_mate_pairs_cmdline.hpp
+                src/merge_mate_pairs_cmdline.hpp	\
+                src/split_mate_pairs_cmdline.hpp
 
 BUILT_SOURCES = $(YAGGO_SOURCES)
 noinst_HEADERS = $(YAGGO_SOURCES)
 
 bin_PROGRAMS = quorum_error_correct_reads quorum_create_database	\
-               merge_mate_pairs
+               merge_mate_pairs split_mate_pairs
 
 quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc	\
                                      src/err_log.cc
@@ -28,6 +29,8 @@ quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc	\
 quorum_create_database_SOURCES = src/create_database.cc
 
 merge_mate_pairs_SOURCES = src/merge_mate_pairs.cc
+
+split_mate_pairs_SOURCES = src/split_mate_pairs.cc
 
 noinst_HEADERS += src/error_correct_reads.hpp				\
                   src/error_correct_reads.hpp src/verbose_log.hpp	\

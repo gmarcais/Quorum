@@ -1,0 +1,8 @@
+usage "Split fasta file in two"
+description "Read fasta file from stdin and write sequence alternatively to two output files"
+package "split_mate_pairs"
+name "cmdline"
+
+arg("prefix") {
+  description "Output file name prefix"
+  string; typestr "PATH" }

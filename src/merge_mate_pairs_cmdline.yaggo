@@ -1,0 +1,9 @@
+usage "Merge input files"
+description "Take an even number of files and interleave sequences from even and odd files."
+package "merge_mate_pairs"
+name "cmdline"
+
+arg("file") {
+  description "Input sequence files"
+  c_string; typestr "PATH"
+  multiple; at_least 2 }

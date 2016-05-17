@@ -27,7 +27,7 @@ inline bool is_base(const char c) {
     return false;
   }
 }
-inline bool not_base(const char c) { return !is_base; }
+inline bool not_base(const char c) { return !is_base(c); }
 inline std::ostream & operator<<(std::ostream &os, const substr &ss) {
   assert(std::count_if(ss._str, ss._str+ss._len, not_base) == 0);
   return os.write(ss._str, ss._len);

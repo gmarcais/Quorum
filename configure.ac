@@ -1,4 +1,4 @@
-AC_INIT([quorum], [1.0.0], [gmarcais@umd.edu])
+AC_INIT([quorum], [1.1.0], [gmarcais@umd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/error_correct_reads.hpp])
 AC_CONFIG_HEADERS([config.h])

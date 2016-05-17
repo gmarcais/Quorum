@@ -13,5 +13,5 @@ AM_CXXFLAGS += -Werror
 cloc:
 	cloc --force-lang="Ruby,yaggo" --force-lang="make,am" --force-lang="make,mk" \
 	  --exclude-dir="gtest" --ignored=cloc_ignored_src_files \
-	  $(top_srcdir)/src $(top_srcdir)/include \
-	  $(top_srcdir)/Makefile.am $(top_srcdir)/*.mk
+	  $(srcdir)/src $(srcdir)/include \
+	  $(srcdir)/Makefile.am $(srcdir)/*.mk

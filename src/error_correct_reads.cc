@@ -20,6 +20,7 @@
 #include <memory>
 #include <limits>
 #include <cmath>
+#include <cstdlib>
 
 #include <jellyfish/atomic_gcc.hpp>
 #include <jellyfish/stream_manager.hpp>
@@ -156,12 +157,12 @@ private:
 public:
   void do_it(int nb_threads) {
     // Make sure they are deleted when done
-    std::auto_ptr<std::ostream> details(open_file(_prefix, ".log", "/dev/fd/2"));
-    std::auto_ptr<std::ostream> output(open_file(_prefix, ".fa", "/dev/fd/1"));
+    std::unique_ptr<std::ostream> details(open_file(_prefix, ".log", "/dev/fd/2"));
+    std::unique_ptr<std::ostream> output(open_file(_prefix, ".fa", "/dev/fd/1"));
     // Multiplexers, same thing
-    std::auto_ptr<jflib::o_multiplexer>
+    std::unique_ptr<jflib::o_multiplexer>
       log_m(new jflib::o_multiplexer(details.get(), 3 * nb_threads, 1024));
-    std::auto_ptr<jflib::o_multiplexer>
+    std::unique_ptr<jflib::o_multiplexer>
       output_m(new jflib::o_multiplexer(output.get(), 3 * nb_threads, 1024));
     _log    = log_m.get();
     _output = output_m.get();
@@ -224,7 +225,7 @@ public:
 
 private:
   ec_t&   _ec;
-  int     _id;
+  //  int     _id;
   size_t  _buff_size;
   char*   _buffer;
   kmer_t  _tmp_mer;
@@ -236,7 +237,8 @@ private:
 
 public:
   error_correct_instance(ec_t& ec, int id) :
-    _ec(ec), _id(id), _buff_size(0), _buffer(0) { }
+    _ec(ec), _buff_size(0), _buffer(0) { }
+    //    _ec(ec), _id(id), _buff_size(0), _buffer(0) { }
   ~error_correct_instance() {
     free(_buffer);
   }
@@ -516,12 +518,12 @@ private:
         for(int  i = 0; i < 4; ++i) {
           candidate_continuations[i] = false;
           if(cont_counts[i] > 0)
-            min_diff = std::min(min_diff, abs(cont_counts[i] - _prev_count));
+            min_diff = std::min(min_diff, (int)std::abs((long)cont_counts[i] - (long)_prev_count));
         }
 
         //we now know the count that is the closest, now we determine how many alternatives have this count
         for(uint32_t  i = 0; i < 4; i++) {
-          if(abs(cont_counts[i] - _prev_count) == min_diff){
+          if(std::abs((long)cont_counts[i] - (long)_prev_count) == min_diff){
             candidate_continuations[i] = true;
             ++ncandidate_continuations;
             check_code=i;

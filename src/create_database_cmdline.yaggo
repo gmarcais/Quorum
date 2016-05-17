@@ -1,7 +1,8 @@
 purpose "Create database of k-mers for quorum error corrector"
-description <<EOS
-To come.
-EOS
+description "Create k-mer database for quorum_error_correct"
+#description <<EOS
+#To come.
+#EOS
 
 option("s", "size") {
   description "Initial hash size"

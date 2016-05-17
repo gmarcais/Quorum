@@ -1,9 +1,9 @@
 ACLOCAL_AMFLAGS=-I m4
 
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir) $(JELLYFISH_CFLAGS)
+AM_CPPFLAGS = -I$(srcdir)/include -I$(srcdir) $(JELLYFISH2_0_CFLAGS)
 AM_CXXFLAGS = -Wall -g -O2 -std=c++0x
 AM_LDFLAGS = $(STATIC_FLAGS)
-LDADD = $(JELLYFISH_LIBS)
+LDADD = $(JELLYFISH2_0_LIBS)
 
 # Yaggo automatic rules with silencing
 V_YAGGO = $(V_YAGGO_$(V))
@@ -12,17 +12,25 @@ V_YAGGO_0 = @echo "  YAGGO " $@;
 .yaggo.hpp:
 	@echo yaggo $< $@
 	$(V_YAGGO)$(YAGGO) --license $(srcdir)/header-license -o $@ $<
-YAGGO_SOURCES = src/error_correct_reads_cmdline.hpp src/create_database_cmdline.hpp
+YAGGO_SOURCES = src/error_correct_reads_cmdline.hpp	\
+                src/create_database_cmdline.hpp		\
+                src/merge_mate_pairs_cmdline.hpp	\
+                src/split_mate_pairs_cmdline.hpp
 
 BUILT_SOURCES = $(YAGGO_SOURCES)
 noinst_HEADERS = $(YAGGO_SOURCES)
 
-bin_PROGRAMS = quorum_error_correct_reads quorum_create_database
+bin_PROGRAMS = quorum_error_correct_reads quorum_create_database	\
+               merge_mate_pairs split_mate_pairs
 
 quorum_error_correct_reads_SOURCES = src/error_correct_reads.cc	\
                                      src/err_log.cc
 
 quorum_create_database_SOURCES = src/create_database.cc
+
+merge_mate_pairs_SOURCES = src/merge_mate_pairs.cc
+
+split_mate_pairs_SOURCES = src/split_mate_pairs.cc
 
 noinst_HEADERS += src/error_correct_reads.hpp				\
                   src/error_correct_reads.hpp src/verbose_log.hpp	\
@@ -78,7 +86,7 @@ TESTS = all_tests
 check_PROGRAMS = all_tests query_mer_database histo_mer_database
 
 all_tests_SOURCES = unit_tests/test_mer_database.cc
-all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(top_srcdir)/unit_tests/gtest/include -I$(top_srcdir)/unit_tests
+all_tests_CXXFLAGS = $(AM_CXXFLAGS) -I$(srcdir)/unit_tests/gtest/include -I$(srcdir)/unit_tests
 all_tests_LDADD = libgtest_main.la $(LDADD)
 noinst_HEADERS += unit_tests/test_misc.hpp
 
@@ -86,4 +94,4 @@ query_mer_database_SOURCES = src/query_mer_database.cc
 histo_mer_database_SOURCES = src/histo_mer_database.cc
 
 include gtest.mk
--include $(top_srcdir)/local.mk
+-include $(srcdir)/local.mk

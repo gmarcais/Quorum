@@ -11,6 +11,8 @@ my $dir = dirname(__FILE__);
 my $JF_LIB_PATH     = "@JF_LIB_PATH@";
 my $CDB             = "@bindir@/quorum_create_database";
 my $EC              = "@bindir@/quorum_error_correct_reads";
+my $MERGE           = "@bindir@/merge_mate_pairs";
+my $SPLIT           = "@bindir@/split_mate_pairs";
 my $PACKAGE_VERSION = "@PACKAGE_VERSION@";
 
 # Command line switches
@@ -20,14 +22,19 @@ my $klen         = 24;
 my $min_q_char;
 my $min_quality  = 5;
 my $nb_threads;
+my $paired_files;
 my %opts;
-my @switches = qw(min-count skip good anchor-count window error contaminant trim-contaminant homo-trim);
+my @switches = qw(min-count skip good anchor-count window error contaminant homo-trim);
+my @flags = qw(trim-contaminant no-discard);
 my ($help, $debug, $version);
 
 my $usage = <<EOS;
 $0 [options] .fastq [.fastq]+
     
-Run the quorum error corrector on the given fastq file.
+Run the quorum error corrector on the given fastq file. If the --paired-files
+switch is given, quorum expect an even number of files on the command line,
+each pair files containing pair end reads. The output will be two files
+(<prefix>_1.fa and <prefix>_2.fa) containing error corrected pair end reads.
 
 Options:
  -s, --size              Mer database size (default $jf_size)
@@ -43,9 +50,11 @@ Options:
      --anchor            Numer of good kmer in a row for anchor
      --anchor-count      Minimum count for an anchor kmer
      --contaminant       Contaminant sequences
-     --contaminant-trim  Trim sequences with contaminant mers
+     --trim-contaminant  Trim sequences with contaminant mers
+ -d, --no-discard        Do not discard reads, output a single N (false)
+ -P, --paired-files      Preserve mate pairs in two files
      --homo-trim         Trim homo-polymer on 3\' end
- -d, --debug             Display debugging information
+     --debug             Display debugging information
      --version           Display version
  -h, --help              This message
 EOS
@@ -64,9 +73,12 @@ GetOptions("s|size=s"         => \$jf_size,
            "anchor=i"         => \$opts{"good"},
            "anchor-count=i"   => \$opts{"anchor-count"},
            "contaminant=s"    => \$opts{"contaminant"},
+           "trim-contaminant" => \$opts{"trim-contaminant"},
            "contaminant-trim" => \$opts{"trim-contaminant"},
+           "d|no-discard"     => \$opts{"no-discard"},
+           "P|paired-files"   => \$paired_files,
            "homo-trim=i"      => \$opts{"homo-trim"},
-           "d|debug"          => \$debug,
+           "debug"            => \$debug,
            "version"          => \$version,
            "h|help"           => \$help) or die $usage;
 if($help) {
@@ -145,9 +157,76 @@ run($CDB, "-s", $jf_size, "-m", $klen, "-t", $nb_threads,
     @ARGV) == 0 or
     die "Creating the mer database failed. Most likely the size passed to the -s switch is too small.";
 
-my @ec_cmd = ($EC, "-t", $nb_threads, "-o", $prefix);
+my @ec_cmd = ($EC, "-t", $nb_threads);
+$opts{"no-discard"} = 1 if $paired_files;
+
 for my $s (@switches) {
   push(@ec_cmd, "--" . $s, $opts{$s}) if defined($opts{$s});
 }
-run(@ec_cmd, $db_file, @ARGV) == 0 or
+for my $f (@flags) {
+  push(@ec_cmd, "--" . $f) if defined($opts{$f});
+}
+if(!$paired_files) {
+  run(@ec_cmd, $db_file, "-o", $prefix, @ARGV) == 0 or
     die "Error correction failed";
+} else {
+  print(STDERR "+ $MERGE @ARGV | @ec_cmd $db_file /dev/fd/0 2> $prefix.log | $SPLIT $prefix\n") if($debug);
+
+  open(my $error_log, ">", $prefix . ".log") or
+    die "Can't open error log '$prefix.log': $!";
+
+  my ($merge_read, $merge_write);
+  die "Error creating merger pipes" if(!pipe($merge_read, $merge_write));
+  my %process;
+  my $pid_merge = fork;
+  die "Cannot fork merge process" unless defined($pid_merge);
+  if($pid_merge) {
+    $process{$pid_merge} = "merge_mate_pairs";
+  } else {
+    # Setup merge_mate_pairs process
+    close($merge_read);
+    open STDOUT, '>&', $merge_write;
+    exec($MERGE, @ARGV);
+    exit(1); # Should not be reached
+  }
+  close($merge_write);
+
+  my ($correct_read, $correct_write);
+  die "Error creating corrector pipe" if(!pipe($correct_read, $correct_write));
+  my $pid_correct = fork;
+  die "Cannot fork correct process" unless defined($pid_correct);
+  if($pid_correct) {
+    $process{$pid_correct} = "quorum_error_correct";
+  } else {
+    # Setup error correct process
+    close($correct_read);
+    open STDIN, '<&', $merge_read;
+    open STDOUT, '>&', $correct_write;
+    open STDERR, '>&', $error_log;
+    exec(@ec_cmd, $db_file, "/dev/fd/0");
+    exit(1); # Should not be reached
+  }
+  close($merge_read);
+  close($correct_write);
+  close($error_log);
+
+  my $pid_split = fork;
+  die "Cannot fork split process" unless defined($pid_split);
+  if($pid_split) {
+    $process{$pid_split} = "split_mate_pairs";
+  } else {
+    # Setup split process
+    open STDIN, '<&', $correct_read;
+    exec($SPLIT, $prefix);
+    exit(1); # Should not be reached
+  }
+  my $return = 0;
+  for(my $i = 0; $i < 3; ++$i) {
+    my $pid = wait;
+    if($? != 0) {
+      print(STDERR "An error was returned by ", $process{$pid} || "<unknown process>", ": ", $? >> 8, "\n");
+      $return =1;
+    }
+  }
+  exit($return);
+}

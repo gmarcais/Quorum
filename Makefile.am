@@ -59,7 +59,7 @@ libs_scripts = $(patsubst %,.libs/%,$(perl_scripts))
 
 bin_SCRIPTS = $(libs_scripts)
 noinst_SCRIPTS = $(perl_scripts)
-CLEANFILES += $(libs_scripts) $(perl_scripts
+CLEANFILES += $(libs_scripts) $(perl_scripts)
 EXTRA_DIST += $(patsubst %,src/%.in,$(perl_scripts))
 
 if RELATIVE_PATHS

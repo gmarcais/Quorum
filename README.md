@@ -9,8 +9,8 @@ You should download the latest release distribution tar ball from the
 [releases section](https://github.com/gmarcais/Quorum/releases). If
 compiling from the github tree code, you will need `autoconf`,
 `automake` and `yaggo`. You can download `yaggo` from the
-[github release](https://github.com/gmarcais/yaggo/releases) and copy
-the `yaggo` problem into your `PATH`.
+[github release page](https://github.com/gmarcais/yaggo/releases) and
+copy the `yaggo` problem into your `PATH`.
 
 Quorum requires [Jellyfish](https://github.com/gmarcais/Jellyfish/releases) to be installed.
 For Quorum to compile `pkg-config` must find Jellyfish. The following command must pring "OK":

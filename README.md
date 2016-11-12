@@ -7,17 +7,22 @@ Quorum has been tested on Linux with gcc 4.4 to gcc 4.7.
 
 You should download the latest release distribution tar ball from the
 [releases section](https://github.com/gmarcais/Quorum/releases). If
-compiling from the github code, you will need
-[yaggo](https://github.com/gmarcais/yaggo/releases) as well.
+compiling from the github tree code, you will need `autoconf`,
+`automake` and `yaggo`. You can download `yaggo` from the
+[github release page](https://github.com/gmarcais/yaggo/releases) and
+copy the `yaggo` problem into your `PATH`.
 
 Quorum requires [Jellyfish](https://github.com/gmarcais/Jellyfish/releases) to be installed.
-For Quorum to compile and
-run properly, `pkg-config` must find Jellyfish and the library loader
-must find the shared library. See the [README of Jellyfish]](https://github.com/gmarcais/Jellyfish/blob/master/README.md)
-for details.
+For Quorum to compile `pkg-config` must find Jellyfish. The following command must pring "OK":
 
-Provided that Jellyfish is installed and accessible, install the usual
-way:
+~~~
+pkg-config --exists jellyfish-2.0 && echo OK
+~~~
+
+If not, set the variable `PKG_CONFIG_PATH` appropriately.
+
+If installing from the github tree, first run `autoreconf -fi`. Then
+install the usual way:
 
 ~~~
 ./configure --prefix=/path/where/to/install
@@ -25,8 +30,7 @@ make
 make install
 ~~~
 
-Note that 'make install' is necessary or the paths coded in the quorum
-scripts will not be valid.
+The last command may need to be run as root, if installing in a system directory.
 
 # Usage
 

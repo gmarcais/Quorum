@@ -19,6 +19,8 @@ YAGGO_SOURCES = src/error_correct_reads_cmdline.hpp	\
 
 BUILT_SOURCES = $(YAGGO_SOURCES)
 noinst_HEADERS = $(YAGGO_SOURCES)
+CLEANFILES =
+EXTRA_DIST =
 
 bin_PROGRAMS = quorum_error_correct_reads quorum_create_database	\
                merge_mate_pairs split_mate_pairs
@@ -52,10 +54,13 @@ SUFFIXES = .jf .fa
 .fa.jf:
 	$(AM_V_GEN)mkdir -p $(@D); $(JELLYFISH) count -m 24 -s 5k -C -t 10 -o $@ $<
 
+perl_scripts = quorum
+libs_scripts = $(patsubst %,.libs/%,$(perl_scripts))
 
-bin_SCRIPTS = quorum
-CLEANFILES = $(bin_SCRIPTS)
-EXTRA_DIST = src/quorum.in
+bin_SCRIPTS = $(libs_scripts)
+noinst_SCRIPTS = $(perl_scripts)
+CLEANFILES += $(libs_scripts) $(perl_scripts)
+EXTRA_DIST += $(patsubst %,src/%.in,$(perl_scripts))
 
 if RELATIVE_PATHS
 quorum_bindir=$$dir
@@ -65,19 +70,29 @@ endif
 
 if HAVE_RELATIVE_JF_PATH
 quorum_jellyfish=$$dir/$(RELATIVE_JF_PATH)
+local_quorum_jellyfish = $(shell realpath "$(bindir)/$(RELATIVE_JF_PATH)")
 else
 quorum_jellyfish=$(JELLYFISH)
+local_quorum_jellyfish = $(quorum_jellyfish)
 endif
 
-do_subst = sed -e 's|[@]JELLYFISH[@]|$(quorum_jellyfish)|g' \
-               -e 's|[@]bindir[@]|$(quorum_bindir)|g' \
-	       -e 's|[@]JF_LIB_PATH[@]|$(JF_LIB_PATH)|g' \
-	       -e 's|[@]PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
-	       -e 's|[@]JELLYFISH_VERSION[@]|$(JELLYFISH_VERSION)|g'
 
-quorum: src/quorum.in Makefile
-	$(do_subst) < $< > $@
-	chmod +x $@
+inst_subst = sed -e 's|[@]JELLYFISH[@]|$(quorum_jellyfish)|g' \
+                 -e 's|[@]bindir[@]|$(quorum_bindir)|g' \
+	         -e 's|[@]JF_LIB_PATH[@]|$(JF_LIB_PATH)|g' \
+	         -e 's|[@]PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	         -e 's|[@]JELLYFISH_VERSION[@]|$(JELLYFISH_VERSION)|g'
+
+local_subst = sed -e 's|[@]JELLYFISH[@]|$(quorum_jellyfish)|g' \
+	          -e 's|[@]bindir[@]|$(abs_builddir)|g' \
+	          -e 's|[@]JF_LIB_PATH[@]|$(JF_LIB_PATH)|g' \
+	          -e 's|[@]PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	          -e 's|[@]JELLYFISH_VERSION[@]|$(JELLYFISH_VERSION)|g'
+
+.libs/%: src/%.in Makefile
+	@mkdir -p $(dir $@) && $(inst_subst) < $< > $@
+%: src/%.in Makefile
+	$(AM_V_GEN)$(local_subst) < $< > $@ && chmod a+x $@
 
 ##############
 # Unit tests #

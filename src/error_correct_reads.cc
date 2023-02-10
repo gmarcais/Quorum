@@ -161,9 +161,9 @@ public:
     std::unique_ptr<std::ostream> output(open_file(_prefix, ".fa", "/dev/fd/1"));
     // Multiplexers, same thing
     std::unique_ptr<jflib::o_multiplexer>
-      log_m(new jflib::o_multiplexer(details.get(), 3 * nb_threads, 1024));
+      log_m(new jflib::o_multiplexer(details.get(), 3 * (size_t)nb_threads, 1024));
     std::unique_ptr<jflib::o_multiplexer>
-      output_m(new jflib::o_multiplexer(output.get(), 3 * nb_threads, 1024));
+      output_m(new jflib::o_multiplexer(output.get(), 3 * (size_t)nb_threads, 1024));
     _log    = log_m.get();
     _output = output_m.get();
 
@@ -248,7 +248,6 @@ public:
     jflib::omstream details(_ec.log());
     kmer_t          mer, tmer;
 
-    uint64_t nb_reads = 0;
     while(true) {
       read_parser::job job(_ec.parser());
       if(job.is_empty()) break;
@@ -261,7 +260,6 @@ public:
         const char* const  seq_e    = seq_s + sequence.size();
         const char* const  qual_s   = job->data[i].qual.c_str();
 
-        nb_reads++;
         insure_length_buffer(sequence.size());
 
         const char* error = "";

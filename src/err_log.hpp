@@ -39,7 +39,7 @@ private:
     entry(type_t t, T p) : type(t), pos(p) {}
   };
 
-  struct greater_than_pos : std::unary_function<entry, bool> {
+  struct greater_than_pos {
     T pos;
     bool operator()(entry& e) { return e.pos >= *pos; } // Compare the raw value of pos, not using the operator>=
     greater_than_pos(T& pos_) : pos(pos_) { }

@@ -55,7 +55,6 @@ public:
 
   virtual void start(int thid) {
     mer_dna m, rm;
-    size_t counted_high = 0, counted_low = 0;
 
     while(true) {
       read_parser::job job(parser_);
@@ -85,8 +84,6 @@ public:
           if(low_len >= mer_dna::k()) {
             if(!ary_.add(m < rm ? m : rm, high_len >= mer_dna::k()))
               throw std::runtime_error(err::msg() << "Hash is full");
-            counted_high += high_len >= mer_dna::k();
-            ++counted_low;
           }
         }
       }
